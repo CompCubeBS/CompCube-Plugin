@@ -41,7 +41,7 @@ namespace CompCube.UI.BSML.Match
             WinnerScoreText = FormatScore(winnerScore, winner, 1);
             LoserScoreText = FormatScore(loserScore, loser, 2);
             
-            DamageText = (winnerScore.RelativeScore - loserScore.RelativeScore).ToString("P", CultureInfo.InvariantCulture);
+            DamageText = ((winnerScore.RelativeScore - loserScore.RelativeScore) * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
             
             NotifyPropertyChanged(null);
         }
