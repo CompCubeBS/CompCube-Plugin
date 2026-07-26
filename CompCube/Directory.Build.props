@@ -5,7 +5,7 @@
   <PropertyGroup>
     <AssemblyName>CompCube</AssemblyName>
     <Authors>Bela</Authors>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <GameVersion>1.16.4</GameVersion>
     <Description>$ModDesc$</Description>
     <ProjectHome></ProjectHome>
