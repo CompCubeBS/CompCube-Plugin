@@ -150,40 +150,47 @@ namespace CompCube.UI.BSML.Leaderboard
         
         private async void ScrollView_scrollPositionChangedEvent(float position)
         {
-            if (position <= 0f)
+            try
             {
-                return;
-            }
+                if (position <= 0f)
+                {
+                    return;
+                }
 
 
-            if (_noMorePlayers)
-            {
-                return;
-            }
+                if (_noMorePlayers)
+                {
+                    return;
+                }
 
 
-            if (_isFetchingLeaderboard)
-            {
-                return;
-            }
+                if (_isFetchingLeaderboard)
+                {
+                    return;
+                }
 
-            if (Time.unscaledTime - _lastScrollTriggerTime < ScrollTriggerCooldown)
-            {
-                return;
-            }
+                if (Time.unscaledTime - _lastScrollTriggerTime < ScrollTriggerCooldown)
+                {
+                    return;
+                }
 
-            var withinTwo =
-                _playerCellDataSource.TableView.visibleCells
-                    .Any(cell => cell.idx >= _playerCellDataSource.Data.Count - 3);
+                var withinTwo =
+                    _playerCellDataSource.TableView.visibleCells
+                        .Any(cell => cell.idx >= _playerCellDataSource.Data.Count - 3);
 
-            if (!withinTwo)
-            {
-                return;
-            }
+                if (!withinTwo)
+                {
+                    return;
+                }
 
-            _lastScrollTriggerTime = Time.unscaledTime;
+                _lastScrollTriggerTime = Time.unscaledTime;
             
-            await FetchNextPage();
+                await FetchNextPage();
+            }
+            catch (Exception e)
+            {
+                _siraLog.Error(e);
+            }
         }
         
         private async Task FetchNextPage()

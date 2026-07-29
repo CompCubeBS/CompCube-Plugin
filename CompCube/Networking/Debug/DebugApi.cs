@@ -18,19 +18,19 @@ public class DebugApi : IApi
         new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Unknown, "Extreme")
     ];
 
-    public static readonly CompCube_Models.Models.ClientData.UserInfo DebugOpponent = new("debugOpponent", "1", 1000, null, 2, null,
+    public static readonly CompCube_Models.Models.ClientData.UserInfo DebugOpponent = new("debugOpponent", 1, 1000, null, 2, null,
         false, 0, 0, 0, 0);
 
     public static readonly CompCube_Models.Models.ClientData.UserInfo Self = new(
         "self",
-        "0",
+        1,
         1000,
         null,
         1,
         null,
         false, 0, 0, 0, 0);
     
-    public async Task<CompCube_Models.Models.ClientData.UserInfo?> GetUserInfo(string id)
+    public async Task<CompCube_Models.Models.ClientData.UserInfo?> GetUserInfo(int id)
     {
         await Task.Delay(1000);
         return Self;
@@ -45,7 +45,7 @@ public class DebugApi : IApi
         return Task.FromResult(info.ToArray());
     }
 
-    public Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetAroundUser(string id)
+    public Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetAroundUser(int id)
     {
         return Task.FromResult(Array.Empty<CompCube_Models.Models.ClientData.UserInfo>());
     }
