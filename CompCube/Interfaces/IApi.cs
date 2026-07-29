@@ -6,11 +6,11 @@ namespace CompCube.Interfaces;
 
 public interface IApi
 {
-    public Task<CompCube_Models.Models.ClientData.UserInfo?> GetUserInfo(int id);
+    public Task<CompCube_Models.Models.ClientData.UserInfo?> GetUserInfo(string id);
 
     public Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetLeaderboardRange(int start, int range);
 
-    public Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetAroundUser(int id);
+    public Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetAroundUser(string id);
 
     public Task<ServerStatus?> GetServerStatus();
 

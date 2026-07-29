@@ -9,7 +9,7 @@ public class UserModelWrapper
     [Inject] private readonly IPlatformUserModel _platformUserModel = null!;
     [Inject] private readonly PluginConfig _config = null!;
 
-    public int UserId => _config.SkipServer ? DebugApi.Self.UserId : int.Parse(_platformUserModel.GetUserInfo(CancellationToken.None).Result.platformUserId);
+    public string UserId => _config.SkipServer ? DebugApi.Self.UserId : _platformUserModel.GetUserInfo(CancellationToken.None).Result.platformUserId;
     
     public string UserName => _config.SkipServer ? DebugApi.Self.Username : _platformUserModel.GetUserInfo(CancellationToken.None).Result.userName;
 }

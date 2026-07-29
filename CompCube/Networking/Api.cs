@@ -23,7 +23,7 @@ namespace CompCube.Server
             _client.BaseAddress = new Uri($"{config.ApiIP}/", UriKind.Absolute);
         }
 
-        public async Task<CompCube_Models.Models.ClientData.UserInfo?> GetUserInfo(int id)
+        public async Task<CompCube_Models.Models.ClientData.UserInfo?> GetUserInfo(string id)
         {
             var response = await _client.GetAsync($"/api/user/id/{id}");
 
@@ -37,7 +37,7 @@ namespace CompCube.Server
             return JsonConvert.DeserializeObject<CompCube_Models.Models.ClientData.UserInfo[]>(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetAroundUser(int id)
+        public async Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetAroundUser(string id)
         {
             var response = await _client.GetAsync($"/api/leaderboard/aroundUser/{id}");
             return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<CompCube_Models.Models.ClientData.UserInfo[]>(await response.Content.ReadAsStringAsync());
