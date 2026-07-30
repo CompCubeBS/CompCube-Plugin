@@ -365,6 +365,9 @@ namespace CompCube.UI.FlowCoordinators
                 _waitingForMatchToStartViewController.PopulateData(map, DateTime.Now.AddSeconds(15));
                 
                 yield return new WaitForSeconds(15);
+
+                if (!isActivated)
+                    yield break;
                 
                 _transitionToLevelManager.StartLevel(map, DateTime.Now.AddSeconds(10), _gameplaySetupViewManager.ProMode, async void (results, transitionSetupDataSo) =>
                 {
