@@ -59,6 +59,8 @@ public class VotingScreenViewController : BSMLAutomaticViewController
     {
         _customMapListController = CustomMapListController.ParseOntoViewController(this, (map) => MapSelected?.Invoke(map), 0, -10);
     }
+    
+    public void EmptyMapList() => _customMapListController.SetMaps([]);
 
     public void StopCountdown() => _ranOutOfTimeCallback = null;
 

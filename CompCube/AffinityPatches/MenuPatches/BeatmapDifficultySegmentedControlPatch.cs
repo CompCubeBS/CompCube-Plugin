@@ -8,8 +8,8 @@ namespace CompCube.AffinityPatches.MenuPatches;
 
 public class BeatmapDifficultySegmentedControlPatch : IAffinity
 {
-    [Inject] private readonly StandardLevelDetailViewManager _standardLevelDetailViewManager = null;
-    [Inject] private readonly MatchFlowCoordinator _matchFlowCoordinator = null;
+    [Inject] private readonly StandardLevelDetailViewManager _standardLevelDetailViewManager = null!;
+    [Inject] private readonly MatchFlowCoordinator _matchFlowCoordinator = null!;
     
     [AffinityPatch(typeof(BeatmapDifficultySegmentedControlController),
         nameof(BeatmapDifficultySegmentedControlController.SetData))]
@@ -21,6 +21,6 @@ public class BeatmapDifficultySegmentedControlPatch : IAffinity
         
         var texts = __instance._difficultySegmentedControl._texts;
         
-        __instance._difficultySegmentedControl.SetTexts(texts.Select(i => $"{i}\n(Category: {_standardLevelDetailViewManager.CurrentVotingMap.CategoryLabel})").ToList());
+        __instance._difficultySegmentedControl.SetTexts(texts.Select(i => $"{i}\n(Category: {_standardLevelDetailViewManager.CurrentVotingMap.MapCategory})").ToList());
     }
 }

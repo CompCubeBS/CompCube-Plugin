@@ -2,12 +2,14 @@
 using System.Globalization;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube_Models.Models.Packets.ServerPackets;
 using JetBrains.Annotations;
 using CompCube.Extensions;
 using CompCube.Game;
 using CompCube.Game.MatchState;
+using CompCube.UI.BSML.Components.CustomLevelBar;
 using UnityEngine;
 using Zenject;
 
@@ -17,6 +19,7 @@ namespace CompCube.UI.BSML.Match
     public class RoundResultsViewController : BSMLAutomaticViewController
     {
         [Inject] private readonly MatchStateManager _matchStateManager = null!;
+        [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
         
         [UIValue("titleBgColor")] private string TitleBgColor { get; set; } = "#FFA500";
         [UIValue("titleText")] private string TitleText { get; set; } = "";
@@ -25,25 +28,44 @@ namespace CompCube.UI.BSML.Match
         [UIValue("loserScoreText")] private string LoserScoreText { get; set; } = "";
         
         [UIValue("damageText")] private string DamageText { get; set; } = "";
-        
-        public void PopulateData(RoundResultsPacket results, float multiplier)
+
+        private CustomLevelBar? _customLevelbar;
+
+        [UIAction("#post-parse")]
+        void PostParse()
         {
-            TitleText = "Results";
+            _customLevelbar ??= Resources.FindObjectsOfTypeAll<CustomLevelBar>()
+                .First(i => i.name == "RoundResultsLevelBar");
+        }
+        
+        public void PopulateData(RoundResultsPacket results, float multiplier, VotingMap votingMap)
+        {
+            _sharedCoroutineStarter.Run(PopulateDataCoroutine());
+            return;
+
+            IEnumerator PopulateDataCoroutine()
+            {
+                yield return new WaitUntil(() => isActivated);
+                
+                TitleText = "Results";
             
-            var redWon = results.RedScore.Points >= results.BlueScore.Points;
+                _customLevelbar?.Setup(votingMap);
             
-            var winnerScore = redWon ? results.RedScore : results.BlueScore;
-            var loserScore = redWon ? results.BlueScore : results.RedScore;
+                var redWon = results.RedScore.Points >= results.BlueScore.Points;
             
-            var winner = redWon ? _matchStateManager.RedPlayer : _matchStateManager.BluePlayer;
-            var loser = redWon ? _matchStateManager.BluePlayer : _matchStateManager.RedPlayer;
+                var winnerScore = redWon ? results.RedScore : results.BlueScore;
+                var loserScore = redWon ? results.BlueScore : results.RedScore;
             
-            WinnerScoreText = FormatScore(winnerScore, winner, 1);
-            LoserScoreText = FormatScore(loserScore, loser, 2);
+                var winner = redWon ? _matchStateManager.RedPlayer : _matchStateManager.BluePlayer;
+                var loser = redWon ? _matchStateManager.BluePlayer : _matchStateManager.RedPlayer;
             
-            DamageText = ((winnerScore.RelativeScore - loserScore.RelativeScore) * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
+                WinnerScoreText = FormatScore(winnerScore, winner, 1);
+                LoserScoreText = FormatScore(loserScore, loser, 2);
             
-            NotifyPropertyChanged(null);
+                DamageText = ((winnerScore.RelativeScore - loserScore.RelativeScore) * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
+            
+                NotifyPropertyChanged(null);
+            }
         }
 
         private string FormatScore(Score score,CompCube_Models.Models.ClientData.UserInfo user, int placement) => 

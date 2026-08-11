@@ -32,7 +32,7 @@ public class WaitingForDiscardPhaseToFinishViewController : BSMLAutomaticViewCon
         
         IEnumerator PopulateDataCoroutine()
         {
-            yield return new WaitUntil(() => isActivated && !isInTransition);
+            yield return new WaitUntil(() => isActivated);
             yield return new WaitForEndOfFrame();
             
             _customMapListController.SetMaps(votingMaps, false);

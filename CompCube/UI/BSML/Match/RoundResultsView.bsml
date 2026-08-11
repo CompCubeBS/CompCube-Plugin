@@ -1,12 +1,16 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
 
-    <horizontal bg="title-gradient" background-color="~titleBgColor" horizontal-fit="PreferredSize" vertical-fit="PreferredSize" preferred-height="12" pref-width="100" anchor-pos-x="0" anchor-pos-y="27.5">
+    <vertical anchor-pos-y="50" pref-width="100" pref-height="12">
+        <level-bar name="RoundResultsLevelBar"/>
+    </vertical>
+    
+    <horizontal bg="title-gradient" background-color="~titleBgColor" horizontal-fit="PreferredSize" vertical-fit="PreferredSize" preferred-height="12" pref-width="100" anchor-pos-x="0" anchor-pos-y="14">
         <text text="~titleText" font-size="10" all-uppercase="true" align="Midline" italics="true"/>
     </horizontal>
 
     <horizontal anchor-pos-x="0" anchor-pos-y="0">
-        <vertical spacing="3">
+        <vertical spacing="1.5">
             <text text="~winnerScoreText" align="Midline" font-size="4.75"/>
             <text text="~loserScoreText" align="Midline" font-size="4.75"/>
         </vertical>

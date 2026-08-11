@@ -11,11 +11,11 @@ public class DebugApi : IApi
 {
     public static readonly VotingMap[] Maps =
     [
-        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Unknown, "Tech"), 
-        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Unknown, "Balanced"),
-        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Unknown, "Extreme"),
-        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Unknown, "Extreme"),
-        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Unknown, "Extreme")
+        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Tech), 
+        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.MidSpeed),
+        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Extreme),
+        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Speed),
+        new("44d8d1c7c5821a7f1929542cab49c906c9e585e4", VotingMap.DifficultyType.ExpertPlus, VotingMap.Category.Accuracy)
     ];
 
     public static readonly CompCube_Models.Models.ClientData.UserInfo DebugOpponent = new("debugOpponent", "1", 1000, null, 2, null,
@@ -52,7 +52,7 @@ public class DebugApi : IApi
 
     public Task<ServerStatus?> GetServerStatus()
     {
-        return Task.FromResult(new ServerStatus([UnityGame.GameVersion.ToString()], ["1.0.0"],
+        return Task.FromResult(new ServerStatus([UnityGame.GameVersion.ToString()], [IPA.Loader.PluginManager.GetPluginFromId("CompCube").HVersion.ToString()],
             ServerState.State.Online));
     }
 

@@ -57,6 +57,8 @@ namespace CompCube.UI.FlowCoordinators
 
         private bool _hasShownFinalCardsToPlayer = false;
 
+        private VotingMap _lastPlayed;
+
         public void PopulateData(MatchCreatedPacket packet, Action? onMatchFinishedCallback)
         {
             _bottomScreenMatchStateViewController.PopulateData(packet.Red, packet.Blue);
@@ -72,6 +74,8 @@ namespace CompCube.UI.FlowCoordinators
             IEnumerator WaitForVotingScreenToPresent()
             {
                 yield return new WaitUntil(() => !isInTransition && isActivated);
+                
+                _votingScreenViewController.EmptyMapList();
                 
                 yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
                 
@@ -106,6 +110,9 @@ namespace CompCube.UI.FlowCoordinators
         {
             SetTitle("Match Room");
             showBackButton = true;
+
+            _hasShownFinalCardsToPlayer = false;
+            _roundResultsAnimationInProgress = false;
             
             _votingScreenNavigationController = BeatSaberUI.CreateViewController<NavigationController>();
             
@@ -191,7 +198,7 @@ namespace CompCube.UI.FlowCoordinators
                 _roundResultsAnimationInProgress = true;
                 this.ReplaceViewControllerSynchronously(_roundResultsViewController);
                 
-                _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier);
+                _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed);
                 
                 yield return new WaitForSeconds(3f);
 
@@ -360,6 +367,8 @@ namespace CompCube.UI.FlowCoordinators
                 ShowLeaderboard(map);
                 _soundEffectManager.PlayGongSoundEffect();
                 this.ReplaceViewControllerSynchronously(_waitingForMatchToStartViewController);
+
+                _lastPlayed = map;
                 
                 yield return new WaitUntil(() => _waitingForMatchToStartViewController.isActivated);
                 
