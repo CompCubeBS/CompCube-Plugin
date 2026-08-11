@@ -169,6 +169,7 @@ namespace CompCube.UI.FlowCoordinators
         private void HandleOpponentSelectedMap(PlayerSelectedMapPacket packet)
         {
             StartCoroutine(HandleOpponentSelectedMapCoroutine());
+            return;
             
             IEnumerator HandleOpponentSelectedMapCoroutine()
             {
