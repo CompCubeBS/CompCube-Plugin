@@ -137,7 +137,7 @@ namespace CompCube.Networking
                         break;
                     case ServerPacket.ServerPacketTypes.AbruptDisconnection:
                         var disconnectPacket = packet as AbruptDisconnectionPacket;
-
+                        _siraLog.Notice("Disconnected from server: " + disconnectPacket?.Reason);
                         await HandleAbruptDisconnectionAsync(disconnectPacket!.Reason);
                         break;
                     default:
@@ -172,7 +172,7 @@ namespace CompCube.Networking
         {
             _shouldListenToServer = false;
             _cancellationTokenSource.Cancel();
-            await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", _cancellationTokenSource.Token);
+            await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             _client.Dispose();
         }
 
@@ -184,8 +184,8 @@ namespace CompCube.Networking
 
         public async Task HandleAbruptDisconnectionAsync(string reason)
         {
-            await StopListeningToServerAsync();
             OnAbruptDisconnect?.Invoke(reason);
+            await StopListeningToServerAsync();
         }
 
         public void Dispose() => _client.Dispose();

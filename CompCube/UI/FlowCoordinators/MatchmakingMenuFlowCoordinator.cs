@@ -16,6 +16,7 @@ namespace CompCube.UI.FlowCoordinators
 {
     public class MatchmakingMenuFlowCoordinator : FlowCoordinator, IInitializable, IDisposable
     {
+        [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
         [Inject] private readonly MainFlowCoordinator _mainFlowCoordinator = null!;
         [Inject] private readonly MatchFlowCoordinator _matchFlowCoordinator = null!;
         [Inject] private readonly InfoFlowCoordinator _infoFlowCoordinator = null!;
@@ -67,7 +68,7 @@ namespace CompCube.UI.FlowCoordinators
 
         private void HandleShouldShowDisconnectScreen(string reason)
         {
-            StartCoroutine(HandleShouldShowDisconnectScreenCoroutine());
+            _sharedCoroutineStarter.Run(HandleShouldShowDisconnectScreenCoroutine());
             return;
             
             IEnumerator HandleShouldShowDisconnectScreenCoroutine()
