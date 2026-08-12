@@ -66,6 +66,8 @@ namespace CompCube.UI.FlowCoordinators
             _bottomScreenMatchStateViewController.UpdateHealth(_matchStateManager.RedHealth, _matchStateManager.BlueHealth);
             _bottomScreenMatchStateViewController.UpdateMultiplier(1f);
 
+            _hasShownFinalCardsToPlayer = false;
+
             StartCoroutine(WaitForVotingScreenToPresent());
             
             _onMatchFinishedCallback = onMatchFinishedCallback;
@@ -111,7 +113,7 @@ namespace CompCube.UI.FlowCoordinators
             SetTitle("Match Room");
             showBackButton = true;
 
-            _hasShownFinalCardsToPlayer = false;
+            // _hasShownFinalCardsToPlayer = false;
             _roundResultsAnimationInProgress = false;
             
             _votingScreenNavigationController = BeatSaberUI.CreateViewController<NavigationController>();
