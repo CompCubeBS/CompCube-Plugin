@@ -79,8 +79,6 @@ namespace CompCube.UI.FlowCoordinators
                 
                 yield return new WaitUntil(() => isActivated && !isInTransition);
                 
-                Plugin.Log.Info("here 2");
-                
                 _warningModalViewController.ParseOntoGameObject(topViewController, $"Disconnected from server.\nReason: {reason}", _warningModalViewController.Hide);
             }
         }

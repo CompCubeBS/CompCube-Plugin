@@ -64,7 +64,7 @@ namespace CompCube.UI.BSML.Menu
                     if (response.Successful) 
                         return;
                         
-                    ShowFailedToConnectModal(response.Message);
+                    // ShowFailedToConnectModal(response.Message);
                 });
             }
             catch (Exception e)
@@ -120,6 +120,7 @@ namespace CompCube.UI.BSML.Menu
         {
             _parserParams.EmitEvent("disconnectModalHideEvent");
             _serverListener.DisconnectAsync();
+            SetState(false);
         }
 
         [UIAction("failedToConnectModalOkButtonOnClick")]
