@@ -37,7 +37,7 @@ public class DebugServerListener : IServerListener
         _siraLog.Info("connected");
 
         await Task.Delay(1000);
-        await SendPacketAsync(new JoinRequestPacket(DebugApi.Self.Username, DebugApi.Self.UserId, queue));
+        OnMatchCreated?.Invoke(new MatchCreatedPacket(DebugApi.Self, DebugApi.DebugOpponent, DebugApi.Maps));
     }
 
     public async Task SendPacketAsync(UserPacket packet)
@@ -52,11 +52,6 @@ public class DebugServerListener : IServerListener
 
         switch (packet.PacketType)
         {
-            case UserPacket.UserPacketTypes.JoinRequest:
-                OnMatchCreated?.Invoke(new MatchCreatedPacket(DebugApi.Self, DebugApi.DebugOpponent, DebugApi.Maps));
-
-                // await Task.Delay(2000);
-                break;
             case UserPacket.UserPacketTypes.DiscardMaps:
                 OnPickPhaseStarted?.Invoke(new StartPickPhasePacket(DebugApi.Maps, true, 10f));
                 break;
