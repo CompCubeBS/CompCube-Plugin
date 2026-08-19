@@ -20,16 +20,14 @@ public class SettingsViewController : BSMLAutomaticViewController, IInitializabl
     private string ServerIp
     {
         get => _config.WebsocketIp;
-        set
-        {
-            if (!IPAddress.TryParse(value, out _))
-            {
-                _parserParams.EmitEvent("invalidValueModalShow");
-                return;
-            }
+        set => _config.WebsocketIp = value;
+    }
 
-            _config.WebsocketIp = ServerIp;
-        }
+    [UIValue("apiIp")]
+    private string ApiIp
+    {
+        get => _config.ApiIP;
+        set => _config.ApiIP = value;
     }
 
     [UIValue("scoreSubmission")]
@@ -38,9 +36,6 @@ public class SettingsViewController : BSMLAutomaticViewController, IInitializabl
         get => _config.ScoreSubmission;
         set => _config.ScoreSubmission = value;
     }
-
-    [UIAction("invalidValueModalOkButtonOnClick")]
-    private void OkButtonOnClick() => _parserParams.EmitEvent("invalidValueModalHide");
 
     public void Initialize() => _bsmlSettings.AddSettingsMenu("CompCube", "CompCube.UI.BSML.Settings.SettingsView.bsml", this);
 
