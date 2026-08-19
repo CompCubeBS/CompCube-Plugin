@@ -26,13 +26,13 @@ public class DebugServerListener : IServerListener
     public event Action<string>? OnAbruptDisconnect;
     public bool Connected => _isConnected;
 
-    public async Task ConnectAsync(string queue, Action<JoinResponsePacket> onConnectedCallback)
+    public async Task ConnectAsync(string queue, Action? onConnectedCallback)
     {
         await Task.Delay(1000);
 
         _isConnected = true;
         
-        onConnectedCallback?.Invoke(new JoinResponsePacket(true, ""));
+        onConnectedCallback?.Invoke();
         OnConnected?.Invoke();
         _siraLog.Info("connected");
 

@@ -25,7 +25,7 @@ public interface IServerListener
     
     public bool Connected { get; }
 
-    public Task ConnectAsync(string queue, Action<JoinResponsePacket> onConnectedCallback);
+    public Task ConnectAsync(string queue, Action onConnectedCallback);
 
     public Task SendPacketAsync(UserPacket packet);
 

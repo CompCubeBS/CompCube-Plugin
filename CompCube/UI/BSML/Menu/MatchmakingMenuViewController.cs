@@ -59,12 +59,9 @@ namespace CompCube.UI.BSML.Menu
                     return;
                 }
             
-                await _serverListener.ConnectAsync(((QueueOptionTab) _queueOptions[_queueTabSelector.TextSegmentedControl.selectedCellNumber]).Queue, (response) =>
+                await _serverListener.ConnectAsync(((QueueOptionTab) _queueOptions[_queueTabSelector.TextSegmentedControl.selectedCellNumber]).QueueEndpoint, () =>
                 {
-                    if (response.Successful) 
-                        return;
-                        
-                    // ShowFailedToConnectModal(response.Message);
+                    
                 });
             }
             catch (Exception e)
@@ -128,6 +125,8 @@ namespace CompCube.UI.BSML.Menu
 
         public void Initialize()
         {
+            _serverListener.OnAbruptDisconnect += HandleAbruptDisconnect;
+            
             if (!_config.ConnectToDebugQueue)
                 return;
             
@@ -135,8 +134,6 @@ namespace CompCube.UI.BSML.Menu
                 return;
             
             _queueOptions.Add(new QueueOptionTab("Debug", "debug"));
-            
-            _serverListener.OnAbruptDisconnect += HandleAbruptDisconnect;
         }
 
         private void HandleAbruptDisconnect(string reason)

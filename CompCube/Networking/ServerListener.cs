@@ -38,7 +38,7 @@ namespace CompCube.Networking
         
         private CancellationTokenSource _cancellationTokenSource = new();
         
-        public async Task ConnectAsync(string queue, Action<JoinResponsePacket>? onConnectedCallback)
+        public async Task ConnectAsync(string queueEndpoint, Action? onConnectedCallback)
         {
             if (Connected)
             {
@@ -49,37 +49,14 @@ namespace CompCube.Networking
             try
             {
                 _client = new ClientWebSocket();
+                
+                _client.Options.SetRequestHeader("UserId", _userModelWrapper.UserId);
+                _client.Options.SetRequestHeader("UserName", _userModelWrapper.UserName);
+                
                 _cancellationTokenSource = new CancellationTokenSource();
-                await _client.ConnectAsync(new Uri($"{_config.WebsocketIp}", UriKind.Absolute), _cancellationTokenSource.Token);
-
-                await SendPacketAsync(new JoinRequestPacket(_userModelWrapper.UserName, _userModelWrapper.UserId, queue));
-
-                var bytes = new byte[1024];
-                var result = await _client.ReceiveAsync(new ArraySegment<byte>(bytes), _cancellationTokenSource.Token);
-                Array.Resize(ref bytes, result.Count);
-
-                if (result.MessageType == WebSocketMessageType.Close)
-                {
-                    await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal Closure", _cancellationTokenSource.Token);
-                    await HandleAbruptDisconnectionAsync("Disconnected");
-                    return;
-                }
+                await _client.ConnectAsync(new Uri($"{_config.WebsocketIp}/{queueEndpoint}", UriKind.Absolute), _cancellationTokenSource.Token);
                 
-                var json = Encoding.UTF8.GetString(bytes);
-
-                if (ServerPacket.Deserialize(json) is not JoinResponsePacket joinResponsePacket)
-                {
-                    await HandleAbruptDisconnectionAsync("Failed to get server response!");
-                    return;
-                }
-                
-                onConnectedCallback?.Invoke(joinResponsePacket);
-
-                if (!joinResponsePacket.Successful)
-                {
-                    await HandleAbruptDisconnectionAsync(joinResponsePacket.Message);
-                    return;
-                }
+                onConnectedCallback?.Invoke();
                 
                 _shouldListenToServer = true;
                 
