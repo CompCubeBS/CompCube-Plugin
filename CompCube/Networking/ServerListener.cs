@@ -149,12 +149,13 @@ namespace CompCube.Networking
         {
             _shouldListenToServer = false;
             _cancellationTokenSource.Cancel();
-            await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+            await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal Closure", CancellationToken.None);
             _client.Dispose();
         }
 
         public async Task DisconnectAsync()
         {
+            await SendPacketAsync(new ClientDisconnectPacket());
             await StopListeningToServerAsync();
             OnDisconnected?.Invoke();
         }
