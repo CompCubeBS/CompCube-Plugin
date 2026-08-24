@@ -22,14 +22,18 @@ public class MatchResultsViewController : BSMLAutomaticViewController
     
     private Action? _continueButtonPressedCallback = null;
     
-    public void PopulateData(bool won, int eloChange, Action continueButtonPressedCallback)
+    /** Shows a win, loss or draw and keeps the server-provided completion reason visible. */
+    public void PopulateData(string result, int eloChange, string? reason, Action continueButtonPressedCallback)
     {
         _continueButtonPressedCallback = continueButtonPressedCallback;
-        TitleText = won ? "Victory!" : "Defeat...";
-        TitleBgColor = won ? "#0000FF" : "#FF0000";
-
-        MmrChangeText =
-            $"You {(won ? "gained" : "lost")}: {eloChange.ToString().FormatWithHtmlColor(won ? "#90EE90" : "#FF7F7F")} ELO";
+		var won = result == "win";
+		var draw = result == "draw";
+		TitleText = won ? "Victory!" : draw ? "Draw" : "Defeat...";
+		TitleBgColor = won ? "#0000FF" : draw ? "#666666" : "#FF0000";
+		var rating = draw
+			? "No MMR change"
+			: $"You {(won ? "gained" : "lost")}: {Math.Abs(eloChange).ToString().FormatWithHtmlColor(won ? "#90EE90" : "#FF7F7F")} MMR";
+		MmrChangeText = string.IsNullOrWhiteSpace(reason) ? rating : $"{rating}\n{reason.Replace('_', ' ')}";
             
         NotifyPropertyChanged(null);
     }

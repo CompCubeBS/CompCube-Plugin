@@ -1,0 +1,16 @@
+{
+  "id": "CompCube",
+  "name": "CompCube",
+  "author": "Bela",
+  "version": "0.2.1",
+  "gameVersion": "1.40.8",
+  "description": "Competitive Beat Saber matchmaking.",
+  "dependsOn": {
+    "BSIPA": "^4.3.5",
+    "BeatSaberMarkupLanguage": "*",
+    "SiraUtil": "*",
+    "SongCore": "*",
+    "BeatSaverSharp": "*",
+    "protobuf-net": "*"
+  }
+}

@@ -30,6 +30,8 @@ namespace CompCube.Installers
             Container.BindInterfacesAndSelfTo<MatchBeatmapManager>().AsSingle();
             
             Container.BindInterfacesAndSelfTo<UserModelWrapper>().AsSingle();
+			Container.BindInterfacesAndSelfTo<BeatKhanaGameAuth>().AsSingle();
+			Container.BindInterfacesAndSelfTo<ReplayPublisher>().AsSingle();
 
             Container.BindInterfacesAndSelfTo<SharedCoroutineStarter>().FromNewComponentOnNewGameObject().AsSingle();
 

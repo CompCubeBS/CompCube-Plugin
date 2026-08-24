@@ -1,0 +1,99 @@
+name: Build PCVR plugin
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/**"
+      - "CompCube/**"
+      - "CompCube.sln"
+  pull_request:
+    paths:
+      - ".github/**"
+      - "CompCube/**"
+      - "CompCube.sln"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pcvr-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Beat Saber ${{ matrix.game-version }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        game-version:
+          - 1.39.1
+          - 1.40.8
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v5
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Acquire stripped Beat Saber references
+        uses: beat-forge/init-beatsaber@v1
+        with:
+          token: ${{ github.token }}
+          version: ${{ matrix.game-version }}
+          path: ${{ github.workspace }}/Refs
+
+      - name: Acquire mod references
+        shell: pwsh
+        run: |
+          $gameVersion = "${{ matrix.game-version }}"
+          $manifest = Get-Content ".github/manifests/$gameVersion.json" -Raw | ConvertFrom-Json
+          $response = Invoke-RestMethod -Uri "https://beatmods.com/api/mods?gameVersion=$gameVersion&status=verified"
+
+          foreach ($name in $manifest.dependsOn.PSObject.Properties.Name) {
+            $entry = $response.mods | Where-Object { $_.mod.name -eq $name } | Select-Object -First 1
+            if ($null -eq $entry) {
+              throw "No verified version of '$name' exists on BeatMods for Beat Saber $gameVersion."
+            }
+
+            $archive = Join-Path $env:RUNNER_TEMP "$name.zip"
+            Write-Output "Downloading $name $($entry.latest.modVersion)..."
+            Invoke-WebRequest -Uri "https://beatmods.com/cdn/mod/$($entry.latest.zipHash).zip" -OutFile $archive
+            Expand-Archive -LiteralPath $archive -DestinationPath "${{ github.workspace }}/Refs" -Force
+          }
+
+      - name: Build plugin
+        env:
+          FrameworkPathOverride: /usr/lib/mono/4.8-api
+        run: >-
+          dotnet build CompCube.sln
+          --configuration Release
+          -p:GameVersion=${{ matrix.game-version }}
+          -p:LocalRefsDir=${{ github.workspace }}/Refs
+          -p:BeatSaberDir=${{ github.workspace }}/Refs
+          -p:ContinuousIntegrationBuild=False
+          -p:DisableCopyToPlugins=True
+          -p:DisableZipRelease=True
+
+      - name: Stage DLL
+        shell: pwsh
+        run: |
+          $dll = Get-ChildItem "CompCube/bin/Release" -Recurse -Filter "CompCube.dll" | Select-Object -First 1
+          if ($null -eq $dll) {
+            throw "CompCube.dll was not produced."
+          }
+
+          New-Item -ItemType Directory -Path "artifact" -Force | Out-Null
+          Copy-Item $dll.FullName "artifact/CompCube-bs${{ matrix.game-version }}.dll"
+
+      - name: Upload DLL
+        uses: actions/upload-artifact@v7
+        with:
+          name: CompCube-bs${{ matrix.game-version }}
+          path: artifact/CompCube-bs${{ matrix.game-version }}.dll
+          if-no-files-found: error
+          retention-days: 30
