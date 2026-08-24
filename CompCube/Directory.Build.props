@@ -6,19 +6,14 @@
     <AssemblyName>CompCube</AssemblyName>
     <Authors>Bela</Authors>
     <Version>0.2.1</Version>
-    <GameVersion Condition="'$(GameVersion)' == ''">1.40.8</GameVersion>
+    <GameVersion>1.16.4</GameVersion>
     <Description>$ModDesc$</Description>
     <ProjectHome></ProjectHome>
     <ProjectSource></ProjectSource>
     <Donate></Donate>
   </PropertyGroup>
   <ItemGroup>
-    <Dependency Include="BSIPA" Version="^4.3.5" />
-    <Dependency Include="BeatSaberMarkupLanguage" Version="*" />
-    <Dependency Include="SiraUtil" Version="*" />
-    <Dependency Include="SongCore" Version="*" />
-    <Dependency Include="BeatSaverSharp" Version="*" />
-    <Dependency Include="protobuf-net" Version="*" />
+    <Dependency Include="BSIPA" Version="^4.1.3" />
   </ItemGroup>
   <!-- End Manifest -->
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">

@@ -4,7 +4,7 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube.Models;
+using CompCube_Models.Models.Map;
 using CompCube.Extensions;
 using HMUI;
 using SongCore;

@@ -9,7 +9,6 @@ namespace CompCube.Configuration
     {
         public virtual string WebsocketIp { get; set; } = "wss://ws.compcube.net";
         public virtual string ApiIP { get; set; } = "https://api.compcube.net";
-		public virtual string BeatKhanaApiIP { get; set; } = "https://api.beatkhana.com";
 
         public virtual bool ScoreSubmission { get; set; } = true;
 

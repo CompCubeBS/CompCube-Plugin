@@ -2,7 +2,9 @@
 using System.Globalization;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube.Models;
+using CompCube_Models.Models.Map;
+using CompCube_Models.Models.Match;
+using CompCube_Models.Models.Packets.ServerPackets;
 using JetBrains.Annotations;
 using CompCube.Extensions;
 using CompCube.Game;
@@ -36,7 +38,7 @@ namespace CompCube.UI.BSML.Match
                 .First(i => i.name == "RoundResultsLevelBar");
         }
         
-        public void PopulateData(RoundResultsMessage results, float multiplier, VotingMap votingMap)
+        public void PopulateData(RoundResultsPacket results, float multiplier, VotingMap votingMap)
         {
             _sharedCoroutineStarter.Run(PopulateDataCoroutine());
             return;
@@ -60,15 +62,15 @@ namespace CompCube.UI.BSML.Match
                 WinnerScoreText = FormatScore(winnerScore, winner, 1);
                 LoserScoreText = FormatScore(loserScore, loser, 2);
             
-                DamageText = ((winnerScore.Accuracy - loserScore.Accuracy) * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
+                DamageText = ((winnerScore.RelativeScore - loserScore.RelativeScore) * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
             
                 NotifyPropertyChanged(null);
             }
         }
 
-        private string FormatScore(Score score,CompCube.Models.UserInfo user, int placement) =>
+        private string FormatScore(Score score,CompCube_Models.Models.ClientData.UserInfo user, int placement) => 
             $"{(placement)}. {user.GetFormattedUserName()} - " +
-            $"{(score.Accuracy * 100):F}% " +
+            $"{(score.RelativeScore * 100):F}% " +
             $"{(score.FullCombo ? "FC".FormatWithHtmlColor("#90EE90") : $"{score.Misses}x".FormatWithHtmlColor("#FF7F7F"))}" +
             $"{(score.ProMode ? " (PM)" : "")}";
     }

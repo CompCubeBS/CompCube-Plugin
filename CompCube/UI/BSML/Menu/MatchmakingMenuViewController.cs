@@ -4,7 +4,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube.Models;
+using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube.Configuration;
 using CompCube.Interfaces;
 using CompCube.Server;
@@ -45,21 +45,10 @@ namespace CompCube.UI.BSML.Menu
         [UIValue("failedToConnectReason")] private string FailedToConnectReason { get; set; } = "";
 
         [UIAction("joinMatchmakingPoolButtonOnClick")]
-        private void HandleJoinMatchmakingPoolClicked()
-        {
-            _warningModalViewController.ParseOntoGameObject(
-                this,
-                "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity.",
-                JoinSelectedQueue,
-                _warningModalViewController.Hide);
-        }
-
-        /** Validates the server and joins the queue the player explicitly selected. */
-        private async void JoinSelectedQueue()
+        private async void HandleJoinMatchmakingPoolClicked()
         {
             try
             {
-				_warningModalViewController.Hide();
                 SetState(true);
 
                 var canConnectToServer = await _serverChecker.CanConnectToServer();

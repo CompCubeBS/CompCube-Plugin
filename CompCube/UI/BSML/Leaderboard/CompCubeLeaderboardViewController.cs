@@ -82,7 +82,7 @@ namespace CompCube.UI.BSML.Leaderboard
         [UIValue("winRate")] private string WinRateText { get; set; } = string.Empty;
         [UIValue("winStreak")] private string WinStreakText { get; set; } = string.Empty;
         
-        private void OnUserInfoButtonClicked(CompCube.Models.UserInfo userInfo)
+        private void OnUserInfoButtonClicked(CompCube_Models.Models.ClientData.UserInfo userInfo)
         {
             _parserParams.EmitEvent("profileModalShow");
             
@@ -131,7 +131,7 @@ namespace CompCube.UI.BSML.Leaderboard
 
         [UIValue("cell-data")] private readonly List<IconSegmentedControl.DataItem> _cellData = new(){};
 
-        private void SetLeaderboardData(CompCube.Models.UserInfo[] userInfo, bool isAppend = false)
+        private void SetLeaderboardData(CompCube_Models.Models.ClientData.UserInfo[] userInfo, bool isAppend = false)
         {
             if (userInfo == null || userInfo.Length == 0)
             {
@@ -197,7 +197,7 @@ namespace CompCube.UI.BSML.Leaderboard
 
                 int start = _pageNumber * PageSize;
 
-                CompCube.Models.UserInfo[] result;
+                CompCube_Models.Models.ClientData.UserInfo[] result;
 
                 result = await _api.GetLeaderboardRange(start, PageSize);
 

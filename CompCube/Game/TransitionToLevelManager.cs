@@ -1,9 +1,8 @@
-﻿using CompCube.Models;
+﻿using CompCube_Models.Models.Map;
 using CompCube.Configuration;
 using CompCube.UI.BSML.PauseMenu;
 using CompCube.Extensions;
 using CompCube.Game.MatchState;
-using CompCube.Networking;
 using SiraUtil.Logging;
 using SiraUtil.Submissions;
 using Zenject;
@@ -16,7 +15,6 @@ public class TransitionToLevelManager
     [Inject] private readonly PlayerDataModel _playerDataModel = null!;
     [Inject] private readonly SiraLog _siraLog = null!;
     [Inject] private readonly PluginConfig _config = null!;
-	[Inject] private readonly ReplayPublisher _replayPublisher = null!;
         
     [Inject] private readonly MatchStateManager _matchStateManager = null!;
          
@@ -38,35 +36,8 @@ public class TransitionToLevelManager
         InLevel = true;
             
         var beatmapLevel = level.GetBeatmapLevel() ?? throw new Exception("Could not get beatmap level!");
-		_ = _replayPublisher.StartAsync(level).ContinueWith(task =>
-		{
-			if (task.Exception != null) _siraLog.Warn($"Replay streaming could not start: {task.Exception.GetBaseException().Message}");
-		}, TaskScheduler.Default);
-		var songSpeed = level.Modifiers.Contains("SS")
-			? GameplayModifiers.SongSpeed.Slower
-			: level.Modifiers.Contains("SFS")
-				? GameplayModifiers.SongSpeed.SuperFast
-				: level.Modifiers.Contains("FS")
-					? GameplayModifiers.SongSpeed.Faster
-					: GameplayModifiers.SongSpeed.Normal;
-		var gameplayModifiers = new GameplayModifiers(
-			level.Modifiers.Contains("4L") ? GameplayModifiers.EnergyType.Battery : GameplayModifiers.EnergyType.Bar,
-			level.Modifiers.Contains("NF"),
-			level.Modifiers.Contains("IF"),
-			false,
-			level.Modifiers.Contains("NW") ? GameplayModifiers.EnabledObstacleType.NoObstacles : GameplayModifiers.EnabledObstacleType.All,
-			level.Modifiers.Contains("NB"),
-			false,
-			level.Modifiers.Contains("SA"),
-			level.Modifiers.Contains("DA"),
-			songSpeed,
-			level.Modifiers.Contains("NA"),
-			level.Modifiers.Contains("GN"),
-			level.Modifiers.Contains("PM") || proMode,
-			level.Modifiers.Contains("ZM"),
-			level.Modifiers.Contains("SN"));
             
-#if BS_1_39_1
+        // 1.39.1
         _menuTransitionsHelper.StartStandardLevel(
             "Solo",
             level.GetBeatmapKey(),
@@ -74,7 +45,7 @@ public class TransitionToLevelManager
             _playerDataModel.playerData.overrideEnvironmentSettings,
             _playerDataModel.playerData.colorSchemesSettings.overrideDefaultColors ? _playerDataModel.playerData.colorSchemesSettings.GetSelectedColorScheme() : null,
             null,
-            gameplayModifiers,
+            new GameplayModifiers(GameplayModifiers.EnergyType.Bar, true, false, false, GameplayModifiers.EnabledObstacleType.All, false, false, false, false, GameplayModifiers.SongSpeed.Normal, false, false, proMode, false, false),
             _playerDataModel.playerData.playerSpecificSettings,
             null,
             //TODO: fix this sometimes causing an exception because of creating from addressables
@@ -87,8 +58,9 @@ public class TransitionToLevelManager
             AfterSceneSwitchToMenuCallback,
             null
         );
-#else
-        _menuTransitionsHelper.StartStandardLevel(
+            
+        // 1.40.8
+        /*_menuTransitionsHelper.StartStandardLevel(
             "Solo",
             level.GetBeatmapKey(),
             beatmapLevel,
@@ -96,7 +68,7 @@ public class TransitionToLevelManager
             _playerDataModel.playerData.colorSchemesSettings.overrideDefaultColors ? _playerDataModel.playerData.colorSchemesSettings.GetSelectedColorScheme() : null,
             true,
             beatmapLevel.GetColorScheme(beatmapLevel.GetCharacteristics().First(i => i.serializedName == "Standard"), level.GetBaseGameDifficultyType()),
-            gameplayModifiers,
+            new GameplayModifiers(GameplayModifiers.EnergyType.Bar, true, false, false, GameplayModifiers.EnabledObstacleType.All, false, false, false, false, GameplayModifiers.SongSpeed.Normal, false, false, proMode, false, false),
             _playerDataModel.playerData.playerSpecificSettings,
             null,
             EnvironmentsListModel.CreateFromAddressables(),
@@ -107,8 +79,7 @@ public class TransitionToLevelManager
             diContainer => AfterSceneSwitchToGameplayCallback(diContainer, unpauseTime),
             AfterSceneSwitchToMenuCallback,
             null
-        );
-#endif
+        );*/
     }
 
     public void StopLevel(Action<LevelCompletionResults, StandardLevelScenesTransitionSetupDataSO>? menuSwitchCallback = null)
@@ -122,7 +93,6 @@ public class TransitionToLevelManager
     private void AfterSceneSwitchToMenuCallback(StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSo, LevelCompletionResults levelCompletionResults)
     {
         InLevel = false;
-		_replayPublisher.Complete(levelCompletionResults);
             
         _menuSwitchCallback?.Invoke(levelCompletionResults, standardLevelScenesTransitionSetupDataSo);
         _menuSwitchCallback = null;

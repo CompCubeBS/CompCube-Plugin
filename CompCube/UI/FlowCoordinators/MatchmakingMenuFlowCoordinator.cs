@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using CompCube.Models;
+using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube.Interfaces;
 using CompCube.UI.BSML.Leaderboard;
 using CompCube.UI.BSML.Menu;
@@ -37,7 +37,7 @@ namespace CompCube.UI.FlowCoordinators
             ProvideInitialViewControllers(_matchmakingMenuViewController, rightScreenViewController: _leaderboardViewController, leftScreenViewController: _gameplaySetupViewManager.ManagedController);
         }
 
-        private void OnMatchCreated(MatchCreatedMessage packet)
+        private void OnMatchCreated(MatchCreatedPacket packet)
         {
             this.PresentFlowCoordinatorSynchronously(_matchFlowCoordinator);
 
