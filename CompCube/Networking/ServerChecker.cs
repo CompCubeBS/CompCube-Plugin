@@ -1,4 +1,4 @@
-﻿using CompCube_Models.Models.Server;
+﻿using CompCube.Models;
 using CompCube.Interfaces;
 using Zenject;
 
@@ -15,10 +15,11 @@ public class ServerChecker
         if (serverStatus == null)
             return new ServerCheckingResults(false, "Could not connect to server!");
         
-        if (!serverStatus.AllowedModVersions.Contains(IPA.Loader.PluginManager.GetPluginFromId("CompCube").HVersion.ToString()))
+        if (serverStatus.AllowedModVersions.Length > 0 &&
+            !serverStatus.AllowedModVersions.Contains(IPA.Loader.PluginManager.GetPluginFromId("CompCube").HVersion.ToString()))
             return new ServerCheckingResults(false, "Plugin version is outdated. Please update your mod!");
 
-        if (serverStatus.State == ServerState.State.Maintenance)
+        if (serverStatus.State == ServerState.Maintenance)
             return new ServerCheckingResults(false, "Server is undergoing maintenance. Please check back later!");
         
         return new ServerCheckingResults(true);

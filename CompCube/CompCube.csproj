@@ -3,7 +3,7 @@
         <ProductVersion>8.0.30703</ProductVersion>
         <ProjectGuid>{A5710D75-1F96-46D6-9B64-5C6DEC84C561}</ProjectGuid>
         <AssemblyName>CompCube</AssemblyName>
-        <TargetFramework>net472</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
         <DebugSymbols>true</DebugSymbols>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
         <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
@@ -15,6 +15,8 @@
         <LangVersion>default</LangVersion>
         <Nullable>annotations</Nullable>
         <PackageId>CompCube</PackageId>
+        <DefineConstants Condition="'$(GameVersion)' == '1.39.1'">$(DefineConstants);BS_1_39_1</DefineConstants>
+        <DefineConstants Condition="'$(GameVersion)' == '1.40.8'">$(DefineConstants);BS_1_40_8</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition="$(DefineConstants.Contains('CIBuild')) OR '$(NCrunch)' == '1'">
         <DisableCopyToPlugins>True</DisableCopyToPlugins>
@@ -39,6 +41,10 @@
         </Reference>
         <Reference Include="BeatSaber.ViewSystem">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="BGNetCore">
+            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNetCore.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="BeatSaverSharp">
@@ -109,6 +115,14 @@
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="netstandard">
+            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\netstandard.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="protobuf-net">
+            <HintPath>$(BeatSaberDir)\Libs\protobuf-net.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="SegmentedControl" Publicize="True">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\SegmentedControl.dll</HintPath>
             <Private>false</Private>
@@ -122,6 +136,10 @@
             <Private>false</Private>
         </Reference>
         <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="System.Reflection" Condition="'$(FrameworkPathOverride)' != ''">
+            <HintPath>$(FrameworkPathOverride)/Facades/System.Reflection.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="Tweening">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Tweening.dll</HintPath>
             <Private>false</Private>
@@ -190,10 +208,14 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+		<PackageReference Include="Fody" Version="6.8.2" PrivateAssets="all" />
+		<PackageReference Include="Costura.Fody" Version="6.0.0" PrivateAssets="all" />
+		<PackageReference Include="SocketIOClient" Version="3.0.8" />
     </ItemGroup>
     <ItemGroup>
         <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
         <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')" />
+        <None Include="FodyWeavers.xml" />
     </ItemGroup>
     <ItemGroup>
       <None Remove="UI\BSML\LoadingView.bsml" />

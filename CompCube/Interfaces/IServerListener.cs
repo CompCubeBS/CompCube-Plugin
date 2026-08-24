@@ -1,21 +1,20 @@
-﻿using CompCube_Models.Models.Packets;
-using CompCube_Models.Models.Packets.ServerPackets;
+﻿using CompCube.Models;
 
 namespace CompCube.Interfaces;
 
 public interface IServerListener
 {
-    public event Action<MatchCreatedPacket> OnMatchCreated;
+    public event Action<MatchCreatedMessage> OnMatchCreated;
     
-    public event Action<PlayerSelectedMapPacket> OnPlayerSelectedMap;
+    public event Action<PlayerSelectedMapMessage> OnPlayerSelectedMap;
     
-    public event Action<RoundResultsPacket> OnRoundResults;
+    public event Action<RoundResultsMessage> OnRoundResults;
     
-    public event Action<StartPickPhasePacket> OnPickPhaseStarted;
+    public event Action<PickPhaseMessage> OnPickPhaseStarted;
 
-    public event Action<MatchFinishedPacket> OnMatchFinished;
+    public event Action<MatchFinishedMessage> OnMatchFinished;
     
-    public event Action<UpdateCardsPacket> OnCardsUpdated; 
+    public event Action<CardsUpdatedMessage> OnCardsUpdated;
 
     public event Action OnConnected;
     
@@ -27,7 +26,11 @@ public interface IServerListener
 
     public Task ConnectAsync(string queue, Action onConnectedCallback);
 
-    public Task SendPacketAsync(UserPacket packet);
+    public Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps);
+
+    public Task SelectMapAsync(VotingMap map);
+
+    public Task SubmitScoreAsync(ScoreSubmission score);
 
     public Task DisconnectAsync();
     

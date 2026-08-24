@@ -2,7 +2,7 @@
 using System.Globalization;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube_Models.Models.Map;
+using CompCube.Models;
 using CompCube.Configuration;
 using CompCube.UI.BSML.Components.CustomLevelBar;
 using HMUI;

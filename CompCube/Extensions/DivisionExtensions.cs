@@ -1,4 +1,4 @@
-﻿using CompCube_Models.Models.ClientData;
+﻿using CompCube.Models;
 
 namespace CompCube.Extensions;
 

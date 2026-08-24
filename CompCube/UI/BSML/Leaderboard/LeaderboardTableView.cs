@@ -35,7 +35,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     public TableView TableView { get; private set; }
 
-    internal List<CompCube_Models.Models.ClientData.UserInfo> Data { get; private set; } = new();
+    internal List<CompCube.Models.UserInfo> Data { get; private set; } = new();
 
     private LevelListTableCell _tableCellPrefab;
     private bool firstLoad = true;
@@ -47,7 +47,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     #region Data
 
-    internal void SetData(List<CompCube_Models.Models.ClientData.UserInfo> users)
+    internal void SetData(List<CompCube.Models.UserInfo> users)
     {
         Data = users;
         TableView.ReloadData();
@@ -59,7 +59,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
         }
     }
     
-    internal void AddData(List<CompCube_Models.Models.ClientData.UserInfo> users, CancellationToken token = default) {
+    internal void AddData(List<CompCube.Models.UserInfo> users, CancellationToken token = default) {
         Data.AddRange(users);
 
         var scrollView = TableView.scrollView;
@@ -188,7 +188,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     #region Text
 
-    private void ConfigureText(LevelListTableCell cell, CompCube_Models.Models.ClientData.UserInfo user)
+    private void ConfigureText(LevelListTableCell cell, CompCube.Models.UserInfo user)
     {
         string name = $"#{user.Rank} - {user.GetFormattedUserName()}";
         string divisionText = $"{user.Mmr} ELO";// $"<color={user.Division.Color}>{user.Division.Division}</color> {user.Mmr} MMR";
@@ -216,7 +216,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
     #region Avatar & Badge Loading
 
     private async Task ConfigureAvatarAsync(LevelListTableCell cell,
-        CompCube_Models.Models.ClientData.UserInfo user,
+        CompCube.Models.UserInfo user,
         int idx,
         CancellationToken token)
     {
