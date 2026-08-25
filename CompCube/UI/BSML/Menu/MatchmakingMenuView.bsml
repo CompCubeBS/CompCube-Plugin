@@ -4,6 +4,10 @@
     <vertical anchor-pos-y="32.5" pref-height="7.5" vertical-fit="PreferredSize">
         <tab-selector tab-tag="tab-queues-tag" id="queueTabSelector"/>
     </vertical>
+    
+    <vertical anchor-pos-y="32.5" pref-height="7.5" vertical-fit="PreferredSize">
+        <loading preferred-height="7.5" pref-width="7.5" preserve-aspect="true" id="loadingIndicator"/>
+    </vertical>
 
     <macro.for-each pass-back-tags="true" hosts="queueOptions">
         <tab tab-name="~tabName" tags="tab-queues-tag"/>

@@ -13,6 +13,8 @@ public interface IApi
     public Task<CompCube_Models.Models.ClientData.UserInfo[]?> GetAroundUser(string id);
 
     public Task<ServerStatus?> GetServerStatus();
+    
+    public Task<Queue[]?> GetQueues();
 
     public Task<string[]?> GetMapHashes();
     

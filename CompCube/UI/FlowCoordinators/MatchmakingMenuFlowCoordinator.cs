@@ -79,7 +79,7 @@ namespace CompCube.UI.FlowCoordinators
                 
                 yield return new WaitUntil(() => isActivated && !isInTransition);
                 
-                _warningModalViewController.ParseOntoGameObject(topViewController, $"Disconnected from server.\nReason: {reason}", _warningModalViewController.Hide);
+                _warningModalViewController.ParseOntoViewController(topViewController, $"Disconnected from server.\nReason: {reason}", _warningModalViewController.Hide);
             }
         }
 
@@ -94,7 +94,7 @@ namespace CompCube.UI.FlowCoordinators
         {
             if (_serverListener.Connected)
             {
-                _warningModalViewController.ParseOntoGameObject(viewController, "Are you sure you want to leave the matchmaking queue?", () =>
+                _warningModalViewController.ParseOntoViewController(viewController, "Are you sure you want to leave the matchmaking queue?", () =>
                 {
                     _serverListener.DisconnectAsync();
                     _mainFlowCoordinator.DismissFlowCoordinator(this);

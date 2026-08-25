@@ -56,6 +56,13 @@ public class DebugApi : IApi
             ServerState.State.Online));
     }
 
+    public async Task<Queue[]?> GetQueues()
+    {
+        await Task.Delay(500);
+
+        return [new Queue("test", "test", "test", "test", false, true)];
+    }
+
     public async Task<string[]?> GetMapHashes()
     {
         await Task.Delay(1000);
