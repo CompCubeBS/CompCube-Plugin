@@ -199,11 +199,12 @@ namespace CompCube.UI.FlowCoordinators
                 
                 _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed);
                 
-                yield return new WaitForSeconds(3f);
+				var resultStepSeconds = Mathf.Max(0f, (float)(results.ResultsDueAt - DateTime.UtcNow).TotalSeconds) / 2f;
+				yield return new WaitForSeconds(resultStepSeconds);
 
                 _bottomScreenMatchStateViewController.UpdateHealth(results.RedHealth, results.BlueHealth);
                 
-                yield return new WaitForSeconds(3f);
+				yield return new WaitForSeconds(resultStepSeconds);
 
                 _roundResultsAnimationInProgress = false;
             }
@@ -314,16 +315,16 @@ namespace CompCube.UI.FlowCoordinators
         {
             try
             {
+                if (_matchBeatmapManager.InDiscardPhase && !_matchBeatmapManager.DiscardMap(votingMap))
+                    return;
+
                 HideStandardLevelDetailControllerIfPresent();
                 _votingScreenViewController.ClearSelection();
                 _votingScreenViewController.RemoveMapFromList(votingMap);
                 HideLeaderboard();
                 
                 if (_matchBeatmapManager.InDiscardPhase)
-                {
-                    _matchBeatmapManager.DiscardMap(votingMap);
                     return;
-                }
                 
                 StartCoroutine(ShowMapPreviewViewAndStartMatch(votingMap));
                 await _serverListener.SelectMapAsync(votingMap);

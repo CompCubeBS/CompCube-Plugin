@@ -21,6 +21,7 @@ public class TransitionToLevelManager
     [Inject] private readonly MatchStateManager _matchStateManager = null!;
          
     public bool InLevel { get; private set; } = false;
+	public bool NoFailEnabled { get; private set; } = false;
 
     private Action<LevelCompletionResults, StandardLevelScenesTransitionSetupDataSO>? _menuSwitchCallback;
         
@@ -36,6 +37,7 @@ public class TransitionToLevelManager
         _menuSwitchCallback = onLevelCompletedCallback;
             
         InLevel = true;
+		NoFailEnabled = level.Modifiers.Contains("NF");
             
         var beatmapLevel = level.GetBeatmapLevel() ?? throw new Exception("Could not get beatmap level!");
 		_ = _replayPublisher.StartAsync(level).ContinueWith(task =>
@@ -51,7 +53,7 @@ public class TransitionToLevelManager
 					: GameplayModifiers.SongSpeed.Normal;
 		var gameplayModifiers = new GameplayModifiers(
 			level.Modifiers.Contains("4L") ? GameplayModifiers.EnergyType.Battery : GameplayModifiers.EnergyType.Bar,
-			level.Modifiers.Contains("NF"),
+			NoFailEnabled,
 			level.Modifiers.Contains("IF"),
 			false,
 			level.Modifiers.Contains("NW") ? GameplayModifiers.EnabledObstacleType.NoObstacles : GameplayModifiers.EnabledObstacleType.All,
@@ -122,6 +124,7 @@ public class TransitionToLevelManager
     private void AfterSceneSwitchToMenuCallback(StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSo, LevelCompletionResults levelCompletionResults)
     {
         InLevel = false;
+		NoFailEnabled = false;
 		_replayPublisher.Complete(levelCompletionResults);
             
         _menuSwitchCallback?.Invoke(levelCompletionResults, standardLevelScenesTransitionSetupDataSo);

@@ -13,12 +13,13 @@ public sealed class PlayerSelectedMapMessage(VotingMap map)
     public VotingMap Map { get; } = map;
 }
 
-public sealed class RoundResultsMessage(Score redScore, Score blueScore, float redHealth, float blueHealth)
+public sealed class RoundResultsMessage(Score redScore, Score blueScore, float redHealth, float blueHealth, DateTime resultsDueAt)
 {
     public Score RedScore { get; } = redScore;
     public Score BlueScore { get; } = blueScore;
     public float RedHealth { get; } = redHealth;
     public float BlueHealth { get; } = blueHealth;
+	public DateTime ResultsDueAt { get; } = resultsDueAt;
 }
 
 public sealed class PickPhaseMessage(VotingMap[] availableMaps, bool isOwnPick, float newMultiplier)

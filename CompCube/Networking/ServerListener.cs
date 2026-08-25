@@ -5,6 +5,9 @@ using IPA.Loader;
 using SiraUtil.Logging;
 using SocketIOClient;
 using SocketIOClient.Transport;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Zenject;
 
 namespace CompCube.Networking;
@@ -55,6 +58,7 @@ public sealed class ServerListener : IServerListener, IDisposable
                     ["accessToken"] = auth.Token,
                     ["clientType"] = "plugin",
                     ["pluginVersion"] = PluginManager.GetPluginFromId("CompCube").HVersion.ToString(),
+					["roundResultsSeconds"] = _config.RoundResultsDurationSeconds.ToString(CultureInfo.InvariantCulture),
                 },
             });
             RegisterServerEvents(_socket);
@@ -170,11 +174,19 @@ public sealed class ServerListener : IServerListener, IDisposable
         socket.On("roundResults", response =>
         {
             var value = response.GetValue<RoundResultsEvent>();
+			var resultsDueAt = DateTime.TryParse(
+				value.ResultsDueAt,
+				CultureInfo.InvariantCulture,
+				DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+				out var parsedDueAt)
+				? parsedDueAt
+				: DateTime.UtcNow.AddSeconds(_config.RoundResultsDurationSeconds);
             OnRoundResults?.Invoke(new RoundResultsMessage(
                 ToScore(value.Scores.FirstOrDefault(score => score.UserGuid == _redUserGuid)),
                 ToScore(value.Scores.FirstOrDefault(score => score.UserGuid == _blueUserGuid)),
                 (float)value.RedHealth,
-                (float)value.BlueHealth));
+				(float)value.BlueHealth,
+				resultsDueAt));
         });
         socket.On("matchFinished", response =>
         {
@@ -196,12 +208,35 @@ public sealed class ServerListener : IServerListener, IDisposable
     private async Task<T?> EmitAcknowledgedAsync<T>(string eventName, object payload)
     {
         RequireConnection();
-        var completion = new TaskCompletionSource<T?>();
+
+        _siraLog.Debug($"[Socket.IO]: Sending {eventName}: {JsonSerializer.Serialize(payload)}");
+        var completion = new TaskCompletionSource<T?>(TaskCreationOptions.RunContinuationsAsynchronously);
         await _socket!.EmitAsync(eventName, response =>
         {
-            var ack = response.GetValue<Acknowledgement<T>>();
-            if (ack.Ok) completion.TrySetResult(ack.Data);
-            else completion.TrySetException(new InvalidOperationException(ack.Error?.Message ?? "The server rejected the action."));
+            try
+            {
+                _siraLog.Debug($"[Socket.IO]: Received {eventName} acknowledgement: {response}");
+                var ack = response.GetValue<Acknowledgement<T>>();
+                if (ack.Ok)
+                {
+                    completion.TrySetResult(ack.Data);
+                    return;
+                }
+
+                var message = ack.Error?.Message ?? "The server rejected the action.";
+                var error = string.IsNullOrWhiteSpace(ack.Error?.Code)
+                    ? message
+                    : $"{ack.Error.Code}: {message}";
+                _siraLog.Error($"[Socket.IO]: {eventName} was rejected: {error}");
+                completion.TrySetException(new InvalidOperationException(error));
+            }
+            catch (Exception exception)
+            {
+                _siraLog.Error($"[Socket.IO]: Could not read the {eventName} acknowledgement: {exception}");
+                completion.TrySetException(new InvalidOperationException(
+                    $"Could not read the server acknowledgement for {eventName}.",
+                    exception));
+            }
         }, payload);
         return await completion.Task;
     }
@@ -239,8 +274,18 @@ public sealed class ServerListener : IServerListener, IDisposable
 
     public void Dispose() => _socket?.Dispose();
 
-    private sealed class Acknowledgement<T> { public bool Ok { get; set; } public T? Data { get; set; } public ErrorDetails? Error { get; set; } }
-    private sealed class ErrorDetails { public string Message { get; set; } = string.Empty; }
+    private sealed class Acknowledgement<T>
+    {
+        [JsonPropertyName("ok")] public bool Ok { get; set; }
+        [JsonPropertyName("data")] public T? Data { get; set; }
+        [JsonPropertyName("error")] public ErrorDetails? Error { get; set; }
+    }
+
+    private sealed class ErrorDetails
+    {
+        [JsonPropertyName("code")] public string Code { get; set; } = string.Empty;
+        [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
+    }
     private sealed class PacketUser { public string Guid { get; set; } = string.Empty; public string PlatformId { get; set; } = string.Empty; public string Username { get; set; } = string.Empty; }
     private sealed class PacketMap
     {
@@ -266,6 +311,6 @@ public sealed class ServerListener : IServerListener, IDisposable
     private sealed class PickPhaseEvent { public bool IsOwnPick { get; set; } public PacketMap[] AvailableMaps { get; set; } = []; public double DamageMultiplier { get; set; } }
     private sealed class SelectedMapEvent { public PacketMap Map { get; set; } = new(); }
     private sealed class StartMapEvent { public string RoundGuid { get; set; } = string.Empty; }
-    private sealed class RoundResultsEvent { public double RedHealth { get; set; } public double BlueHealth { get; set; } public PacketScore[] Scores { get; set; } = []; }
+    private sealed class RoundResultsEvent { public double RedHealth { get; set; } public double BlueHealth { get; set; } public string? ResultsDueAt { get; set; } public PacketScore[] Scores { get; set; } = []; }
     private sealed class MatchFinishedEvent { public string Result { get; set; } = "loss"; public int MmrChange { get; set; } public string? Reason { get; set; } }
 }

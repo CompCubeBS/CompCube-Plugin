@@ -49,7 +49,7 @@ public class DebugServerListener : IServerListener
     public async Task SubmitScoreAsync(ScoreSubmission score)
     {
         if (!_isConnected) return;
-        OnRoundResults?.Invoke(new RoundResultsMessage(Score.Empty, Score.Empty, .5f, .5f));
+        OnRoundResults?.Invoke(new RoundResultsMessage(Score.Empty, Score.Empty, .5f, .5f, DateTime.UtcNow.AddSeconds(6)));
         await Task.Delay(500);
         OnMatchFinished?.Invoke(new MatchFinishedMessage(100, "loss"));
     }
