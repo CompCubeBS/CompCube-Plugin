@@ -1,6 +1,9 @@
-﻿using CompCube.Models;
+﻿using CompCube_Models.Models.Server;
+using CompCube.Models;
 using CompCube.Interfaces;
 using IPA.Utilities;
+using ServerState = CompCube.Models.ServerState;
+using ServerStatus = CompCube.Models.ServerStatus;
 
 namespace CompCube.Server.Debug;
 
@@ -51,6 +54,13 @@ public class DebugApi : IApi
     {
         return Task.FromResult(new ServerStatus([UnityGame.GameVersion.ToString()], [IPA.Loader.PluginManager.GetPluginFromId("CompCube").HVersion.ToString()],
             ServerState.Online));
+    }
+
+    public async Task<Queue[]?> GetQueues()
+    {
+        await Task.Delay(500);
+
+        return [new Queue("test", "test", "test", "test", false, true)];
     }
 
     public async Task<string[]?> GetMapHashes()

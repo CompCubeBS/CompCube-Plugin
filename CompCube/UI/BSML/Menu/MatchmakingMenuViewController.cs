@@ -11,6 +11,7 @@ using CompCube.Server;
 using CompCube.UI.BSML.Components;
 using CompCube.UI.BSML.EarlyLeaveWarning;
 using SiraUtil.Logging;
+using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
@@ -24,6 +25,7 @@ namespace CompCube.UI.BSML.Menu
         [Inject] private readonly ServerChecker _serverChecker = null!;
         [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         [Inject] private readonly SiraLog _siraLog = null!;
+        [Inject] private readonly IApi _api = null!;
 
         [UIParams] private readonly BSMLParserParams _parserParams = null!;
 
@@ -38,7 +40,7 @@ namespace CompCube.UI.BSML.Menu
         private void AboutButtonClicked() => _aboutButtonClickedCallback?.Invoke();
         
         [UIValue("queueOptions")] 
-        private readonly List<object> _queueOptions = [new QueueOptionTab("Casual 1v1", "standard_casual_1v1"), new QueueOptionTab("Competitive 1v1", "standard_competitive_1v1")];
+        private List<object> _queueOptions = [];
 
         [UIComponent("queueTabSelector")] private readonly TabSelector _queueTabSelector = null!;
 
@@ -47,7 +49,7 @@ namespace CompCube.UI.BSML.Menu
         [UIAction("joinMatchmakingPoolButtonOnClick")]
         private void HandleJoinMatchmakingPoolClicked()
         {
-            _warningModalViewController.ParseOntoGameObject(
+            _warningModalViewController.ParseOntoViewController(
                 this,
                 "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity.",
                 JoinSelectedQueue,
@@ -59,8 +61,7 @@ namespace CompCube.UI.BSML.Menu
         {
             try
             {
-				_warningModalViewController.Hide();
-                SetState(true);
+                SetState(State.Connected);
 
                 var canConnectToServer = await _serverChecker.CanConnectToServer();
 
@@ -70,14 +71,11 @@ namespace CompCube.UI.BSML.Menu
                     return;
                 }
             
-                await _serverListener.ConnectAsync(((QueueOptionTab) _queueOptions[_queueTabSelector.TextSegmentedControl.selectedCellNumber]).QueueEndpoint, () =>
-                {
-                    
-                });
+                await _serverListener.ConnectAsync(((QueueOptionTab) _queueOptions[_queueTabSelector.TextSegmentedControl.selectedCellNumber]).QueueEndpoint);
             }
             catch (Exception e)
             {
-                SetState(false);
+                SetState(State.Disconnected);
                 ShowFailedToConnectModal();
                 _siraLog.Error(e);
             }
@@ -85,14 +83,14 @@ namespace CompCube.UI.BSML.Menu
 
         private void ShowFailedToConnectModal(string reason = "")
         {
-            SetState(false);
+            SetState(State.Disconnected);
 
             var modalText = "Failed to connect to server";
             
             if (reason != "")
                 modalText += "\nReason: " + reason;
             
-            _warningModalViewController.ParseOntoGameObject(this, modalText, _warningModalViewController.Hide);
+            _warningModalViewController.ParseOntoViewController(this, modalText, _warningModalViewController.Hide);
         }
 
         [UIComponent("join-pool-button")] private readonly Button _joinPoolButton = null!;
@@ -102,19 +100,46 @@ namespace CompCube.UI.BSML.Menu
         [UIComponent("about-button")] private readonly Button _aboutButton = null!;
 
         [UIComponent("events-button")] private readonly Button _eventsButton = null!;
-        private void SetState(bool connected)
+
+        [UIObject("loadingIndicator")] private readonly GameObject _loadingIndicatorGO = null!;
+        
+        private void SetState(State state)
         {
-            _joinPoolButton.interactable = !connected;
-            _leavePoolButton.gameObject.SetActive(connected);
-            _aboutButton.interactable = !connected;
-            _eventsButton.interactable = !connected;
+            _joinPoolButton.interactable = state == State.Disconnected;
+            _leavePoolButton.gameObject.SetActive(state == State.Connected);
+            _aboutButton.interactable = state is State.Disconnected or State.FetchingAvailableQueues;
+            _eventsButton.interactable = state is State.Disconnected or State.FetchingAvailableQueues;
+            _loadingIndicatorGO.SetActive(state == State.FetchingAvailableQueues);
+            _queueTabSelector.gameObject.SetActive(state is State.Connected or State.Disconnected);
         }
         
-        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            
-            SetState(false);
+            try
+            {
+                base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+
+                SetState(State.FetchingAvailableQueues);
+                
+                var queues = await _api.GetQueues();
+
+                if (queues == null || queues.Length == 0)
+                {
+                    _warningModalViewController.ParseOntoViewController(this, "Failed to fetch available queues!", _warningModalViewController.Hide);
+                    return;
+                }
+                
+                _queueOptions = queues.Cast<object>().ToList();
+                SetState(State.Disconnected);
+                
+                NotifyPropertyChanged(nameof(_queueOptions));
+            }
+            catch (Exception e)
+            {
+                ShowFailedToConnectModal("An unhandled exception occured while fetching queue data from server!");
+                
+                _siraLog.Error(e);
+            }
         }
 
         [UIAction("leaveMatchmakingPoolButtonOnClick")]
@@ -128,7 +153,7 @@ namespace CompCube.UI.BSML.Menu
         {
             _parserParams.EmitEvent("disconnectModalHideEvent");
             _serverListener.DisconnectAsync();
-            SetState(false);
+            SetState(State.Disconnected);
         }
 
         [UIAction("failedToConnectModalOkButtonOnClick")]
@@ -149,12 +174,19 @@ namespace CompCube.UI.BSML.Menu
 
         private void HandleAbruptDisconnect(string reason)
         {
-            SetState(false);
+            SetState(State.Disconnected);
         }
 
         public void Dispose()
         {
             _serverListener.OnAbruptDisconnect -= HandleAbruptDisconnect;
+        }
+        
+        enum State
+        {
+            Connected,
+            FetchingAvailableQueues,
+            Disconnected
         }
     }
 }

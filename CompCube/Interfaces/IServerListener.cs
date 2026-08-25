@@ -24,7 +24,7 @@ public interface IServerListener
     
     public bool Connected { get; }
 
-    public Task ConnectAsync(string queue, Action onConnectedCallback);
+    public Task ConnectAsync(string queue, Action? onConnectedCallback = null);
 
     public Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps);
 

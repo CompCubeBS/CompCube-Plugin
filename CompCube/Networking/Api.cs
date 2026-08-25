@@ -1,9 +1,14 @@
 ﻿using System.Net;
 using System.Net.Http;
+using CompCube_Models.Models.Server;
 using CompCube.Models;
 using CompCube.Configuration;
 using CompCube.Interfaces;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
+using SiraUtil.Logging;
+using Zenject;
+using ServerStatus = CompCube.Models.ServerStatus;
 
 namespace CompCube.Server
 {
@@ -53,6 +58,13 @@ namespace CompCube.Server
             var response = await _client.GetAsync("/server/status");
             if (!response.IsSuccessStatusCode) return null;
             return JsonConvert.DeserializeObject<ServerStatus>(await response.Content.ReadAsStringAsync());
+        }
+
+        public async Task<Queue[]?> GetQueues()
+        {
+            var response  = await _client.GetAsync("/queues");
+            
+            return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<Queue[]>(await response.Content.ReadAsStringAsync());
         }
 
         public async Task<string[]?> GetMapHashes()

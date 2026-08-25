@@ -1,4 +1,6 @@
-﻿using CompCube.Models;
+﻿using CompCube_Models.Models.Server;
+using CompCube.Models;
+using ServerStatus = CompCube.Models.ServerStatus;
 
 namespace CompCube.Interfaces;
 
@@ -11,6 +13,8 @@ public interface IApi
     public Task<CompCube.Models.UserInfo[]?> GetAroundUser(string id);
 
     public Task<ServerStatus?> GetServerStatus();
+    
+    public Task<Queue[]?> GetQueues();
 
     public Task<string[]?> GetMapHashes();
     

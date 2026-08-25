@@ -22,7 +22,7 @@ public class WarningModalViewController : BSMLAutomaticViewController
     
     [UIValue("modalText")] private string ModalText { get; set; } = "";
 
-    public void ParseOntoGameObject(ViewController viewController, string text, Action? onOkButtonClicked)
+    public void ParseOntoViewController(ViewController viewController, string text, Action? onOkButtonClicked)
     {
         _onYesButtonClickedCallback = onOkButtonClicked;
 
@@ -35,7 +35,7 @@ public class WarningModalViewController : BSMLAutomaticViewController
         Parse(viewController);
     }
 
-    public void ParseOntoGameObject(ViewController viewController, string text, Action? onYesButtonClicked,
+    public void ParseOntoViewController(ViewController viewController, string text, Action? onYesButtonClicked,
         Action? onNoButtonClicked)
     {
         _onYesButtonClickedCallback = onYesButtonClicked;
