@@ -9,6 +9,7 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
     [Inject] private readonly IServerListener _serverListener = null!;
     
     private List<VotingMap> _discardedMaps = [];
+    private bool _discardSubmissionStarted;
     
     public IReadOnlyList<VotingMap?> DiscardedMaps => _discardedMaps;
 
@@ -18,25 +19,35 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
 
     public IReadOnlyList<VotingMap> AvailablePicks => _maps;
     
-    public bool CanDiscardMaps => InDiscardPhase && DiscardedMaps.Count < 2 && !DiscardPhaseWasSkipped;
+    public bool CanDiscardMaps => InDiscardPhase && DiscardedMaps.Count < 2 && !_discardSubmissionStarted;
 
     public bool DiscardPhaseWasSkipped { get; private set; } = false;
 
     public event Action? CanNoLongerDiscardMaps;
 
-    public void DiscardMap(VotingMap map)
+    public bool DiscardMap(VotingMap map)
     {
-        _maps.Remove(map);
+        if (!CanDiscardMaps || !_maps.Remove(map))
+            return false;
         
         _discardedMaps.Add(map);
         
-        if (!CanDiscardMaps)
+        if (_discardedMaps.Count == 2)
+        {
+            _discardSubmissionStarted = true;
             CanNoLongerDiscardMaps?.Invoke();
+        }
+
+        return true;
     }
 
     public void SkipDiscardingMaps()
     {
+        if (!InDiscardPhase || _discardSubmissionStarted)
+            return;
+
         DiscardPhaseWasSkipped = true;
+        _discardSubmissionStarted = true;
         CanNoLongerDiscardMaps?.Invoke();
     }
 
@@ -54,8 +65,9 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
     
     private void HandleMatchCreated(MatchCreatedMessage packet)
     {
-        _maps = [];
+        _maps = packet.InitialMaps.ToList();
         _discardedMaps = [];
+        _discardSubmissionStarted = false;
         
         InDiscardPhase = true;
         DiscardPhaseWasSkipped = false;

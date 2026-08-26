@@ -80,6 +80,7 @@ jobs:
           -p:DisableZipRelease=True
 
       - name: Stage DLL
+        id: stage
         shell: pwsh
         run: |
           $dll = Get-ChildItem "CompCube/bin/Release" -Recurse -Filter "CompCube.dll" | Select-Object -First 1
@@ -89,11 +90,40 @@ jobs:
 
           New-Item -ItemType Directory -Path "artifact" -Force | Out-Null
           Copy-Item $dll.FullName "artifact/CompCube-bs${{ matrix.game-version }}.dll"
+          [xml]$props = Get-Content "CompCube/Directory.Build.props"
+          $pluginVersion = $props.Project.PropertyGroup.Version | Select-Object -First 1
+          if ([string]::IsNullOrWhiteSpace($pluginVersion)) {
+            throw "Plugin version is missing from Directory.Build.props."
+          }
+          "plugin-version=$pluginVersion" >> $env:GITHUB_OUTPUT
 
       - name: Upload DLL
         uses: actions/upload-artifact@v7
         with:
-          name: CompCube-bs${{ matrix.game-version }}
+          name: ${{ github.ref == 'refs/heads/main' && format('CompCube-bs{0}', matrix.game-version) || format('CompCube-development-bs{0}-run-{1}-attempt-{2}', matrix.game-version, github.run_number, github.run_attempt) }}
           path: artifact/CompCube-bs${{ matrix.game-version }}.dll
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish DLL to CompCube server
+        # Production publishing is deliberately branch-gated. Pushes, pull requests,
+        # and manual runs from every other ref remain available only as Actions artifacts.
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          COMPCUBE_UPLOAD_URL: ${{ secrets.COMPCUBE_UPLOAD_URL }}
+          COMPCUBE_UPLOAD_TOKEN: ${{ secrets.COMPCUBE_UPLOAD_TOKEN }}
+          PLUGIN_VERSION: ${{ steps.stage.outputs.plugin-version }}
+          GAME_VERSION: ${{ matrix.game-version }}
+        run: |
+          if [[ -z "$COMPCUBE_UPLOAD_URL" || -z "$COMPCUBE_UPLOAD_TOKEN" ]]; then
+            echo "CompCube upload secrets are not configured; keeping the Actions artifact only."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $COMPCUBE_UPLOAD_TOKEN" \
+            --header "Content-Type: application/octet-stream" \
+            --header "X-CompCube-Plugin-Version: $PLUGIN_VERSION" \
+            --data-binary "@artifact/CompCube-bs${GAME_VERSION}.dll" \
+            "${COMPCUBE_UPLOAD_URL%/}/internal/plugin-releases/$GAME_VERSION"
