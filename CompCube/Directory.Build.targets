@@ -53,6 +53,7 @@
     <Message Text="Copying '$(OutputAssemblyName).dll' to '$(ProjectDir)$(ArtifactDestination)\Plugins\$(AssemblyName).dll'" Importance="high" />
     <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(ProjectDir)$(ArtifactDestination)\Plugins\$(AssemblyName).dll" />
     <Copy SourceFiles="$(OutputAssemblyName).pdb" DestinationFiles="$(ProjectDir)$(ArtifactDestination)\Plugins\$(AssemblyName).pdb" />
+	<Copy SourceFiles="@(ReferenceCopyLocalPaths)" DestinationFolder="$(ProjectDir)$(ArtifactDestination)\Libs" SkipUnchangedFiles="true" />
   </Target>
   <!--Creates a BeatMods compliant zip file with the release.-->
   <Target Name="ZipRelease" AfterTargets="Build" Condition="'$(DisableZipRelease)' != 'True' AND '$(Configuration)' == 'Release' AND '$(BSMTTaskAssembly)' != ''">
@@ -65,6 +66,7 @@
       <OldZips Include="$(DestinationDirectory)$(AssemblyName)*.zip"/>
     </ItemGroup>
     <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(ArtifactDestination)\Plugins\$(AssemblyName).dll" />
+	<Copy SourceFiles="@(ReferenceCopyLocalPaths)" DestinationFolder="$(ArtifactDestination)\Libs" SkipUnchangedFiles="true" />
     <Message Text="Version: $(Version), GameVersion: $(GameVersion)" Importance="high" />
     <Delete Files="@(OldZips)" TreatErrorsAsWarnings="true" ContinueOnError="true" />
     <ZipDir SourceDirectory="$(ArtifactDestination)" DestinationFile="$(DestinationDirectory)$(ArtifactName).zip" />
@@ -93,6 +95,7 @@
     <Message Text="Copying '$(OutputAssemblyName).dll' to '$(PluginDir)'." Importance="high" Condition="$(CanCopyToPlugins)" />
     <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(PluginDir)\$(AssemblyName).dll" Condition="$(CanCopyToPlugins)"  />
     <Copy SourceFiles="$(OutputAssemblyName).pdb" DestinationFiles="$(PluginDir)\$(AssemblyName).pdb" Condition="'$(CanCopyToPlugins)' == 'True' AND Exists('$(OutputAssemblyName).pdb')"  />
+	<Copy SourceFiles="@(ReferenceCopyLocalPaths)" DestinationFolder="$(BeatSaberDir)\Libs" SkipUnchangedFiles="true" Condition="'$(CanCopyToPlugins)' == 'True'" />
     <Warning Text="Beat Saber is running, restart the game to use the latest build." Condition="'$(IsRunning)' == 'True'" />
   </Target>
 </Project>

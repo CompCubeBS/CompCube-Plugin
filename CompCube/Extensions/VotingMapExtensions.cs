@@ -1,4 +1,4 @@
-﻿using CompCube_Models.Models.Map;
+﻿using CompCube.Models;
 using JetBrains.Annotations;
 using SongCore;
 

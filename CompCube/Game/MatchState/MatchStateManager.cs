@@ -1,4 +1,4 @@
-﻿using CompCube_Models.Models.Packets.ServerPackets;
+﻿using CompCube.Models;
 using CompCube.Interfaces;
 using Zenject;
 
@@ -9,8 +9,8 @@ public class MatchStateManager : IInitializable, IDisposable
     [Inject] private readonly IServerListener _serverListener = null!;
     [Inject] private readonly UserModelWrapper _userModelWrapper = null!;
 
-    public CompCube_Models.Models.ClientData.UserInfo RedPlayer { get; private set; }
-    public CompCube_Models.Models.ClientData.UserInfo BluePlayer { get; private set; }
+    public CompCube.Models.UserInfo RedPlayer { get; private set; }
+    public CompCube.Models.UserInfo BluePlayer { get; private set; }
 
     public float RedHealth { get; private set; } = 1f;
     public float BlueHealth { get; private set; } = 1f;
@@ -19,9 +19,9 @@ public class MatchStateManager : IInitializable, IDisposable
 
     public bool IsRedTeam => RedPlayer.UserId == _userModelWrapper.UserId;
     
-    public CompCube_Models.Models.ClientData.UserInfo Opponent => !IsRedTeam ? RedPlayer : BluePlayer;
+    public CompCube.Models.UserInfo Opponent => !IsRedTeam ? RedPlayer : BluePlayer;
     
-    public CompCube_Models.Models.ClientData.UserInfo Self => IsRedTeam ? RedPlayer : BluePlayer;
+    public CompCube.Models.UserInfo Self => IsRedTeam ? RedPlayer : BluePlayer;
     
     public int CurrentRound { get; private set; } = 0;
     
@@ -32,13 +32,13 @@ public class MatchStateManager : IInitializable, IDisposable
         _serverListener.OnPickPhaseStarted += HandlePickPhaseStarted;
     }
 
-    private void HandlePickPhaseStarted(StartPickPhasePacket packet)
+    private void HandlePickPhaseStarted(PickPhaseMessage packet)
     {
         CurrentRound++;
         DamageMultiplier = packet.NewMultiplier;
     }
 
-    private void HandleMatchCreated(MatchCreatedPacket matchCreated)
+    private void HandleMatchCreated(MatchCreatedMessage matchCreated)
     {
         RedPlayer = matchCreated.Red;
         BluePlayer = matchCreated.Blue;
@@ -51,7 +51,7 @@ public class MatchStateManager : IInitializable, IDisposable
         CurrentRound = 0;
     }
     
-    private void HandleRoundResults(RoundResultsPacket results)
+    private void HandleRoundResults(RoundResultsMessage results)
     {
         RedHealth = results.RedHealth;
         BlueHealth = results.BlueHealth;
