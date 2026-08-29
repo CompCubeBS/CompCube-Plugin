@@ -1,6 +1,6 @@
-﻿using System.Net;
+﻿using System.Collections;
+using System.Net;
 using System.Net.Http;
-using CompCube_Models.Models.Server;
 using CompCube.Models;
 using CompCube.Configuration;
 using CompCube.Interfaces;
@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using SiraUtil.Logging;
 using Zenject;
+using Queue = CompCube.Models.Queue;
 using ServerStatus = CompCube.Models.ServerStatus;
 
 namespace CompCube.Server

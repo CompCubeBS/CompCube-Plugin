@@ -1,5 +1,4 @@
-﻿using CompCube_Models.Models.Server;
-using CompCube.Models;
+﻿using CompCube.Models;
 using CompCube.Interfaces;
 using IPA.Utilities;
 using ServerState = CompCube.Models.ServerState;

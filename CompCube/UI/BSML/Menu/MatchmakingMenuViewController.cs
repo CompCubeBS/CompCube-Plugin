@@ -21,14 +21,11 @@ namespace CompCube.UI.BSML.Menu
     [ViewDefinition("CompCube.UI.BSML.Menu.MatchmakingMenuView.bsml")]
     public class MatchmakingMenuViewController : BSMLAutomaticViewController, IInitializable, IDisposable
     {
-        [Inject] private readonly PluginConfig _config = null!;
         [Inject] private readonly IServerListener _serverListener = null!;
         [Inject] private readonly ServerChecker _serverChecker = null!;
         [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         [Inject] private readonly SiraLog _siraLog = null!;
         [Inject] private readonly IApi _api = null!;
-
-        [UIParams] private readonly BSMLParserParams _parserParams = null!;
 
         private Action? _aboutButtonClickedCallback;
 

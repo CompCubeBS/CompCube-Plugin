@@ -1,3 +1,4 @@
+using CompCube.UI.BSML.Components;
 using Newtonsoft.Json;
 
 namespace CompCube.Models;
@@ -189,6 +190,30 @@ public sealed class ServerStatus(string[] allowedGameVersions, string[] allowedM
     public string[] AllowedGameVersions { get; } = allowedGameVersions;
     public string[] AllowedModVersions { get; } = allowedModVersions;
     public ServerState State { get; } = state;
+}
+
+[method: JsonConstructor]
+public sealed class Queue(string guid, string slug, string name, string poolGuid, bool competitive, bool enabled)
+{
+    [JsonProperty("guid")]
+    public readonly string Guid = guid;
+    
+    [JsonProperty("slug")]
+    public readonly string Slug = slug;
+    
+    [JsonProperty("name")]
+    public readonly string Name = name;
+    
+    [JsonProperty("poolGuid")]
+    public readonly string PoolGuid = poolGuid;
+    
+    [JsonProperty("competitive")]
+    public readonly bool Competitive = competitive;
+    
+    [JsonProperty("enabled")]
+    public readonly bool Enabled = enabled;
+
+    public QueueOptionTab ToQueueOptionTab() => new(Name, Slug);
 }
 
 public enum ServerState

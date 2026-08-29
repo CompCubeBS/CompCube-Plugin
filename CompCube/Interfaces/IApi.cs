@@ -1,6 +1,4 @@
-﻿using CompCube_Models.Models.Server;
-using CompCube.Models;
-using ServerStatus = CompCube.Models.ServerStatus;
+﻿using CompCube.Models;
 
 namespace CompCube.Interfaces;
 
