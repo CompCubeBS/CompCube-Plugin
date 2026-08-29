@@ -125,7 +125,7 @@ namespace CompCube.UI.BSML.Menu
                 
             var queues = await _api.GetQueues();
 
-            if (queues == null || queues.Length == 0)
+            if (queues == null)
             {
                 _warningModalViewController.ParseOntoViewController(this, "Failed to fetch available queues!", _warningModalViewController.Hide);
                 return;
@@ -135,8 +135,6 @@ namespace CompCube.UI.BSML.Menu
                 
             _queueOptions = queues.Select(i => i.ToQueueOptionTab()).ToList();
             
-            if (_config.ConnectToDebugQueue)
-                _queueOptions.Add(new QueueOptionTab("Debug", "debug"));
             
             SetState(State.Disconnected);
                 
