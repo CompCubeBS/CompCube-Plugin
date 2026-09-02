@@ -4,7 +4,7 @@ using CompCube.Models;
 using CompCube.Networking.Replay;
 using UnityEngine;
 
-namespace CompCube.Networking;
+namespace CompCube.Networking.ReplayStreaming;
 
 /** Samples compact poses and HUD state into the same protobuf chunks ChroViewer uses for TA live replays. */
 public sealed class ReplayStreamer : MonoBehaviour

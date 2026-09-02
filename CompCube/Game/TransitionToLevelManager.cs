@@ -4,6 +4,7 @@ using CompCube.UI.BSML.PauseMenu;
 using CompCube.Extensions;
 using CompCube.Game.MatchState;
 using CompCube.Networking;
+using CompCube.Networking.ReplayStreaming;
 using SiraUtil.Logging;
 using SiraUtil.Submissions;
 using Zenject;

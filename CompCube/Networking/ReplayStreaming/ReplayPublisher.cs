@@ -1,12 +1,12 @@
 using System.Net.WebSockets;
-using CompCube.Models;
 using CompCube.Configuration;
+using CompCube.Models;
 using CompCube.Networking.Replay;
 using IPA.Loader;
 using ProtoBuf;
 using UnityEngine;
 
-namespace CompCube.Networking;
+namespace CompCube.Networking.ReplayStreaming;
 
 /** Publishes bounded protobuf frames to the authenticated raw replay WebSocket. */
 public sealed class ReplayPublisher : IDisposable
