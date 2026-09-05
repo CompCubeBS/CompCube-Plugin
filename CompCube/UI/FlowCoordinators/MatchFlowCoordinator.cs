@@ -54,7 +54,7 @@ namespace CompCube.UI.FlowCoordinators
 
         private bool _hasShownFinalCardsToPlayer = false;
 
-        private VotingMap _lastPlayed;
+        private VotingMap? _lastPlayed;
 
         public void PopulateData(MatchCreatedMessage packet, Action? onMatchFinishedCallback)
         {
@@ -197,7 +197,7 @@ namespace CompCube.UI.FlowCoordinators
                 _roundResultsAnimationInProgress = true;
                 this.ReplaceViewControllerSynchronously(_roundResultsViewController);
                 
-                _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed);
+                _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed!);
                 
 				var resultStepSeconds = Mathf.Max(0f, (float)(results.ResultsDueAt - DateTime.UtcNow).TotalSeconds) / 2f;
 				yield return new WaitForSeconds(resultStepSeconds);

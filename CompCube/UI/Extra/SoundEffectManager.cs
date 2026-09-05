@@ -12,9 +12,9 @@ public class SoundEffectManager : MonoBehaviour, IInitializable
     
     private AudioSource _audioSource;
     
-    [Inject] private readonly AudioClipAsyncLoader _audioClipAsyncLoader = null;
-    [Inject] private readonly PerceivedLoudnessPerLevelModel _perceivedLoudnessPerLevelModel = null;
-    [Inject] private readonly SongPreviewPlayer _songPreviewPlayer = null;
+    [Inject] private readonly AudioClipAsyncLoader _audioClipAsyncLoader = null!;
+    [Inject] private readonly PerceivedLoudnessPerLevelModel _perceivedLoudnessPerLevelModel = null!;
+    [Inject] private readonly SongPreviewPlayer _songPreviewPlayer = null!;
     
     public void PlayWinningMusic()
     {
