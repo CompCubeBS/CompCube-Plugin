@@ -153,7 +153,8 @@ namespace CompCube.UI.FlowCoordinators
                 
                 this.ReplaceViewControllerSynchronously(_matchResultsViewController);
                 
-                _fireworksManager.StartFireworks();
+                if (packet.Won)
+                    _fireworksManager.StartFireworks();
                 
                 _matchResultsViewController.PopulateData(packet.Result, packet.MmrChange, packet.Reason, () =>
                 {
