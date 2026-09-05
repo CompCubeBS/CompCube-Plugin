@@ -45,7 +45,8 @@ namespace CompCube.UI.FlowCoordinators
         [Inject] private readonly BeatmapDownloader _beatmapDownloader = null!;
         
         [Inject] private readonly PlatformLeaderboardViewController _platformLeaderboardViewController = null!;
-
+        [Inject] private readonly FireworksManager _fireworksManager = null!;
+        
         private NavigationController _votingScreenNavigationController;
 
         private Action? _onMatchFinishedCallback = null;
@@ -54,7 +55,7 @@ namespace CompCube.UI.FlowCoordinators
 
         private bool _hasShownFinalCardsToPlayer = false;
 
-        private VotingMap _lastPlayed;
+        private VotingMap? _lastPlayed;
 
         public void PopulateData(MatchCreatedMessage packet, Action? onMatchFinishedCallback)
         {
@@ -151,7 +152,15 @@ namespace CompCube.UI.FlowCoordinators
                 yield return new WaitUntil(() => !_roundResultsAnimationInProgress);
                 
                 this.ReplaceViewControllerSynchronously(_matchResultsViewController);
-                _matchResultsViewController.PopulateData(packet.Result, packet.MmrChange, packet.Reason, () => _onMatchFinishedCallback?.Invoke());
+                
+                if (packet.Won)
+                    _fireworksManager.StartFireworks();
+                
+                _matchResultsViewController.PopulateData(packet.Result, packet.MmrChange, packet.Reason, () =>
+                {
+                    _fireworksManager.StopFireworks();
+                    _onMatchFinishedCallback?.Invoke();
+                });
                 
                 SetBottomScreenViewController(null, ViewController.AnimationType.Out);
                 SetLeftScreenViewController(null, ViewController.AnimationType.Out);
@@ -197,7 +206,7 @@ namespace CompCube.UI.FlowCoordinators
                 _roundResultsAnimationInProgress = true;
                 this.ReplaceViewControllerSynchronously(_roundResultsViewController);
                 
-                _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed);
+                _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed!);
                 
 				var resultStepSeconds = Mathf.Max(0f, (float)(results.ResultsDueAt - DateTime.UtcNow).TotalSeconds) / 2f;
 				yield return new WaitForSeconds(resultStepSeconds);

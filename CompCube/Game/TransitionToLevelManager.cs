@@ -18,8 +18,6 @@ public class TransitionToLevelManager
     [Inject] private readonly SiraLog _siraLog = null!;
     [Inject] private readonly PluginConfig _config = null!;
 	[Inject] private readonly ReplayPublisher _replayPublisher = null!;
-        
-    [Inject] private readonly MatchStateManager _matchStateManager = null!;
          
     public bool InLevel { get; private set; } = false;
 	public bool NoFailEnabled { get; private set; } = false;
