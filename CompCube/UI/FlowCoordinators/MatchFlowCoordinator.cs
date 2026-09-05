@@ -45,7 +45,8 @@ namespace CompCube.UI.FlowCoordinators
         [Inject] private readonly BeatmapDownloader _beatmapDownloader = null!;
         
         [Inject] private readonly PlatformLeaderboardViewController _platformLeaderboardViewController = null!;
-
+        [Inject] private readonly FireworksManager _fireworksManager = null!;
+        
         private NavigationController _votingScreenNavigationController;
 
         private Action? _onMatchFinishedCallback = null;
@@ -151,7 +152,14 @@ namespace CompCube.UI.FlowCoordinators
                 yield return new WaitUntil(() => !_roundResultsAnimationInProgress);
                 
                 this.ReplaceViewControllerSynchronously(_matchResultsViewController);
-                _matchResultsViewController.PopulateData(packet.Result, packet.MmrChange, packet.Reason, () => _onMatchFinishedCallback?.Invoke());
+                
+                _fireworksManager.StartFireworks();
+                
+                _matchResultsViewController.PopulateData(packet.Result, packet.MmrChange, packet.Reason, () =>
+                {
+                    _fireworksManager.StopFireworks();
+                    _onMatchFinishedCallback?.Invoke();
+                });
                 
                 SetBottomScreenViewController(null, ViewController.AnimationType.Out);
                 SetLeftScreenViewController(null, ViewController.AnimationType.Out);
