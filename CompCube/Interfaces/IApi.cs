@@ -21,4 +21,6 @@ public interface IApi
     public Task<byte[]?> DownloadBeatmap(string hash);
     
     public Task<byte[]?> DownloadUserProfilePicture(CompCube.Models.UserInfo userInfo);
+
+    public Task SendReport(PlayerReport report);
 }

@@ -277,6 +277,8 @@
       <EmbeddedResource Include="UI\BSML\Match\WaitingForDiscardPhaseToFinishView.bsml" />
       <None Remove="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
       <EmbeddedResource Include="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
+      <None Remove="UI\BSML\Modal\PlayerReportingView.bsml" />
+      <EmbeddedResource Include="UI\BSML\Modal\PlayerReportingView.bsml" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="CompCube.csproj.user" />

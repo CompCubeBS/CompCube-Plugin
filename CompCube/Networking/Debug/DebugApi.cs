@@ -84,4 +84,9 @@ public class DebugApi : IApi
     {
         return Task.FromResult<byte[]?>([]);
     }
+
+    public async Task SendReport(PlayerReport report)
+    {
+        await Task.Delay(1000);
+    }
 }

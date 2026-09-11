@@ -216,6 +216,15 @@ public sealed class Queue(string guid, string slug, string name, string poolGuid
     public QueueOptionTab ToQueueOptionTab() => new(Name, Slug);
 }
 
+[method: JsonConstructor]
+public sealed class PlayerReport(UserInfo sender, UserInfo target, string reason, string matchGuid)
+{
+    // todo: add sender and reporter here
+    public readonly string Reason = reason;
+    public readonly string ReportSource = "plugin";
+    public readonly string MatchGuid = matchGuid;
+}
+
 public enum ServerState
 {
     Online,
