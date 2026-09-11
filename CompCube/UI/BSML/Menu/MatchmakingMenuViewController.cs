@@ -58,7 +58,7 @@ namespace CompCube.UI.BSML.Menu
             
             _warningModalViewController.ParseOntoViewController(
                 this,
-                "Competitive matches may take a long time.\nOnly queue when you can finish the match and protect competitive integrity.",
+                "Competitive matches may take a long time.\nOnly queue when you can finish the match and\nprotect competitive integrity.\n\nAre you sure you want to continue?",
                 () =>
                 {
                     _warningModalViewController.Hide(); 
