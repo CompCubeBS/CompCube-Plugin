@@ -27,6 +27,8 @@ namespace CompCube.UI.BSML.Menu
         [Inject] private readonly SiraLog _siraLog = null!;
         [Inject] private readonly IApi _api = null!;
 
+        private static bool _hasShownMatchWarningModal = false;
+
         private Action? _aboutButtonClickedCallback;
 
         public void SetButtonCallbacks(Action aboutButtonClickedCallback)
@@ -46,15 +48,27 @@ namespace CompCube.UI.BSML.Menu
         [UIAction("joinMatchmakingPoolButtonOnClick")]
         private void HandleJoinMatchmakingPoolClicked()
         {
+            if (_hasShownMatchWarningModal)
+            {
+                JoinSelectedQueue();
+                return;
+            }
+            
+            _hasShownMatchWarningModal = true;
+            
             _warningModalViewController.ParseOntoViewController(
                 this,
-                "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity.",
-                JoinSelectedQueue,
+                "Competitive matches may take a long time.\nOnly queue when you can finish the match and protect competitive integrity.",
+                () =>
+                {
+                    _warningModalViewController.Hide(); 
+                    JoinSelectedQueue();
+                },
                 _warningModalViewController.Hide);
         }
 
         /** Validates the server and joins the queue the player explicitly selected. */
-        private async void JoinSelectedQueue()
+        private async Task JoinSelectedQueue()
         {
             try
             {
