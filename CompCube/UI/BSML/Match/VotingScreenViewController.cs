@@ -3,7 +3,7 @@ using System.Globalization;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube.Models;
+using CompCube_Models.Models.Map;
 using HMUI;
 using JetBrains.Annotations;
 using CompCube.Extensions;

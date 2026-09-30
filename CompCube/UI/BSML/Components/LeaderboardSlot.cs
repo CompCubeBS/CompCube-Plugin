@@ -3,11 +3,11 @@ using CompCube.Extensions;
 
 namespace CompCube.UI.BSML.Components;
 
-public class LeaderboardSlot(CompCube.Models.UserInfo userInfo, bool isSelf)
+public class LeaderboardSlot(CompCube_Models.Models.ClientData.UserInfo userInfo, bool isSelf)
 {
     private const string OwnCellTextColor = "#00C0FF";
 
-    public event Action<CompCube.Models.UserInfo> OnUserInfoButtonClicked;
+    public event Action<CompCube_Models.Models.ClientData.UserInfo> OnUserInfoButtonClicked;
 
     [UIValue("leaderboardCellColor")] private string LeaderboardCellColor { get; set; } = isSelf ? OwnCellTextColor : "white";
 

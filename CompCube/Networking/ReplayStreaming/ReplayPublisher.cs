@@ -1,4 +1,6 @@
+/*
 using System.Net.WebSockets;
+using CompCube_Models.Models.Map;
 using CompCube.Configuration;
 using CompCube.Models;
 using CompCube.Networking.Replay;
@@ -8,7 +10,7 @@ using UnityEngine;
 
 namespace CompCube.Networking.ReplayStreaming;
 
-/** Publishes bounded protobuf frames to the authenticated raw replay WebSocket. */
+/** Publishes bounded protobuf frames to the authenticated raw replay WebSocket. #1#
 public sealed class ReplayPublisher : IDisposable
 {
     private readonly PluginConfig _config;
@@ -23,7 +25,7 @@ public sealed class ReplayPublisher : IDisposable
         _auth = auth;
     }
 
-    /** Opens the publishing socket and starts collecting this map's broadcast-friendly replay frames. */
+    /** Opens the publishing socket and starts collecting this map's broadcast-friendly replay frames. #1#
     public async Task StartAsync(VotingMap map)
     {
         await StopAsync();
@@ -42,7 +44,7 @@ public sealed class ReplayPublisher : IDisposable
         _streamer.Configure(this, map, auth.PlatformId, version);
     }
 
-    /** Serializes one replay packet and sends it without allowing concurrent WebSocket writes. */
+    /** Serializes one replay packet and sends it without allowing concurrent WebSocket writes. #1#
     public async Task SendAsync(ReplayStreamPacket packet)
     {
         if (_socket?.State != WebSocketState.Open) return;
@@ -80,3 +82,4 @@ public sealed class ReplayPublisher : IDisposable
         _sendLock.Dispose();
     }
 }
+*/

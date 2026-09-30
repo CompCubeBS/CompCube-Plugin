@@ -1,4 +1,5 @@
-﻿using CompCube.Models;
+﻿using CompCube_Models.Models.Map;
+using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube.Interfaces;
 using Zenject;
 
@@ -57,13 +58,13 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
         _serverListener.OnPickPhaseStarted += HandlePickPhaseStarted;
     }
 
-    private void HandlePickPhaseStarted(PickPhaseMessage packet)
+    private void HandlePickPhaseStarted(StartPickPhasePacket packet)
     {
         _maps = packet.AvailableMaps.ToList();
         InDiscardPhase = false;
     }
     
-    private void HandleMatchCreated(MatchCreatedMessage packet)
+    private void HandleMatchCreated(MatchCreatedPacket packet)
     {
         _maps = packet.InitialMaps.ToList();
         _discardedMaps = [];

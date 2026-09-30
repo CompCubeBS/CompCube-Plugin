@@ -152,8 +152,6 @@ namespace CompCube.UI.BSML.Menu
                 return;
             }
                 
-            queues.Do(i => _siraLog.Info(i.Name));
-                
             _queueOptions = queues.Select(i => i.ToQueueOptionTab()).ToList();
             
             

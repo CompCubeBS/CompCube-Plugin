@@ -1,10 +1,9 @@
-﻿using CompCube.Models;
+﻿using CompCube_Models.Models.Map;
 using CompCube.Configuration;
 using CompCube.UI.BSML.PauseMenu;
 using CompCube.Extensions;
 using CompCube.Game.MatchState;
 using CompCube.Networking;
-using CompCube.Networking.ReplayStreaming;
 using SiraUtil.Logging;
 using SiraUtil.Submissions;
 using Zenject;
@@ -17,7 +16,7 @@ public class TransitionToLevelManager
     [Inject] private readonly PlayerDataModel _playerDataModel = null!;
     [Inject] private readonly SiraLog _siraLog = null!;
     [Inject] private readonly PluginConfig _config = null!;
-	[Inject] private readonly ReplayPublisher _replayPublisher = null!;
+	// [Inject] private readonly ReplayPublisher _replayPublisher = null!;
          
     public bool InLevel { get; private set; } = false;
 	public bool NoFailEnabled { get; private set; } = false;
@@ -36,10 +35,10 @@ public class TransitionToLevelManager
         _menuSwitchCallback = onLevelCompletedCallback;
             
         InLevel = true;
-		NoFailEnabled = level.Modifiers.Contains("NF");
+		// NoFailEnabled = level.Modifiers.Contains("NF");
             
         var beatmapLevel = level.GetBeatmapLevel() ?? throw new Exception("Could not get beatmap level!");
-		_ = _replayPublisher.StartAsync(level).ContinueWith(task =>
+		/*_ = _replayPublisher.StartAsync(level).ContinueWith(task =>
 		{
 			if (task.Exception != null) _siraLog.Warn($"Replay streaming could not start: {task.Exception.GetBaseException().Message}");
 		}, TaskScheduler.Default);
@@ -65,7 +64,7 @@ public class TransitionToLevelManager
 			level.Modifiers.Contains("GN"),
 			level.Modifiers.Contains("PM") || proMode,
 			level.Modifiers.Contains("ZM"),
-			level.Modifiers.Contains("SN"));
+			level.Modifiers.Contains("SN"));*/
             
 #if BS_1_39_1
         _menuTransitionsHelper.StartStandardLevel(
@@ -75,7 +74,7 @@ public class TransitionToLevelManager
             _playerDataModel.playerData.overrideEnvironmentSettings,
             _playerDataModel.playerData.colorSchemesSettings.overrideDefaultColors ? _playerDataModel.playerData.colorSchemesSettings.GetSelectedColorScheme() : null,
             null,
-            gameplayModifiers,
+		new GameplayModifiers(GameplayModifiers.EnergyType.Bar, true, false, false, GameplayModifiers.EnabledObstacleType.All, false, false, false, false, GameplayModifiers.SongSpeed.Normal, false, false, proMode, false, false),
             _playerDataModel.playerData.playerSpecificSettings,
             null,
             //TODO: fix this sometimes causing an exception because of creating from addressables
@@ -97,7 +96,7 @@ public class TransitionToLevelManager
             _playerDataModel.playerData.colorSchemesSettings.overrideDefaultColors ? _playerDataModel.playerData.colorSchemesSettings.GetSelectedColorScheme() : null,
             true,
             beatmapLevel.GetColorScheme(beatmapLevel.GetCharacteristics().First(i => i.serializedName == "Standard"), level.GetBaseGameDifficultyType()),
-            gameplayModifiers,
+            new GameplayModifiers(GameplayModifiers.EnergyType.Bar, true, false, false, GameplayModifiers.EnabledObstacleType.All, false, false, false, false, GameplayModifiers.SongSpeed.Normal, false, false, proMode, false, false),
             _playerDataModel.playerData.playerSpecificSettings,
             null,
             EnvironmentsListModel.CreateFromAddressables(),
@@ -124,7 +123,7 @@ public class TransitionToLevelManager
     {
         InLevel = false;
 		NoFailEnabled = false;
-		_replayPublisher.Complete(levelCompletionResults);
+		// _replayPublisher.Complete(levelCompletionResults);
             
         _menuSwitchCallback?.Invoke(levelCompletionResults, standardLevelScenesTransitionSetupDataSo);
         _menuSwitchCallback = null;

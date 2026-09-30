@@ -1,5 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
-using CompCube.Models;
+using CompCube_Models.Models.Events;
 
 namespace CompCube.UI.BSML.Components;
 

@@ -6,7 +6,7 @@ using CompCube.Server;
 using CompCube.Server.Debug;
 using CompCube.Interfaces;
 using CompCube.Networking;
-using CompCube.Networking.ReplayStreaming;
+// using CompCube.Networking.ReplayStreaming;
 using CompCube.UI;
 using Zenject;
 
@@ -32,7 +32,7 @@ namespace CompCube.Installers
             
             Container.BindInterfacesAndSelfTo<UserModelWrapper>().AsSingle();
 			Container.BindInterfacesAndSelfTo<BeatKhanaGameAuth>().AsSingle();
-			Container.BindInterfacesAndSelfTo<ReplayPublisher>().AsSingle();
+			// Container.BindInterfacesAndSelfTo<ReplayPublisher>().AsSingle();
 
             Container.BindInterfacesAndSelfTo<SharedCoroutineStarter>().FromNewComponentOnNewGameObject().AsSingle();
 

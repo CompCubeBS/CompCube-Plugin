@@ -1,340 +1,188 @@
-using CompCube.Configuration;
-using CompCube.Interfaces;
-using CompCube.Models;
-using IPA.Loader;
-using SiraUtil.Logging;
-using SocketIOClient;
-using SocketIOClient.Transport;
-using System.Globalization;
+﻿using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Newtonsoft.Json;
-using SocketIOClient.JsonSerializer;
+using CompCube_Models.Models.Map;
+using CompCube_Models.Models.Match;
+using CompCube_Models.Models.Packets;
+using CompCube_Models.Models.Packets.ServerPackets;
+using CompCube_Models.Models.Packets.UserPackets;
+using CompCube.Configuration;
+using CompCube.Game.MatchState;
+using CompCube.Interfaces;
+using SiraUtil.Logging;
 using Zenject;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace CompCube.Networking;
-
-/** Owns the authenticated Socket.IO session and translates backend events into the existing game flow. */
-public sealed class ServerListener : IServerListener, IDisposable
+namespace CompCube.Networking
 {
-    [Inject] private readonly PluginConfig _config = null!;
-    [Inject] private readonly BeatKhanaGameAuth _auth = null!;
-    [Inject] private readonly SiraLog _siraLog = null!;
-
-    private SocketIO? _socket;
-    private string? _matchGuid;
-    private string? _roundGuid;
-    private string? _redUserGuid;
-    private string? _blueUserGuid;
-
-    public event Action<MatchCreatedMessage>? OnMatchCreated;
-    public event Action<PlayerSelectedMapMessage>? OnPlayerSelectedMap;
-    public event Action<RoundResultsMessage>? OnRoundResults;
-    public event Action<PickPhaseMessage>? OnPickPhaseStarted;
-    public event Action<MatchFinishedMessage>? OnMatchFinished;
-    public event Action<CardsUpdatedMessage>? OnCardsUpdated;
-    public event Action? OnConnected;
-    public event Action? OnDisconnected;
-    public event Action<string>? OnAbruptDisconnect;
-
-    public bool Connected => _socket?.Connected == true;
-
-    /** Authenticates through BeatKhana, opens Socket.IO and joins the selected queue. */
-    public async Task ConnectAsync(string queueEndpoint, Action? onConnectedCallback)
+    public class ServerListener : IServerListener, IDisposable
     {
-        if (Connected)
-        {
-            _siraLog.Error("Tried to connect to the server while already connected!");
-            return;
-        }
+        [Inject] private readonly PluginConfig _config = null!;
+        [Inject] private readonly SiraLog _siraLog = null!;
 
-        try
+        private ClientWebSocket _client = new();
+        
+        public event Action<MatchCreatedPacket>? OnMatchCreated;
+        public event Action<PlayerSelectedMapPacket>? OnPlayerSelectedMap;
+        public event Action<RoundResultsPacket>? OnRoundResults;
+        public event Action<StartPickPhasePacket>? OnPickPhaseStarted;
+        public event Action<MatchFinishedPacket>? OnMatchFinished;
+        
+        public event Action<UpdateCardsPacket>? OnCardsUpdated; 
+        public event Action? OnConnected;
+        public event Action? OnDisconnected;
+        public event Action<string>? OnAbruptDisconnect;
+
+        private bool _shouldListenToServer;
+
+
+        [Inject] private readonly UserModelWrapper _userModelWrapper = null!;
+
+        public bool Connected => _client.State == WebSocketState.Open;
+        
+        private CancellationTokenSource _cancellationTokenSource = new();
+        
+        public async Task ConnectAsync(string queueEndpoint, Action? onConnectedCallback)
         {
-            var auth = await _auth.RequestTokenAsync();
-            _socket = new SocketIO(new Uri(_config.WebsocketIp), new SocketIOOptions
+            if (Connected)
             {
-                Transport = TransportProtocol.WebSocket,
-                Reconnection = false,
-                Auth = new Dictionary<string, string>
-                {
-                    ["accessToken"] = auth.Token,
-                    ["clientType"] = "plugin",
-                    ["pluginVersion"] = PluginManager.GetPluginFromId("CompCube").HVersion.ToString(),
-					["roundResultsSeconds"] = _config.RoundResultsDurationSeconds.ToString(CultureInfo.InvariantCulture),
-                },
-            });
-            
-            _socket.JsonSerializer = new SystemTextJsonSerializer(new JsonSerializerOptions
+                _siraLog.Error("Tried to connect to server while already connected!");
+                return;
+            }
+
+            try
             {
-                PropertyNameCaseInsensitive = true,
-            });
-            
-            RegisterServerEvents(_socket);
-            await _socket.ConnectAsync();
-            var queue = queueEndpoint.StartsWith("queue/", StringComparison.OrdinalIgnoreCase)
-                ? queueEndpoint.Substring("queue/".Length)
-                : queueEndpoint;
-            await EmitAcknowledgedAsync<object>("joinQueue", new { queue });
-            OnConnected?.Invoke();
-            onConnectedCallback?.Invoke();
+                _client = new ClientWebSocket();
+                
+                _client.Options.SetRequestHeader("UserId", _userModelWrapper.UserId);
+                _client.Options.SetRequestHeader("UserName", _userModelWrapper.UserName);
+                
+                _cancellationTokenSource = new CancellationTokenSource();
+                await _client.ConnectAsync(new Uri($"{_config.WebsocketIp}/{queueEndpoint}", UriKind.Absolute), _cancellationTokenSource.Token);
+                
+                onConnectedCallback?.Invoke();
+                
+                _shouldListenToServer = true;
+                
+                while (_shouldListenToServer)
+                    await ListenToServerAsync();
+            }
+            catch (OperationCanceledException)
+            {
+                // do nothing
+            }
         }
-        catch (Exception exception)
+
+        public Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps)
         {
-            _siraLog.Error(exception);
-            await HandleAbruptDisconnectionAsync(exception.Message);
-            throw;
+            throw new NotImplementedException();
         }
-    }
 
-    /** Submits the maps discarded by the local player. */
-    public async Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps)
-    {
-        RequireMatch();
-        await EmitAcknowledgedAsync<object>("discardMaps", new
+        public Task SelectMapAsync(VotingMap map)
         {
-            matchGuid = _matchGuid,
-            mapGuids = maps.Select(map => map.Guid).ToArray(),
-        });
-    }
-
-    /** Selects one map for the local player's pick. */
-    public async Task SelectMapAsync(VotingMap map)
-    {
-        RequireMatch();
-        await EmitAcknowledgedAsync<object>("selectMap", new { matchGuid = _matchGuid, mapGuid = map.Guid });
-    }
-
-    /** Submits the completed round score using the current server-issued round identifier. */
-    public async Task SubmitScoreAsync(ScoreSubmission score)
-    {
-        RequireMatch();
-        if (string.IsNullOrWhiteSpace(_roundGuid))
-            throw new InvalidOperationException("The server has not started a score round.");
-        await EmitAcknowledgedAsync<object>("submitScore", new
-        {
-            matchGuid = _matchGuid,
-            roundGuid = _roundGuid,
-            rawScore = score.RawScore,
-            modifiedScore = score.ModifiedScore,
-            noFailTriggered = score.NoFailTriggered,
-            proMode = score.ProMode,
-            missCount = score.MissCount,
-            fullCombo = score.FullCombo,
-        });
-    }
-
-    /** Forfeits an active match, or leaves the queue, before closing the transport. */
-    public async Task DisconnectAsync()
-    {
-        _siraLog.Info("disconnected");
-        if (_socket == null) return;
-        try
-        {
-            if (_socket.Connected) await ForfeitOrLeaveAsync("player_left");
-            if (_socket.Connected) await _socket.DisconnectAsync();
+            throw new NotImplementedException();
         }
-        finally
+
+        public Task SubmitScoreAsync(Score score)
         {
-            _socket.Dispose();
-            _socket = null;
-            ClearMatch();
-            OnDisconnected?.Invoke();
+            throw new NotImplementedException();
         }
-    }
 
-    /** Moves the UI out of its connected state after a transport or authentication failure. */
-    public async Task HandleAbruptDisconnectionAsync(string reason)
-    {
-        OnAbruptDisconnect?.Invoke(reason);
-        if (_socket?.Connected == true) await _socket.DisconnectAsync();
-        _socket?.Dispose();
-        _socket = null;
-        ClearMatch();
-    }
-
-    private void RegisterServerEvents(SocketIO socket)
-    {
-        socket.OnDisconnected += (_, reason) => OnDisconnected?.Invoke();
-        
-        socket.OnError += (_, reason) => OnAbruptDisconnect?.Invoke(reason);
-        
-        socket.OnAny((name, response) => _siraLog.Info(name + " : " + response.ToString()));
-        
-        socket.On("matchCreated", response =>
-        {
-            var value = response.GetValue<MatchCreatedEvent>();
-            _matchGuid = value.MatchGuid;
-            _redUserGuid = value.Red.Guid;
-            _blueUserGuid = value.Blue.Guid;
-            OnMatchCreated?.Invoke(new MatchCreatedMessage(ToUser(value.Red), ToUser(value.Blue), value.InitialMaps.Select(ToMap).ToArray()));
-        });
-        socket.On("cardsUpdated", response =>
-        {
-            var value = response.GetValue<CardsUpdatedEvent>();
-            OnCardsUpdated?.Invoke(new CardsUpdatedMessage(value.Maps.Select(ToMap).ToArray()));
-        });
-        socket.On("pickPhaseStarted", response =>
-        {
-            var value = response.GetValue<PickPhaseEvent>();
-            OnPickPhaseStarted?.Invoke(new PickPhaseMessage(
-                value.AvailableMaps.Select(ToMap).ToArray(), value.IsOwnPick, (float)value.DamageMultiplier));
-        });
-        socket.On("playerSelectedMap", response =>
-        {
-            var value = response.GetValue<SelectedMapEvent>();
-            OnPlayerSelectedMap?.Invoke(new PlayerSelectedMapMessage(ToMap(value.Map)));
-        });
-        socket.On("startMap", response => _roundGuid = response.GetValue<StartMapEvent>().RoundGuid);
-        socket.On("roundResults", response =>
-        {
-            var value = response.GetValue<RoundResultsEvent>();
-			var resultsDueAt = DateTime.TryParse(
-				value.ResultsDueAt,
-				CultureInfo.InvariantCulture,
-				DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-				out var parsedDueAt)
-				? parsedDueAt
-				: DateTime.UtcNow.AddSeconds(_config.RoundResultsDurationSeconds);
-            OnRoundResults?.Invoke(new RoundResultsMessage(
-                ToScore(value.Scores.FirstOrDefault(score => score.UserGuid == _redUserGuid)),
-                ToScore(value.Scores.FirstOrDefault(score => score.UserGuid == _blueUserGuid)),
-                (float)value.RedHealth,
-				(float)value.BlueHealth,
-				resultsDueAt));
-        });
-        socket.On("matchFinished", response =>
-        {
-            var value = response.GetValue<MatchFinishedEvent>();
-            OnMatchFinished?.Invoke(new MatchFinishedMessage(value.MmrChange, value.Result, value.Reason));
-            ClearMatch();
-        });
-    }
-
-    private async Task ForfeitOrLeaveAsync(string reason)
-    {
-        if (_socket?.Connected != true) return;
-        if (!string.IsNullOrWhiteSpace(_matchGuid))
-            await EmitAcknowledgedAsync<object>("forfeit", new { matchGuid = _matchGuid, reason });
-        else
-            await EmitAcknowledgedAsync<object>("leaveQueue", new { });
-    }
-
-    private async Task<T?> EmitAcknowledgedAsync<T>(string eventName, object payload)
-    {
-        RequireConnection();
-
-        _siraLog.Debug($"[Socket.IO]: Sending {eventName}: {JsonSerializer.Serialize(payload)}");
-        var completion = new TaskCompletionSource<T?>(TaskCreationOptions.RunContinuationsAsynchronously);
-        await _socket!.EmitAsync(eventName, response =>
+        private async Task ListenToServerAsync()
         {
             try
             {
-                _siraLog.Debug($"[Socket.IO]: Received {eventName} acknowledgement: {response}");
-                var ack = response.GetValue<Acknowledgement<T>>();
-                if (ack.Ok)
+                var data = new byte[4096];
+
+                var result = await _client.ReceiveAsync(new ArraySegment<byte>(data), _cancellationTokenSource.Token);
+
+                if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    completion.TrySetResult(ack.Data);
+                    await HandleAbruptDisconnectionAsync("Disconnected");
                     return;
                 }
 
-                var message = ack.Error?.Message ?? "The server rejected the action.";
-                var error = string.IsNullOrWhiteSpace(ack.Error?.Code)
-                    ? message
-                    : $"{ack.Error.Code}: {message}";
-                _siraLog.Error($"[Socket.IO]: {eventName} was rejected: {error}");
-                completion.TrySetException(new InvalidOperationException(error));
+                var json = Encoding.UTF8.GetString(data);
+
+                if (json == "")
+                    return;
+
+                var packet = ServerPacket.Deserialize(json);
+
+                switch (packet.PacketType)
+                {
+                    case ServerPacket.ServerPacketTypes.MatchCreated:
+                        OnMatchCreated?.Invoke(packet as MatchCreatedPacket);
+                        break;
+                    case ServerPacket.ServerPacketTypes.PlayerSelectedMap:
+                        OnPlayerSelectedMap?.Invoke(packet as PlayerSelectedMapPacket);
+                        break;
+                    case ServerPacket.ServerPacketTypes.RoundResults:
+                        OnRoundResults?.Invoke(packet as RoundResultsPacket);
+                        break;
+                    case ServerPacket.ServerPacketTypes.StartPickPhase:
+                        OnPickPhaseStarted?.Invoke(packet as StartPickPhasePacket);
+                        break;
+                    case ServerPacket.ServerPacketTypes.MatchFinished:
+                        OnMatchFinished?.Invoke(packet as MatchFinishedPacket);
+                        
+                        await StopListeningToServerAsync();
+                        break;
+                    case ServerPacket.ServerPacketTypes.UpdateCards:
+                        OnCardsUpdated?.Invoke(packet as UpdateCardsPacket);
+                        break;
+                    case ServerPacket.ServerPacketTypes.AbruptDisconnection:
+                        var disconnectPacket = packet as AbruptDisconnectionPacket;
+                        _siraLog.Notice("Disconnected from server: " + disconnectPacket?.Reason);
+                        await HandleAbruptDisconnectionAsync(disconnectPacket!.Reason);
+                        break;
+                    default:
+                        throw new Exception("Could not get packet type!");
+                }
             }
-            catch (Exception exception)
+            catch (OperationCanceledException)
             {
-                _siraLog.Error($"[Socket.IO]: Could not read the {eventName} acknowledgement: {exception}");
-                completion.TrySetException(new InvalidOperationException(
-                    $"Could not read the server acknowledgement for {eventName}.",
-                    exception));
+
             }
-        }, payload);
-        return await completion.Task;
-    }
+            catch (Exception e)
+            {
+                _siraLog.Error(e);
+                await HandleAbruptDisconnectionAsync("Unhandled exception, please check your logs!");
+            }
+        }
 
-    private void RequireConnection()
-    {
-        if (_socket?.Connected != true) throw new InvalidOperationException("The CompCube socket is not connected.");
-    }
+        public async Task SendPacketAsync(UserPacket packet)
+        {
+            try
+            {
+                var buffer = packet.SerializeToBytes();
+                await _client.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, _cancellationTokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                
+            }
+        }
 
-    private void RequireMatch()
-    {
-        if (string.IsNullOrWhiteSpace(_matchGuid)) throw new InvalidOperationException("There is no active CompCube match.");
-    }
+        private async Task StopListeningToServerAsync()
+        {
+            _shouldListenToServer = false;
+            _cancellationTokenSource.Cancel();
+            await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal Closure", CancellationToken.None);
+            _client.Dispose();
+        }
 
-    private void ClearMatch()
-    {
-        _siraLog.Info("match cleared");
-        _matchGuid = null;
-        _roundGuid = null;
-        _redUserGuid = null;
-        _blueUserGuid = null;
-    }
+        public async Task DisconnectAsync()
+        {
+            await SendPacketAsync(new ClientDisconnectPacket());
+            await StopListeningToServerAsync();
+            OnDisconnected?.Invoke();
+        }
 
-    private static CompCube.Models.UserInfo ToUser(PacketUser user) => new(user.Username, user.PlatformId, 0, null, 0, null, false, 0, 0, 0, 0);
+        public async Task HandleAbruptDisconnectionAsync(string reason)
+        {
+            OnAbruptDisconnect?.Invoke(reason);
+            await StopListeningToServerAsync();
+        }
 
-    private static VotingMap ToMap(PacketMap map)
-    {
-        Enum.TryParse(map.Difficulty, true, out VotingMap.DifficultyType difficulty);
-        return new VotingMap(map.Hash, difficulty, VotingMap.Category.Special, map.Guid, map.Characteristic,
-            map.Modifiers, map.DurationSeconds, map.MaxScore);
+        public void Dispose() => _client.Dispose();
     }
-
-    private static Score ToScore(PacketScore? score) => score == null
-        ? Score.Empty
-        : new Score(score.ModifiedScore, (float)score.Accuracy, score.ProMode, score.MissCount, score.FullCombo);
-
-    public void Dispose() => _socket?.Dispose();
-
-    private sealed class Acknowledgement<T>
-    {
-        [JsonPropertyName("ok")] public bool Ok { get; set; }
-        [JsonPropertyName("data")] public T? Data { get; set; }
-        [JsonPropertyName("error")] public ErrorDetails? Error { get; set; }
-    }
-
-    private sealed class ErrorDetails
-    {
-        [JsonPropertyName("code")] public string Code { get; set; } = string.Empty;
-        [JsonPropertyName("message")] public string Message { get; set; } = string.Empty;
-    }
-    private sealed class PacketUser { public string Guid { get; set; } = string.Empty; public string PlatformId { get; set; } = string.Empty; public string Username { get; set; } = string.Empty; }
-    private sealed class PacketMap
-    {
-        public string Guid { get; set; } = string.Empty;
-        public string Hash { get; set; } = string.Empty;
-        public string Characteristic { get; set; } = "Standard";
-        public string Difficulty { get; set; } = "ExpertPlus";
-        public string[] Modifiers { get; set; } = [];
-        public int DurationSeconds { get; set; }
-        public int MaxScore { get; set; }
-    }
-    private sealed class PacketScore
-    {
-        public string UserGuid { get; set; } = string.Empty;
-        public int ModifiedScore { get; set; }
-        public double Accuracy { get; set; }
-        public bool ProMode { get; set; }
-        public int MissCount { get; set; }
-        public bool FullCombo { get; set; }
-    }
-
-    private sealed class MatchCreatedEvent
-    {
-        public string MatchGuid { get; set; } = string.Empty; 
-        public PacketUser Red { get; set; } = new(); 
-        public PacketUser Blue { get; set; } = new(); 
-        public PacketMap[] InitialMaps { get; set; } = [];
-    }
-    private sealed class CardsUpdatedEvent { public PacketMap[] Maps { get; set; } = []; }
-    private sealed class PickPhaseEvent { public bool IsOwnPick { get; set; } public PacketMap[] AvailableMaps { get; set; } = []; public double DamageMultiplier { get; set; } }
-    private sealed class SelectedMapEvent { public PacketMap Map { get; set; } = new(); }
-    private sealed class StartMapEvent { public string RoundGuid { get; set; } = string.Empty; }
-    private sealed class RoundResultsEvent { public double RedHealth { get; set; } public double BlueHealth { get; set; } public string? ResultsDueAt { get; set; } public PacketScore[] Scores { get; set; } = []; }
-    private sealed class MatchFinishedEvent { public string Result { get; set; } = "loss"; public int MmrChange { get; set; } public string? Reason { get; set; } }
 }

@@ -1,12 +1,14 @@
+/*
 using System.Collections;
 using System.Reflection;
+using CompCube_Models.Models.Map;
 using CompCube.Models;
 using CompCube.Networking.Replay;
 using UnityEngine;
 
 namespace CompCube.Networking.ReplayStreaming;
 
-/** Samples compact poses and HUD state into the same protobuf chunks ChroViewer uses for TA live replays. */
+/** Samples compact poses and HUD state into the same protobuf chunks ChroViewer uses for TA live replays. #1#
 public sealed class ReplayStreamer : MonoBehaviour
 {
     private const int MaxFramesPerChunk = 24;
@@ -240,3 +242,4 @@ public sealed class ReplayStreamer : MonoBehaviour
         catch { return 0; }
     }
 }
+*/

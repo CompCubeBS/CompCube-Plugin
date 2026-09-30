@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube.Models;
+using CompCube_Models.Models.Map;
 using CompCube.UI.BSML.Components.CustomMapList;
 using UnityEngine;
 using Zenject;

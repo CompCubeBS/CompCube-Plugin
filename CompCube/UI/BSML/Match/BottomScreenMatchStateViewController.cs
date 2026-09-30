@@ -48,7 +48,7 @@ public class BottomScreenMatchStateViewController : BSMLAutomaticViewController
         _blueImage.material = material;
     }
     
-    public void PopulateData(CompCube.Models.UserInfo red, CompCube.Models.UserInfo blue)
+    public void PopulateData(CompCube_Models.Models.ClientData.UserInfo red, CompCube_Models.Models.ClientData.UserInfo blue)
     {
         RedPlayerText = red.GetFormattedUserName();
         BluePlayerText = blue.GetFormattedUserName();

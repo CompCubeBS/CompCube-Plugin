@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using BeatSaberMarkupLanguage;
-using CompCube.Models;
+using CompCube_Models.Models.Map;
+using CompCube_Models.Models.Match;
+using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube.Game;
 using CompCube.Interfaces;
 using CompCube.UI.BSML.Match;
@@ -57,7 +59,7 @@ namespace CompCube.UI.FlowCoordinators
 
         private VotingMap? _lastPlayed;
 
-        public void PopulateData(MatchCreatedMessage packet, Action? onMatchFinishedCallback)
+        public void PopulateData(MatchCreatedPacket packet, Action? onMatchFinishedCallback)
         {
             _bottomScreenMatchStateViewController.PopulateData(packet.Red, packet.Blue);
             _bottomScreenMatchStateViewController.SetStatus("Discard Phase");
@@ -181,7 +183,7 @@ namespace CompCube.UI.FlowCoordinators
             }
         }
 
-        private void HandleOpponentSelectedMap(PlayerSelectedMapMessage packet)
+        private void HandleOpponentSelectedMap(PlayerSelectedMapPacket packet)
         {
             StartCoroutine(HandleOpponentSelectedMapCoroutine());
             return;
@@ -195,7 +197,7 @@ namespace CompCube.UI.FlowCoordinators
             }
         }
 
-        private void HandleRoundResults(RoundResultsMessage results)
+        private void HandleRoundResults(RoundResultsPacket results)
         {
             StartCoroutine(HandleRoundResultsCoroutine());
 
@@ -208,18 +210,17 @@ namespace CompCube.UI.FlowCoordinators
                 
                 _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed!);
                 
-				var resultStepSeconds = Mathf.Max(0f, (float)(results.ResultsDueAt - DateTime.UtcNow).TotalSeconds) / 2f;
-				yield return new WaitForSeconds(resultStepSeconds);
+				yield return new WaitForSeconds(6);
 
                 _bottomScreenMatchStateViewController.UpdateHealth(results.RedHealth, results.BlueHealth);
                 
-				yield return new WaitForSeconds(resultStepSeconds);
+				yield return new WaitForSeconds(6);
 
                 _roundResultsAnimationInProgress = false;
             }
         }
 
-        private void OnPickPhaseStarted(PickPhaseMessage packet)
+        private void OnPickPhaseStarted(StartPickPhasePacket packet)
         {
             StartCoroutine(OnPickPhaseStartedCoroutine());
             return;
@@ -396,14 +397,7 @@ namespace CompCube.UI.FlowCoordinators
                         _waitingViewController.SetText($"Waiting for {_matchStateManager.Opponent.GetFormattedUserName()} to submit a score...");
                         
                         HideLeaderboard(true);
-                        await _serverListener.SubmitScoreAsync(new ScoreSubmission(
-                            results.multipliedScore,
-                            results.modifiedScore,
-                            results.gameplayModifiers.noFailOn0Energy &&
-                                results.levelEndStateType == LevelCompletionResults.LevelEndStateType.Failed,
-                            results.gameplayModifiers.proMode,
-                            results.notGoodCount,
-                            results.fullCombo));
+                        await _serverListener.SubmitScoreAsync(new Score(results.multipliedScore, results.));
                     }
                     catch (Exception e)
                     {
