@@ -6,9 +6,13 @@ using SiraUtil.Logging;
 using SocketIOClient;
 using SocketIOClient.Transport;
 using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using SocketIOClient.JsonSerializer;
 using Zenject;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace CompCube.Networking;
 
@@ -61,6 +65,12 @@ public sealed class ServerListener : IServerListener, IDisposable
 					["roundResultsSeconds"] = _config.RoundResultsDurationSeconds.ToString(CultureInfo.InvariantCulture),
                 },
             });
+            
+            _socket.JsonSerializer = new SystemTextJsonSerializer(new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            });
+            
             RegisterServerEvents(_socket);
             await _socket.ConnectAsync();
             var queue = queueEndpoint.StartsWith("queue/", StringComparison.OrdinalIgnoreCase)
@@ -118,6 +128,7 @@ public sealed class ServerListener : IServerListener, IDisposable
     /** Forfeits an active match, or leaves the queue, before closing the transport. */
     public async Task DisconnectAsync()
     {
+        _siraLog.Info("disconnected");
         if (_socket == null) return;
         try
         {
@@ -145,7 +156,12 @@ public sealed class ServerListener : IServerListener, IDisposable
 
     private void RegisterServerEvents(SocketIO socket)
     {
-        socket.OnDisconnected += (_, reason) => OnAbruptDisconnect?.Invoke(reason);
+        socket.OnDisconnected += (_, reason) => OnDisconnected?.Invoke();
+        
+        socket.OnError += (_, reason) => OnAbruptDisconnect?.Invoke(reason);
+        
+        socket.OnAny((name, response) => _siraLog.Info(name + " : " + response.ToString()));
+        
         socket.On("matchCreated", response =>
         {
             var value = response.GetValue<MatchCreatedEvent>();
@@ -253,6 +269,7 @@ public sealed class ServerListener : IServerListener, IDisposable
 
     private void ClearMatch()
     {
+        _siraLog.Info("match cleared");
         _matchGuid = null;
         _roundGuid = null;
         _redUserGuid = null;
@@ -306,7 +323,14 @@ public sealed class ServerListener : IServerListener, IDisposable
         public int MissCount { get; set; }
         public bool FullCombo { get; set; }
     }
-    private sealed class MatchCreatedEvent { public string MatchGuid { get; set; } = string.Empty; public PacketUser Red { get; set; } = new(); public PacketUser Blue { get; set; } = new(); public PacketMap[] InitialMaps { get; set; } = []; }
+
+    private sealed class MatchCreatedEvent
+    {
+        public string MatchGuid { get; set; } = string.Empty; 
+        public PacketUser Red { get; set; } = new(); 
+        public PacketUser Blue { get; set; } = new(); 
+        public PacketMap[] InitialMaps { get; set; } = [];
+    }
     private sealed class CardsUpdatedEvent { public PacketMap[] Maps { get; set; } = []; }
     private sealed class PickPhaseEvent { public bool IsOwnPick { get; set; } public PacketMap[] AvailableMaps { get; set; } = []; public double DamageMultiplier { get; set; } }
     private sealed class SelectedMapEvent { public PacketMap Map { get; set; } = new(); }
