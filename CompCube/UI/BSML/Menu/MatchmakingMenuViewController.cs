@@ -151,7 +151,7 @@ namespace CompCube.UI.BSML.Menu
                 return;
             }
                 
-            _queueOptions = queues.Select(i => i.ToQueueOptionTab()).ToList();
+            _queueOptions = queues.Select(i => new QueueOptionTab(i.Name, i.Slug)).ToList();
             
             
             SetState(State.Disconnected);
