@@ -71,19 +71,19 @@ namespace CompCube.Networking
             }
         }
 
-        public Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps)
+        public async Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps)
         {
-            throw new NotImplementedException();
+            await SendPacketAsync(new DiscardMapsPacket(maps.ToArray()));
         }
 
-        public Task SelectMapAsync(VotingMap map)
+        public async Task SelectMapAsync(VotingMap map)
         {
-            throw new NotImplementedException();
+            await SendPacketAsync(new MapSelectionPacket(map));
         }
 
-        public Task SubmitScoreAsync(Score score)
+        public async Task SubmitScoreAsync(Score score)
         {
-            throw new NotImplementedException();
+            await SendPacketAsync(new ScoreSubmissionPacket(score));
         }
 
         private async Task ListenToServerAsync()
