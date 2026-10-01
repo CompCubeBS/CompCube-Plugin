@@ -278,7 +278,4 @@
       <None Remove="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
       <EmbeddedResource Include="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
     </ItemGroup>
-    <ItemGroup>
-      <Content Include="CompCube.csproj.user" />
-    </ItemGroup>
 </Project>
