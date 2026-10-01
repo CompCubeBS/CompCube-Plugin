@@ -57,6 +57,12 @@ namespace CompCube.Server
             return JsonConvert.DeserializeObject<string[]>(await response.Content.ReadAsStringAsync());
         }
 
+        public async Task<Queue[]> GetQueues()
+        {
+            var response = await _client.GetAsync("/api/queues");
+            return JsonConvert.DeserializeObject<Queue[]>(await response.Content.ReadAsStringAsync());
+        }
+
         public async Task<EventData[]?> GetEvents()
         {
             var response = await _client.GetAsync("/api/events/events");

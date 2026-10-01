@@ -130,7 +130,7 @@ namespace CompCube.UI.FlowCoordinators
             _serverListener.OnCardsUpdated += HandleCardsUpdated;
         }
 
-        private void HandleCardsUpdated(CardsUpdatedMessage packet)
+        private void HandleCardsUpdated(UpdateCardsPacket packet)
         {
             DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(_waitingForDiscardPhaseToFinishViewController,
                 packet.Maps.Select(i => i.Hash).ToArray(), () => StartCoroutine(PopulateDataCoroutine()));
@@ -144,7 +144,7 @@ namespace CompCube.UI.FlowCoordinators
             }
         }
 
-        private void HandleMatchFinished(MatchFinishedMessage packet)
+        private void HandleMatchFinished(MatchFinishedPacket packet)
         {
             StartCoroutine(HandleMatchFinishedCoroutine());
             return;
@@ -158,7 +158,7 @@ namespace CompCube.UI.FlowCoordinators
                 if (packet.Won)
                     _fireworksManager.StartFireworks();
                 
-                _matchResultsViewController.PopulateData(packet.Result, packet.MmrChange, packet.Reason, () =>
+                _matchResultsViewController.PopulateData(packet.Won, packet.EloChange, () =>
                 {
                     _fireworksManager.StopFireworks();
                     _onMatchFinishedCallback?.Invoke();
@@ -175,7 +175,7 @@ namespace CompCube.UI.FlowCoordinators
         {
             try
             {
-                await _serverListener.DiscardMapsAsync(_matchBeatmapManager.DiscardedMaps.OfType<VotingMap>().ToArray());
+                await _serverListener.DiscardMapsAsync(_matchBeatmapManager.DiscardedMaps.ToArray());
             }
             catch (Exception e)
             {
@@ -397,7 +397,8 @@ namespace CompCube.UI.FlowCoordinators
                         _waitingViewController.SetText($"Waiting for {_matchStateManager.Opponent.GetFormattedUserName()} to submit a score...");
                         
                         HideLeaderboard(true);
-                        await _serverListener.SubmitScoreAsync(new Score(results.multipliedScore, results.));
+                        await _serverListener.SubmitScoreAsync(new Score(results.multipliedScore, ScoreModel.ComputeMaxMultipliedScoreForBeatmap(transitionSetupDataSo.transformedBeatmapData), 
+                            results.gameplayModifiers.proMode, results.notGoodCount, results.fullCombo));
                     }
                     catch (Exception e)
                     {

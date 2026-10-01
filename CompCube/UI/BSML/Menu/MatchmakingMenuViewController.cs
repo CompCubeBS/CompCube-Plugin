@@ -4,7 +4,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube.Models;
 using CompCube.Configuration;
 using CompCube.Interfaces;
 using CompCube.Server;
