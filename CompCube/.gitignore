@@ -1,0 +1,9 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+CompCube/CompCube.csproj.user
+/.idea
+CompCube.sln.DotSettings.user
+FodyWeavers.xsd
