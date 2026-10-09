@@ -35,6 +35,7 @@ namespace CompCube.Networking
 
 
         [Inject] private readonly UserModelWrapper _userModelWrapper = null!;
+        [Inject] private readonly BeatKhanaGameAuth _beatKhanaGameAuth = null!;
 
         public bool Connected => _client.State == WebSocketState.Open;
         
@@ -50,7 +51,11 @@ namespace CompCube.Networking
 
             try
             {
+                var auth = await _beatKhanaGameAuth.RequestTokenAsync();
+                
                 _client = new ClientWebSocket();
+                
+                _client.Options.SetRequestHeader("Authorization", "Bearer " + auth.Token);
                 
                 _client.Options.SetRequestHeader("UserId", _userModelWrapper.UserId);
                 _client.Options.SetRequestHeader("UserName", _userModelWrapper.UserName);

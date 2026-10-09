@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text;
 using CompCube.Configuration;
+using CompCube.Models.CompCube_Models.Models.Auth;
 using Newtonsoft.Json;
 
 namespace CompCube.Networking;
@@ -16,15 +17,6 @@ public sealed class BeatKhanaGameAuth
     {
         _config = config;
         _platformUserModel = platformUserModel;
-    }
-
-    public sealed class AuthResponse
-    {
-        [JsonProperty("token")] public string Token { get; set; } = string.Empty;
-        [JsonProperty("platform")] public string Platform { get; set; } = string.Empty;
-        [JsonProperty("platformId")] public string PlatformId { get; set; } = string.Empty;
-        [JsonProperty("userGuid")] public string? UserGuid { get; set; }
-        [JsonProperty("discordId")] public string? DiscordId { get; set; }
     }
 
     /** Exchanges the game platform's signed ticket for a token carrying the CompCube capability. */
