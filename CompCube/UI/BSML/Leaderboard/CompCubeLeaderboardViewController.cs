@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using BGLib.Polyglot;
+using CompCube_Models.Models.ClientData;
 using CompCube.Interfaces;
 using CompCube.UI.BSML.Components;
 using HMUI;
@@ -82,13 +83,13 @@ namespace CompCube.UI.BSML.Leaderboard
         [UIValue("winRate")] private string WinRateText { get; set; } = string.Empty;
         [UIValue("winStreak")] private string WinStreakText { get; set; } = string.Empty;
         
-        private void OnUserInfoButtonClicked(CompCube_Models.Models.ClientData.UserInfo userInfo)
+        private void OnUserInfoButtonClicked(UserStatistics userInfo)
         {
             _parserParams.EmitEvent("profileModalShow");
             
-            ProfilePictureLink = userInfo.ProfilePictureLink;
+            ProfilePictureLink = userInfo.AvatarUrl;
             ProfileNameText = $"{userInfo.GetFormattedUserName()}'s Profile";
-            ProfileMmrText = "ELO: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Mmr.ToString()}";
+            ProfileMmrText = "ELO: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Elo.ToString()}";
             ProfileRankText = "Rank: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Rank}";
             WinRateText = "Wins: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Wins}" + "/".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.TotalGames}";
             WinStreakText = "Win Streak: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Winstreak}" + " (Best: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.HighestWinstreak}" + ")".FormatWithHtmlColor("#6F6F6F");
@@ -131,7 +132,7 @@ namespace CompCube.UI.BSML.Leaderboard
 
         [UIValue("cell-data")] private readonly List<IconSegmentedControl.DataItem> _cellData = new(){};
 
-        private void SetLeaderboardData(CompCube_Models.Models.ClientData.UserInfo[] userInfo, bool isAppend = false)
+        private void SetLeaderboardData(UserStatistics[] userInfo, bool isAppend = false)
         {
             if (userInfo == null || userInfo.Length == 0)
             {
@@ -197,7 +198,7 @@ namespace CompCube.UI.BSML.Leaderboard
 
                 int start = _pageNumber * PageSize;
 
-                CompCube_Models.Models.ClientData.UserInfo[] result;
+                UserStatistics[] result;
 
                 result = await _api.GetLeaderboardRange(start, PageSize);
 

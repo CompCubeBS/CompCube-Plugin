@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CompCube_Models.Models.ClientData;
 using CompCube.Extensions;
 using SiraUtil.Web;
 using TMPro;
@@ -35,7 +36,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     public TableView TableView { get; private set; }
 
-    internal List<CompCube_Models.Models.ClientData.UserInfo> Data { get; private set; } = new();
+    internal List<UserStatistics> Data { get; private set; } = new();
 
     private LevelListTableCell _tableCellPrefab;
     private bool firstLoad = true;
@@ -47,7 +48,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     #region Data
 
-    internal void SetData(List<CompCube_Models.Models.ClientData.UserInfo> users)
+    internal void SetData(List<UserStatistics> users)
     {
         Data = users;
         TableView.ReloadData();
@@ -59,7 +60,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
         }
     }
     
-    internal void AddData(List<CompCube_Models.Models.ClientData.UserInfo> users, CancellationToken token = default) {
+    internal void AddData(List<UserStatistics> users, CancellationToken token = default) {
         Data.AddRange(users);
 
         var scrollView = TableView.scrollView;
@@ -188,10 +189,10 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     #region Text
 
-    private void ConfigureText(LevelListTableCell cell, CompCube_Models.Models.ClientData.UserInfo user)
+    private void ConfigureText(LevelListTableCell cell, UserStatistics user)
     {
         string name = $"#{user.Rank} - {user.GetFormattedUserName()}";
-        string divisionText = $"{user.Mmr} ELO";// $"<color={user.Division.Color}>{user.Division.Division}</color> {user.Mmr} MMR";
+        string divisionText = $"{user.Elo} ELO";// $"<color={user.Division.Color}>{user.Division.Division}</color> {user.Mmr} MMR";
 
         int losses = user.TotalGames - user.Wins;
         string recordText = $"{user.Wins}<color=green>W</color> / {losses}<color=red>L</color>";
@@ -223,7 +224,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
         var state = cell.GetComponent<PlayerCellAvatarState>() ??
                     cell.gameObject.AddComponent<PlayerCellAvatarState>();
 
-        string avatarUrl = user.ProfilePictureLink;
+        string avatarUrl = user.AvatarUrl;
 
         if (state.CurrentIndex == idx &&
             state.CurrentAvatarUrl == avatarUrl)

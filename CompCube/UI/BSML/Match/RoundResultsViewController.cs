@@ -2,6 +2,7 @@
 using System.Globalization;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube_Models.Models.Packets.ServerPackets;
@@ -68,7 +69,7 @@ namespace CompCube.UI.BSML.Match
             }
         }
 
-        private string FormatScore(Score score, CompCube_Models.Models.ClientData.UserInfo user, int placement) =>
+        private string FormatScore(Score score, UserStatistics user, int placement) =>
             $"{(placement)}. {user.GetFormattedUserName()} - " +
             $"{(score.RelativeScore * 100):F}% " +
             $"{(score.FullCombo ? "FC".FormatWithHtmlColor("#90EE90") : $"{score.Misses}x".FormatWithHtmlColor("#FF7F7F"))}" +

@@ -1,9 +1,10 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using CompCube_Models.Models.ClientData;
 using CompCube.Extensions;
 
 namespace CompCube.UI.BSML.Components;
 
-public class LeaderboardSlot(CompCube_Models.Models.ClientData.UserInfo userInfo, bool isSelf)
+public class LeaderboardSlot(UserStatistics userInfo, bool isSelf)
 {
     private const string OwnCellTextColor = "#00C0FF";
 
@@ -13,7 +14,7 @@ public class LeaderboardSlot(CompCube_Models.Models.ClientData.UserInfo userInfo
 
     [UIValue("rankText")] private string RankText { get; set; } = userInfo.Rank + ".";
     [UIValue("playerNameText")] private string NameText { get; set; } = userInfo.GetFormattedUserName();
-    [UIValue("mmrText")] private string MmrText { get; set; } = $"{userInfo.Mmr:N0} MMR".FormatWithHtmlColor(isSelf ? OwnCellTextColor : "white");
+    [UIValue("mmrText")] private string MmrText { get; set; } = $"{userInfo.Elo:N0} ELO".FormatWithHtmlColor(isSelf ? OwnCellTextColor : "white");
 
     [UIAction("profileButtonOnClick")]
     private void ProfileButtonOnClick() => OnUserInfoButtonClicked?.Invoke(userInfo);

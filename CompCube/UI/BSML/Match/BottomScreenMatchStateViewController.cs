@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net.Http;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using CompCube_Models.Models.ClientData;
 using CompCube.Extensions;
 using CompCube.UI.BSML.Components.EnergyBar;
 using SiraUtil.Logging;
@@ -48,7 +49,7 @@ public class BottomScreenMatchStateViewController : BSMLAutomaticViewController
         _blueImage.material = material;
     }
     
-    public void PopulateData(CompCube_Models.Models.ClientData.UserInfo red, CompCube_Models.Models.ClientData.UserInfo blue)
+    public void PopulateData(UserStatistics red, UserStatistics blue)
     {
         RedPlayerText = red.GetFormattedUserName();
         BluePlayerText = blue.GetFormattedUserName();
@@ -62,8 +63,8 @@ public class BottomScreenMatchStateViewController : BSMLAutomaticViewController
         {
             yield return new WaitUntil(() => _redImage && _blueImage);
             
-            SetSpriteImageFromUrl(red.ProfilePictureLink, _redImage);
-            SetSpriteImageFromUrl(blue.ProfilePictureLink, _blueImage);
+            SetSpriteImageFromUrl(red.AvatarUrl, _redImage);
+            SetSpriteImageFromUrl(blue.AvatarUrl, _blueImage);
         }
     }
 
