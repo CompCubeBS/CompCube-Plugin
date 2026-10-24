@@ -13,8 +13,10 @@ namespace CompCube.Configuration
 
         public virtual bool ScoreSubmission { get; set; } = true;
 		// Must match ROUND_RESULTS_SECONDS on the backend; the server validates it at connection time.
-		public virtual float RoundResultsDurationSeconds { get; set; } = 6f;
+		// public virtual float RoundResultsDurationSeconds { get; set; } = 6f;
 
         public virtual bool SkipServer { get; set; } = false;
+        
+        public virtual bool ShowDebugQueue { get; set; } = false;
     }
 }

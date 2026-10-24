@@ -25,6 +25,7 @@ namespace CompCube.UI.BSML.Menu
         [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         [Inject] private readonly SiraLog _siraLog = null!;
         [Inject] private readonly IApi _api = null!;
+        [Inject] private readonly PluginConfig _config = null!;
 
         private static bool _hasShownMatchWarningModal = false;
 
@@ -142,17 +143,11 @@ namespace CompCube.UI.BSML.Menu
         private async Task FetchQueues()
         {
             SetState(State.FetchingAvailableQueues);
-                
-            var queues = await _api.GetQueues();
 
-            if (queues == null)
-            {
-                _warningModalViewController.ParseOntoViewController(this, "Failed to fetch available queues!", _warningModalViewController.Hide);
-                return;
-            }
-                
-            _queueOptions = queues.Select(i => new QueueOptionTab(i.Name, i.Slug)).ToList();
+            _queueOptions = [new QueueOptionTab("Competitive", "standard_competitive_1v1")];
             
+            if (_config.ShowDebugQueue)
+                _queueOptions.Add(new QueueOptionTab("Debug", "debug"));
             
             SetState(State.Disconnected);
                 
@@ -164,6 +159,7 @@ namespace CompCube.UI.BSML.Menu
         private void HandleLeaveMatchmakingPoolButtonClicked() => _warningModalViewController.ParseOntoViewController(this, "Are you sure you want to leave the matchmaking pool?",
             () =>
             {
+                _warningModalViewController.Hide();
                 _serverListener.DisconnectAsync();
                 SetState(State.Disconnected);
             },
