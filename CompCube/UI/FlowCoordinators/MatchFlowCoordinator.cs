@@ -397,7 +397,7 @@ namespace CompCube.UI.FlowCoordinators
                         _waitingViewController.SetText($"Waiting for {_matchStateManager.Opponent.GetFormattedUserName()} to submit a score...");
                         
                         HideLeaderboard(true);
-                        await _serverListener.SubmitScoreAsync(new Score(results.multipliedScore, ScoreModel.ComputeMaxMultipliedScoreForBeatmap(transitionSetupDataSo.transformedBeatmapData), 
+                        await _serverListener.SubmitScoreAsync(new Score(results.multipliedScore, (float) results.multipliedScore / ScoreModel.ComputeMaxMultipliedScoreForBeatmap(transitionSetupDataSo.transformedBeatmapData), 
                             results.gameplayModifiers.proMode, results.notGoodCount, results.fullCombo));
                     }
                     catch (Exception e)
