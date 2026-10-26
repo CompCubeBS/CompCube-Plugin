@@ -12,6 +12,8 @@ public class BeatmapDownloader
 {
     [Inject] private readonly SiraLog _siraLog = null!;
     [Inject] private readonly IApi _api = null!;
+
+    private readonly BeatSaver _beatSaver = new BeatSaver("CompCube", new Version(1, 0, 0));
     
     public event Action<int, int>? OnMapDownloaded;
     
@@ -31,7 +33,12 @@ public class BeatmapDownloader
 
             _siraLog.Notice($"Attempting to download {mapHash}...");
             
-            var beatmapData = await _api.DownloadBeatmap(mapHash);
+            var beatmap = await _beatSaver.BeatmapByHash(mapHash);
+            
+            if (beatmap == null)
+                throw new Exception($"Failed to download beatmap " + mapHash);
+
+            var beatmapData = await beatmap.LatestVersion.DownloadZIP();
 
             if (beatmapData == null)
                 throw new Exception($"Failed to download {mapHash}!");
