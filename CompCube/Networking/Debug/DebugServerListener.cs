@@ -55,7 +55,7 @@ public class DebugServerListener : IServerListener
         if (!_isConnected) 
             return;
         
-        OnRoundResults?.Invoke(new RoundResultsPacket(Score.Empty, Score.Empty, .5f, .5f));
+        OnRoundResults?.Invoke(new RoundResultsPacket(Score.Empty, Score.Empty, .5f, .5f, .5f));
         await Task.Delay(500);
         OnMatchFinished?.Invoke(new MatchFinishedPacket(100, false));
     }

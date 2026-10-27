@@ -11,6 +11,7 @@ using CompCube.Extensions;
 using CompCube.Game;
 using CompCube.Game.MatchState;
 using CompCube.UI.BSML.Components.CustomLevelBar;
+using SiraUtil.Logging;
 using UnityEngine;
 using Zenject;
 
@@ -21,6 +22,7 @@ namespace CompCube.UI.BSML.Match
     {
         [Inject] private readonly MatchStateManager _matchStateManager = null!;
         [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
+        [Inject] private readonly SiraLog _siraLog = null!;
         
         [UIValue("titleBgColor")] private string TitleBgColor { get; set; } = "#FFA500";
         [UIValue("titleText")] private string TitleText { get; set; } = "";
@@ -62,8 +64,11 @@ namespace CompCube.UI.BSML.Match
             
                 WinnerScoreText = FormatScore(winnerScore, winner, 1);
                 LoserScoreText = FormatScore(loserScore, loser, 2);
+                
+                _siraLog.Info(results.DamageAmount);
+                _siraLog.Info(_matchStateManager.DamageMultiplier);
             
-                DamageText = ((winnerScore.RelativeScore - loserScore.RelativeScore) * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
+                DamageText = (results.DamageAmount * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
             
                 NotifyPropertyChanged(null);
             }
