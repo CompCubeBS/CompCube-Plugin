@@ -12,9 +12,6 @@ namespace CompCube.UI.BSML.Match;
 [ViewDefinition("CompCube.UI.BSML.Match.MatchResultsView.bsml")]
 public class MatchResultsViewController : BSMLAutomaticViewController
 {
-    [Inject] private readonly MatchStateManager _stateManager = null!;
-    [Inject] private readonly SiraLog _siraLog = null!;
-    
     [UIValue("titleBgColor")] private string TitleBgColor { get; set; } = "#0000FF";
     [UIValue("titleText")] private string TitleText { get; set; } = "You Win";
 

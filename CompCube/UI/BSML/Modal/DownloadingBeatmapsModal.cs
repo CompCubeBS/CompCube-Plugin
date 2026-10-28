@@ -18,7 +18,6 @@ namespace CompCube.UI.BSML.EarlyLeaveWarning;
 public class DownloadingBeatmapsModal : BSMLAutomaticViewController
 {
     [Inject] private readonly BeatmapDownloader _beatmapDownloader = null!;
-    [Inject] private readonly SiraLog _siraLog = null!;
     [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
     
     [UIParams] private readonly BSMLParserParams _parserParams = null!;

@@ -101,6 +101,8 @@ namespace CompCube.Networking
                 var data = new byte[4096];
 
                 var result = await _client.ReceiveAsync(new ArraySegment<byte>(data), _cancellationTokenSource.Token);
+                
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -112,6 +114,8 @@ namespace CompCube.Networking
 
                 if (json == "")
                     return;
+                
+                _siraLog.Info(json);
 
                 var packet = ServerPacket.Deserialize(json);
 
@@ -121,6 +125,7 @@ namespace CompCube.Networking
                         OnMatchCreated?.Invoke(packet as MatchCreatedPacket);
                         break;
                     case ServerPacket.ServerPacketTypes.PlayerSelectedMap:
+                        _siraLog.Notice("Player selected map " + (packet as PlayerSelectedMapPacket)!.Map.Hash);
                         OnPlayerSelectedMap?.Invoke(packet as PlayerSelectedMapPacket);
                         break;
                     case ServerPacket.ServerPacketTypes.RoundResults:
@@ -143,6 +148,7 @@ namespace CompCube.Networking
                         await HandleAbruptDisconnectionAsync(disconnectPacket!.Reason);
                         break;
                     case ServerPacket.ServerPacketTypes.PlayerDidRequestReplay:
+                        _siraLog.Notice("Replay requested by " + (packet as PlayerDidRequestReplayPacket)!.Requester.Username);
                         OnReplayRequested?.Invoke(packet as PlayerDidRequestReplayPacket);
                         break;
                     default:

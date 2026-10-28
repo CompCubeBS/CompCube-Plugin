@@ -21,12 +21,10 @@ namespace CompCube.UI.BSML.Match;
 public class VotingScreenViewController : BSMLAutomaticViewController
 {
     [Inject] private readonly SiraLog _log = null!;
-    [Inject] private readonly MatchStateManager _matchStateManager = null!;
     
     public event Action<VotingMap>? MapSelected;
     private Action? _ranOutOfTimeCallback = null;
 
-    [UIComponent("voteStatusText")] private readonly TextMeshProUGUI _voteStatusText = null!;
     [UIValue("timerText")] private string TimerText { get; set; } = "";
     [UIValue("votingText")] private string VotingText { get; set; } = "";
     

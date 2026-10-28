@@ -11,7 +11,6 @@ namespace CompCube.Game;
 public class BeatmapDownloader
 {
     [Inject] private readonly SiraLog _siraLog = null!;
-    [Inject] private readonly IApi _api = null!;
 
     private readonly BeatSaver _beatSaver = new BeatSaver("CompCube", new Version(1, 0, 0));
     

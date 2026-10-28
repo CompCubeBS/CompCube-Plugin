@@ -327,10 +327,12 @@ namespace CompCube.UI.FlowCoordinators
 
             IEnumerator HandleReplayRequestedCoroutine()
             {
-                yield return ShowMapPreviewViewAndStartMatch(packet.MapToReplay!);
+                StartCoroutine(ShowMapPreviewViewAndStartMatch(packet.MapToReplay!));
 
-                yield return new WaitUntil(() => !isInTransition);
-
+                yield return new WaitUntil(() =>
+                    _waitingForMatchToStartViewController.isActivated &&
+                    !_waitingForMatchToStartViewController.isInTransition);
+                
                 yield return ShowPhaseChangeModal("Replay!", $"Replay called by {packet.Requester.GetFormattedUserName()}!");
             }
         }

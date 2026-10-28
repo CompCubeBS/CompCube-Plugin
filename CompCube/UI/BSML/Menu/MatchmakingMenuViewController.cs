@@ -24,7 +24,6 @@ namespace CompCube.UI.BSML.Menu
         [Inject] private readonly ServerChecker _serverChecker = null!;
         [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         [Inject] private readonly SiraLog _siraLog = null!;
-        [Inject] private readonly IApi _api = null!;
         [Inject] private readonly PluginConfig _config = null!;
 
         private static bool _hasShownMatchWarningModal = false;
