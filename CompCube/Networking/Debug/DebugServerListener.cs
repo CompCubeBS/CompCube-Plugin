@@ -21,6 +21,7 @@ public class DebugServerListener : IServerListener
     public event Action<StartPickPhasePacket>? OnPickPhaseStarted;
     public event Action<MatchFinishedPacket>? OnMatchFinished;
     public event Action<UpdateCardsPacket>? OnCardsUpdated;
+    public event Action<PlayerDidRequestReplayPacket>? OnReplayRequested;
 
     public event Action? OnConnected;
     public event Action? OnDisconnected;
@@ -44,7 +45,7 @@ public class DebugServerListener : IServerListener
     public Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps)
     {
         if (!_isConnected) return Task.CompletedTask;
-        OnPickPhaseStarted?.Invoke(new StartPickPhasePacket(DebugApi.Maps, true, 10f));
+        OnPickPhaseStarted?.Invoke(new StartPickPhasePacket(DebugApi.Maps, true, 10f, 1f, 1f));
         return Task.CompletedTask;
     }
 
@@ -55,9 +56,14 @@ public class DebugServerListener : IServerListener
         if (!_isConnected) 
             return;
         
-        OnRoundResults?.Invoke(new RoundResultsPacket(Score.Empty, Score.Empty, .5f, .5f, .5f));
+        OnRoundResults?.Invoke(new RoundResultsPacket(Score.Empty, Score.Empty, .5f));
         await Task.Delay(500);
         OnMatchFinished?.Invoke(new MatchFinishedPacket(100, false));
+    }
+
+    public Task SendReplayRequestAsync(bool replay)
+    {
+        return Task.CompletedTask;
     }
 
     public Task HandleAbruptDisconnectionAsync(string reason)

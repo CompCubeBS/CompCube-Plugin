@@ -20,4 +20,8 @@
         <text italics="true" text="Damage" align="Midline" underlined="true"/>
         <text text="~damageText" align="Midline" font-size="8" italics="true"/> 
     </vertical>
+    
+    <vertical anchor-pos-y="-25">
+        <button interactable="~replayButtonInteractable" active="~replayButtonActive" pref-height='10' pref-width="34" on-click="replayButtonOnClick"/>
+    </vertical>
 </bg>

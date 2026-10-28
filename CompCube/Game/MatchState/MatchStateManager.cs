@@ -26,17 +26,20 @@ public class MatchStateManager : IInitializable, IDisposable
     
     public int CurrentRound { get; private set; } = 0;
     
+    public int RemainingReplays { get; private set; } = 1;
+    
     public void Initialize()
     {
         _serverListener.OnMatchCreated += HandleMatchCreated;
-        _serverListener.OnRoundResults += HandleRoundResults;
         _serverListener.OnPickPhaseStarted += HandlePickPhaseStarted;
     }
 
     private void HandlePickPhaseStarted(StartPickPhasePacket packet)
     {
         CurrentRound++;
-        DamageMultiplier = packet.NewMultiplier;
+        DamageMultiplier = packet.Multiplier;
+        RedHealth = packet.RedHealth;
+        BlueHealth = packet.BlueHealth;
     }
 
     private void HandleMatchCreated(MatchCreatedPacket matchCreated)
@@ -50,18 +53,23 @@ public class MatchStateManager : IInitializable, IDisposable
         DamageMultiplier = 1.0f;
 
         CurrentRound = 0;
+        
+        RemainingReplays = 1;
     }
-    
-    private void HandleRoundResults(RoundResultsPacket results)
+
+    public async Task UseReplay()
     {
-        RedHealth = results.RedHealth;
-        BlueHealth = results.BlueHealth;
+        if (RemainingReplays <= 0)
+            throw new Exception("Tried to use replay with no more available replays");
+
+        RemainingReplays--;
+
+        await _serverListener.SendReplayRequestAsync(true);
     }
 
     public void Dispose()
     {
         _serverListener.OnMatchCreated -= HandleMatchCreated;
-        _serverListener.OnRoundResults -= HandleRoundResults;
         _serverListener.OnPickPhaseStarted -= HandlePickPhaseStarted;
     }
 }

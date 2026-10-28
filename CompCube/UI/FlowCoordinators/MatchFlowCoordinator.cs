@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using BeatSaberMarkupLanguage;
+using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube_Models.Models.Packets.ServerPackets;
@@ -52,8 +53,6 @@ namespace CompCube.UI.FlowCoordinators
         private NavigationController _votingScreenNavigationController;
 
         private Action? _onMatchFinishedCallback = null;
-        
-        private bool _roundResultsAnimationInProgress = false;
 
         private bool _hasShownFinalCardsToPlayer = false;
 
@@ -114,7 +113,6 @@ namespace CompCube.UI.FlowCoordinators
             showBackButton = true;
 
             // _hasShownFinalCardsToPlayer = false;
-            _roundResultsAnimationInProgress = false;
             
             _votingScreenNavigationController = BeatSaberUI.CreateViewController<NavigationController>();
             
@@ -124,10 +122,11 @@ namespace CompCube.UI.FlowCoordinators
             _votingScreenViewController.MapSelected += HandleVotingScreenMapSelected;
             _serverListener.OnPickPhaseStarted += OnPickPhaseStarted;
             _serverListener.OnRoundResults += HandleRoundResults;
-            _serverListener.OnPlayerSelectedMap += HandleOpponentSelectedMap;
+            _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
             _matchBeatmapManager.CanNoLongerDiscardMaps += HandleCanNoLongerDiscardMaps;
             _serverListener.OnMatchFinished += HandleMatchFinished;
             _serverListener.OnCardsUpdated += HandleCardsUpdated;
+            _serverListener.OnReplayRequested += HandleReplayRequested;
         }
 
         private void HandleCardsUpdated(UpdateCardsPacket packet)
@@ -146,29 +145,21 @@ namespace CompCube.UI.FlowCoordinators
 
         private void HandleMatchFinished(MatchFinishedPacket packet)
         {
-            StartCoroutine(HandleMatchFinishedCoroutine());
-            return;
-            
-            IEnumerator HandleMatchFinishedCoroutine()
+            this.ReplaceViewControllerSynchronously(_matchResultsViewController);
+                
+            if (packet.Won)
+                _fireworksManager.StartFireworks();
+                
+            _matchResultsViewController.PopulateData(packet.Won, packet.EloChange, () =>
             {
-                yield return new WaitUntil(() => !_roundResultsAnimationInProgress);
+                _fireworksManager.StopFireworks();
+                _onMatchFinishedCallback?.Invoke();
+            });
                 
-                this.ReplaceViewControllerSynchronously(_matchResultsViewController);
+            SetBottomScreenViewController(null, ViewController.AnimationType.Out);
+            SetLeftScreenViewController(null, ViewController.AnimationType.Out);
                 
-                if (packet.Won)
-                    _fireworksManager.StartFireworks();
-                
-                _matchResultsViewController.PopulateData(packet.Won, packet.EloChange, () =>
-                {
-                    _fireworksManager.StopFireworks();
-                    _onMatchFinishedCallback?.Invoke();
-                });
-                
-                SetBottomScreenViewController(null, ViewController.AnimationType.Out);
-                SetLeftScreenViewController(null, ViewController.AnimationType.Out);
-                
-                _serverListener.DisconnectAsync();
-            }
+            _serverListener.DisconnectAsync();
         }
 
         private async void HandleCanNoLongerDiscardMaps()
@@ -183,7 +174,7 @@ namespace CompCube.UI.FlowCoordinators
             }
         }
 
-        private void HandleOpponentSelectedMap(PlayerSelectedMapPacket packet)
+        private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet)
         {
             StartCoroutine(HandleOpponentSelectedMapCoroutine());
             return;
@@ -199,25 +190,9 @@ namespace CompCube.UI.FlowCoordinators
 
         private void HandleRoundResults(RoundResultsPacket results)
         {
-            StartCoroutine(HandleRoundResultsCoroutine());
-
-            return;
-            
-            IEnumerator HandleRoundResultsCoroutine()
-            {
-                _roundResultsAnimationInProgress = true;
-                this.ReplaceViewControllerSynchronously(_roundResultsViewController);
+            this.ReplaceViewControllerSynchronously(_roundResultsViewController);
                 
-                _roundResultsViewController.PopulateData(results, _matchStateManager.DamageMultiplier, _lastPlayed!);
-                
-				yield return new WaitForSeconds(6);
-
-                _bottomScreenMatchStateViewController.UpdateHealth(results.RedHealth, results.BlueHealth);
-                
-				yield return new WaitForSeconds(6);
-
-                _roundResultsAnimationInProgress = false;
-            }
+            _roundResultsViewController.PopulateData(results.RedScore, results.BlueScore, results.DamageAmount, _matchStateManager.DamageMultiplier, _lastPlayed!);
         }
 
         private void OnPickPhaseStarted(StartPickPhasePacket packet)
@@ -227,10 +202,10 @@ namespace CompCube.UI.FlowCoordinators
 
             IEnumerator OnPickPhaseStartedCoroutine()
             {
-                yield return new WaitUntil(() => !_roundResultsAnimationInProgress);
-                
                 _bottomScreenMatchStateViewController.UpdateRound(_matchStateManager.CurrentRound);
-                _bottomScreenMatchStateViewController.UpdateMultiplier(packet.NewMultiplier);
+                _bottomScreenMatchStateViewController.UpdateMultiplier(packet.Multiplier);
+                
+                _bottomScreenMatchStateViewController.UpdateHealth(packet.RedHealth, packet.BlueHealth);
 
                 if (!_hasShownFinalCardsToPlayer)
                 {
@@ -336,12 +311,27 @@ namespace CompCube.UI.FlowCoordinators
                 if (_matchBeatmapManager.InDiscardPhase)
                     return;
                 
-                StartCoroutine(ShowMapPreviewViewAndStartMatch(votingMap));
+                _standardLevelDetailViewManager.ChangeButtonInteractability(false);
                 await _serverListener.SelectMapAsync(votingMap);
             }
             catch (Exception e)
             {
                 _siraLog.Error(e);
+            }
+        }
+        
+        private void HandleReplayRequested(PlayerDidRequestReplayPacket packet)
+        {
+            StartCoroutine(HandleReplayRequestedCoroutine());
+            return;
+
+            IEnumerator HandleReplayRequestedCoroutine()
+            {
+                yield return ShowMapPreviewViewAndStartMatch(packet.MapToReplay!);
+
+                yield return new WaitUntil(() => !isInTransition);
+
+                yield return ShowPhaseChangeModal("Replay!", $"Replay called by {packet.Requester.GetFormattedUserName()}!");
             }
         }
 
@@ -413,10 +403,11 @@ namespace CompCube.UI.FlowCoordinators
             _votingScreenViewController.MapSelected -= HandleVotingScreenMapSelected;
             _serverListener.OnPickPhaseStarted -= OnPickPhaseStarted;
             _serverListener.OnRoundResults -= HandleRoundResults;
-            _serverListener.OnPlayerSelectedMap -= HandleOpponentSelectedMap;
+            _serverListener.OnPlayerSelectedMap -= HandlePlayerSelectedMap;
             _matchBeatmapManager.CanNoLongerDiscardMaps -= HandleCanNoLongerDiscardMaps;
             _serverListener.OnMatchFinished -= HandleMatchFinished;
             _serverListener.OnCardsUpdated -= HandleCardsUpdated;
+            _serverListener.OnReplayRequested -= HandleReplayRequested;
         }
 
         private void HideStandardLevelDetailControllerIfPresent()

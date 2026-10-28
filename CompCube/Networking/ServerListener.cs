@@ -1,10 +1,12 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube_Models.Models.Packets;
 using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube_Models.Models.Packets.UserPackets;
+using CompCube_Server.Models.CompCube_Models.Models.Packets.UserPackets;
 using CompCube.Configuration;
 using CompCube.Game.MatchState;
 using CompCube.Interfaces;
@@ -26,7 +28,8 @@ namespace CompCube.Networking
         public event Action<StartPickPhasePacket>? OnPickPhaseStarted;
         public event Action<MatchFinishedPacket>? OnMatchFinished;
         
-        public event Action<UpdateCardsPacket>? OnCardsUpdated; 
+        public event Action<UpdateCardsPacket>? OnCardsUpdated;
+        public event Action<PlayerDidRequestReplayPacket>? OnReplayRequested;
         public event Action? OnConnected;
         public event Action? OnDisconnected;
         public event Action<string>? OnAbruptDisconnect;
@@ -139,6 +142,9 @@ namespace CompCube.Networking
                         _siraLog.Notice("Disconnected from server: " + disconnectPacket?.Reason);
                         await HandleAbruptDisconnectionAsync(disconnectPacket!.Reason);
                         break;
+                    case ServerPacket.ServerPacketTypes.PlayerDidRequestReplay:
+                        OnReplayRequested?.Invoke(packet as PlayerDidRequestReplayPacket);
+                        break;
                     default:
                         throw new Exception("Could not get packet type!");
                 }
@@ -154,7 +160,12 @@ namespace CompCube.Networking
             }
         }
 
-        public async Task SendPacketAsync(UserPacket packet)
+        public async Task SendReplayRequestAsync(bool useReplay)
+        {
+            await SendPacketAsync(new ReplayRequestPacket(useReplay));
+        }
+
+        private async Task SendPacketAsync(UserPacket packet)
         {
             try
             {

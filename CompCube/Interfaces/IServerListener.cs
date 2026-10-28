@@ -1,7 +1,10 @@
-﻿using CompCube_Models.Models.Map;
+﻿using BeatSaverSharp.Models;
+using CompCube_Models.Models.ClientData;
+using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube_Models.Models.Packets.UserPackets;
+using CompCube_Server.Models.CompCube_Models.Models.Packets.UserPackets;
 
 namespace CompCube.Interfaces;
 
@@ -18,6 +21,8 @@ public interface IServerListener
     public event Action<MatchFinishedPacket> OnMatchFinished;
     
     public event Action<UpdateCardsPacket> OnCardsUpdated;
+    
+    public event Action<PlayerDidRequestReplayPacket> OnReplayRequested;
 
     public event Action OnConnected;
     
@@ -36,6 +41,8 @@ public interface IServerListener
     public Task SubmitScoreAsync(Score score);
 
     public Task DisconnectAsync();
+
+    public Task SendReplayRequestAsync(bool replay);
     
     public Task HandleAbruptDisconnectionAsync(string reason);
 }
