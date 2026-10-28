@@ -11,13 +11,17 @@
 
     <horizontal anchor-pos-x="0" anchor-pos-y="0">
         <vertical spacing="1.5">
-            <text text="~winnerScoreText" align="Midline" font-size="4.75"/>
-            <text text="~loserScoreText" align="Midline" font-size="4.75"/>
+            <text text="~winnerScoreText" align="Midline" font-size="4.75" italics="true"/>
+            <text text="~loserScoreText" align="Midline" font-size="4.75" italics="true"/>
         </vertical>
     </horizontal>
 
     <vertical anchor-pos-x="0" anchor-pos-y="-20" bg="round-rect-panel" pref-height="15" pref-width="45" horizontal-fit="PreferredSize" vertical-fit="PreferredSize" spacing="6" pad="5">
         <text italics="true" text="Damage" align="Midline" underlined="true"/>
         <text text="~damageText" align="Midline" font-size="8" italics="true"/> 
+    </vertical>
+    
+    <vertical anchor-pos-y="-35">
+        <button interactable="~replayButtonInteractable" active="~replayButtonActive" pref-height='10' pref-width="34" on-click="replayButtonOnClick" text="Replay"/>
     </vertical>
 </bg>

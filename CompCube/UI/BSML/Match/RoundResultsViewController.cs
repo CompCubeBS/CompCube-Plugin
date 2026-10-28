@@ -31,6 +31,10 @@ namespace CompCube.UI.BSML.Match
         [UIValue("loserScoreText")] private string LoserScoreText { get; set; } = "";
         
         [UIValue("damageText")] private string DamageText { get; set; } = "";
+        
+        [UIValue("replayButtonActive")] private bool ReplayButtonActive { get; set; } = false;
+        
+        [UIValue("replayButtonInteractable")] private bool ReplayButtonInteractable { get; set; } = false;
 
         private CustomLevelBar? _customLevelbar;
 
@@ -40,8 +44,25 @@ namespace CompCube.UI.BSML.Match
             _customLevelbar ??= Resources.FindObjectsOfTypeAll<CustomLevelBar>()
                 .First(i => i.name == "RoundResultsLevelBar");
         }
+
+        [UIAction("replayButtonOnClick")]
+        async void ReplayButtonOnClick()
+        {
+            try
+            {
+                ReplayButtonInteractable = false;
+                
+                NotifyPropertyChanged(nameof(ReplayButtonInteractable));
+
+                await _matchStateManager.UseReplay();
+            }
+            catch (Exception e)
+            {
+                _siraLog.Error(e);
+            }
+        }
         
-        public void PopulateData(RoundResultsPacket results, float multiplier, VotingMap votingMap)
+        public void PopulateData(Score redScore, Score blueScore, float damageAmount, float multiplier, VotingMap votingMap)
         {
             _sharedCoroutineStarter.Run(PopulateDataCoroutine());
             return;
@@ -54,21 +75,24 @@ namespace CompCube.UI.BSML.Match
             
                 _customLevelbar?.Setup(votingMap);
             
-                var redWon = results.RedScore.Points >= results.BlueScore.Points;
+                var redWon = redScore.Points >= blueScore.Points;
             
-                var winnerScore = redWon ? results.RedScore : results.BlueScore;
-                var loserScore = redWon ? results.BlueScore : results.RedScore;
+                var winnerScore = redWon ? redScore : blueScore;
+                var loserScore = redWon ? blueScore : redScore;
             
                 var winner = redWon ? _matchStateManager.RedPlayer : _matchStateManager.BluePlayer;
                 var loser = redWon ? _matchStateManager.BluePlayer : _matchStateManager.RedPlayer;
+                
+                var selfWon = (redWon && _matchStateManager.IsRedTeam) || (!redWon && !_matchStateManager.IsRedTeam);
+
+                ReplayButtonActive = !selfWon;
+
+                ReplayButtonInteractable = !selfWon && _matchStateManager.RemainingReplays > 0;
             
                 WinnerScoreText = FormatScore(winnerScore, winner, 1);
                 LoserScoreText = FormatScore(loserScore, loser, 2);
-                
-                _siraLog.Info(results.DamageAmount);
-                _siraLog.Info(_matchStateManager.DamageMultiplier);
             
-                DamageText = (results.DamageAmount * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
+                DamageText = (damageAmount * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
             
                 NotifyPropertyChanged(null);
             }

@@ -14,8 +14,6 @@ public class SettingsViewController : BSMLAutomaticViewController, IInitializabl
     [Inject] private readonly BSMLSettings _bsmlSettings = null!;
     [Inject] private readonly PluginConfig _config = null!;
 
-    [UIParams] private readonly BSMLParserParams _parserParams = null!;
-
     [UIValue("serverIp")]
     private string ServerIp
     {

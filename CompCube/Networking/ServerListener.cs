@@ -1,10 +1,12 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube_Models.Models.Packets;
 using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube_Models.Models.Packets.UserPackets;
+using CompCube_Server.Models.CompCube_Models.Models.Packets.UserPackets;
 using CompCube.Configuration;
 using CompCube.Game.MatchState;
 using CompCube.Interfaces;
@@ -26,7 +28,8 @@ namespace CompCube.Networking
         public event Action<StartPickPhasePacket>? OnPickPhaseStarted;
         public event Action<MatchFinishedPacket>? OnMatchFinished;
         
-        public event Action<UpdateCardsPacket>? OnCardsUpdated; 
+        public event Action<UpdateCardsPacket>? OnCardsUpdated;
+        public event Action<PlayerDidRequestReplayPacket>? OnReplayRequested;
         public event Action? OnConnected;
         public event Action? OnDisconnected;
         public event Action<string>? OnAbruptDisconnect;
@@ -98,6 +101,8 @@ namespace CompCube.Networking
                 var data = new byte[4096];
 
                 var result = await _client.ReceiveAsync(new ArraySegment<byte>(data), _cancellationTokenSource.Token);
+                
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -109,6 +114,8 @@ namespace CompCube.Networking
 
                 if (json == "")
                     return;
+                
+                _siraLog.Info(json);
 
                 var packet = ServerPacket.Deserialize(json);
 
@@ -118,6 +125,7 @@ namespace CompCube.Networking
                         OnMatchCreated?.Invoke(packet as MatchCreatedPacket);
                         break;
                     case ServerPacket.ServerPacketTypes.PlayerSelectedMap:
+                        _siraLog.Notice("Player selected map " + (packet as PlayerSelectedMapPacket)!.Map.Hash);
                         OnPlayerSelectedMap?.Invoke(packet as PlayerSelectedMapPacket);
                         break;
                     case ServerPacket.ServerPacketTypes.RoundResults:
@@ -139,6 +147,10 @@ namespace CompCube.Networking
                         _siraLog.Notice("Disconnected from server: " + disconnectPacket?.Reason);
                         await HandleAbruptDisconnectionAsync(disconnectPacket!.Reason);
                         break;
+                    case ServerPacket.ServerPacketTypes.PlayerDidRequestReplay:
+                        _siraLog.Notice("Replay requested by " + (packet as PlayerDidRequestReplayPacket)!.Requester.Username);
+                        OnReplayRequested?.Invoke(packet as PlayerDidRequestReplayPacket);
+                        break;
                     default:
                         throw new Exception("Could not get packet type!");
                 }
@@ -154,7 +166,12 @@ namespace CompCube.Networking
             }
         }
 
-        public async Task SendPacketAsync(UserPacket packet)
+        public async Task SendReplayRequestAsync(bool useReplay)
+        {
+            await SendPacketAsync(new ReplayRequestPacket(useReplay));
+        }
+
+        private async Task SendPacketAsync(UserPacket packet)
         {
             try
             {
