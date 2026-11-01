@@ -6,9 +6,11 @@ public static class UserStatisticsExtensions
 {
     public static string GetFormattedUserName(this UserStatistics userInfo)
     {
-        if (userInfo.Flair == null) return userInfo.Username;
+        if (userInfo.Flairs.Length == 0) return userInfo.Username;
+        
+        var flair = userInfo.Flairs[0];
             
-        var formatted = $"<color={userInfo.Flair.ColorCode}>{userInfo.Username}</color>";
+        var formatted = $"<color={flair.ColorCode}>{userInfo.Username}</color>";
         return formatted;
     }
 }
