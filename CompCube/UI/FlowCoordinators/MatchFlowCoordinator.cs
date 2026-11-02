@@ -390,7 +390,7 @@ namespace CompCube.UI.FlowCoordinators
                         
                         HideLeaderboard(true);
                         await _serverListener.SubmitScoreAsync(new Score(results.multipliedScore, (float) results.multipliedScore / ScoreModel.ComputeMaxMultipliedScoreForBeatmap(transitionSetupDataSo.transformedBeatmapData), 
-                            results.gameplayModifiers.proMode, results.notGoodCount, results.fullCombo));
+                            results.gameplayModifiers.proMode, results.badCutsCount + results.missedCount + results.notGoodCount, results.fullCombo));
                     }
                     catch (Exception e)
                     {

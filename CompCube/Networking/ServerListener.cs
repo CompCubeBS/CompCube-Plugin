@@ -99,6 +99,8 @@ namespace CompCube.Networking
             try
             {
                 var data = new byte[4096];
+                
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
                 var result = await _client.ReceiveAsync(new ArraySegment<byte>(data), _cancellationTokenSource.Token);
                 
