@@ -429,6 +429,7 @@ namespace CompCube.UI.FlowCoordinators
                 {
                     _soundEffectManager.CrossfadeToDefault();
                     _onMatchFinishedCallback?.Invoke();
+                    _fireworksManager.StopFireworks();
                     await _serverListener.DisconnectAsync();
                 }
                 catch (Exception e)
