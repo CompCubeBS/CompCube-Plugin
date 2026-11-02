@@ -25,6 +25,7 @@
             <img id="profilePicture" src="~profilePictureLink" preserve-aspect="true" pref-height="25"/>
         </vertical>
         <vertical pref-width="65" pref-height="30" anchor-pos-x="30" anchor-pos-y="-2.5" vertical-fit="PreferredSize">
+            <text text="~roleText" align="Left" font-size="3.5" italics="true" active="~roleTextActive"/>
             <text text="~profileMmrText" align="Left" font-size="3.5" italics="true"/>
             <text text="~profileRankText" align="Left" font-size="3.5" italics="true"/>
             <text text="~winRate" align="Left" font-size="3.5" italics="true"/>

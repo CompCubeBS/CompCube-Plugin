@@ -74,6 +74,9 @@ namespace CompCube.UI.BSML.Leaderboard
         #region UserInfo Modal
 
         [UIComponent("profilePicture")] private readonly Image _profilePicture = null!;
+
+        [UIValue("roleTextActive")] private bool RoleTextActive { get; set; } = false;
+        [UIValue("roleText")] private string RoleText { get; set; } = string.Empty;
         
         [UIValue("profilePictureLink")] private string ProfilePictureLink { get; set; } = string.Empty;
         [UIValue("profileNameText")] private string ProfileNameText { get; set; } = string.Empty;
@@ -86,6 +89,9 @@ namespace CompCube.UI.BSML.Leaderboard
         private void OnUserInfoButtonClicked(UserStatistics userInfo)
         {
             _parserParams.EmitEvent("profileModalShow");
+
+            RoleTextActive = userInfo.Flairs.Length > 0;
+            RoleText = "Role(s): ".FormatWithHtmlColor("#6F6F6F") + string.Join(", ".FormatWithHtmlColor("#6F6F6F"), userInfo.Flairs.Select(i => $"{i.Name}".FormatWithHtmlColor(i.ColorCode)));
             
             ProfilePictureLink = userInfo.AvatarUrl;
             ProfileNameText = $"{userInfo.GetFormattedUserName()}'s Profile";
