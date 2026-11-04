@@ -41,7 +41,8 @@ namespace CompCube.Installers
             Container.BindInterfacesAndSelfTo<WaitingForDiscardPhaseToFinishViewController>()
                 .FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<BottomScreenMatchStateViewController>().FromNewComponentAsViewController().AsSingle();
-
+            Container.BindInterfacesAndSelfTo<MatchPreviewViewController>().FromNewComponentAsViewController().AsSingle();
+            
             Container.BindInterfacesAndSelfTo<PhasePopupViewController>().FromNewComponentAsViewController().AsSingle();
             
             Container.BindInterfacesAndSelfTo<InfoFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();

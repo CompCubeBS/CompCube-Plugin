@@ -92,15 +92,14 @@ namespace CompCube.UI.FlowCoordinators
                 
                 yield return WaitForVotingScreenToPresent();
             }
-            return;
             
             IEnumerator WaitForVotingScreenToPresent()
             {
-                yield return new WaitUntil(() => !isInTransition && isActivated);
+                yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
                 
                 _votingScreenViewController.EmptyMapList();
                 
-                yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
+                // yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
                 
                 DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(_votingScreenViewController,
                     packet.InitialMaps.Select(i => i.Hash).ToArray(), () => StartCoroutine(PopulateDataCoroutine()));
