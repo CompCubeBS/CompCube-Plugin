@@ -31,6 +31,7 @@ namespace CompCube.UI.FlowCoordinators
         [Inject] private readonly MatchResultsViewController _matchResultsViewController = null!;
         [Inject] private readonly WaitingForDiscardPhaseToFinishViewController _waitingForDiscardPhaseToFinishViewController = null!;
         [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
+        [Inject] private readonly MatchPreviewViewController _matchPreviewViewController = null!;
         
         [Inject] private readonly PhasePopupViewController _phasePopupViewController = null!;
          
@@ -69,13 +70,26 @@ namespace CompCube.UI.FlowCoordinators
 
             IEnumerator StartRoundIntroSequence()
             {
+                yield return new WaitForEndOfFrame();
                 
+                _matchPreviewViewController.PopulateData(packet.Red, packet.Blue);
+                
+                _soundEffectManager.PlayGongSoundEffect();
+
+                yield return new WaitForSeconds(5f);
+
+                SetBottomScreenViewController(_bottomScreenMatchStateViewController, ViewController.AnimationType.In);
                 
                 _bottomScreenMatchStateViewController.PopulateData(packet.Red, packet.Blue);
                 _bottomScreenMatchStateViewController.SetStatus("Discard Phase");
                 _bottomScreenMatchStateViewController.UpdateHealth(_matchStateManager.RedHealth, _matchStateManager.BlueHealth);
                 _bottomScreenMatchStateViewController.UpdateMultiplier(1f);
-
+                
+                _votingScreenNavigationController = BeatSaberUI.CreateViewController<NavigationController>();
+                this.ReplaceViewControllerSynchronously(_votingScreenNavigationController);
+                
+                _votingScreenNavigationController.PushViewController(_votingScreenViewController, null);
+                
                 yield return WaitForVotingScreenToPresent();
             }
             return;
@@ -121,11 +135,7 @@ namespace CompCube.UI.FlowCoordinators
             showBackButton = true;
 
             // _hasShownFinalCardsToPlayer = false;
-            
-            _votingScreenNavigationController = BeatSaberUI.CreateViewController<NavigationController>();
-            
-            ProvideInitialViewControllers(_votingScreenNavigationController, _gameplaySetupViewManager.ManagedController, bottomScreenViewController: _bottomScreenMatchStateViewController);
-            _votingScreenNavigationController.PushViewController(_votingScreenViewController, null);
+            ProvideInitialViewControllers(_matchPreviewViewController, _gameplaySetupViewManager.ManagedController);
             
             _votingScreenViewController.MapSelected += HandleVotingScreenMapSelected;
             _serverListener.OnPickPhaseStarted += OnPickPhaseStarted;
