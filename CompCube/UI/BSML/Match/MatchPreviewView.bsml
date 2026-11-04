@@ -1,4 +1,20 @@
 <bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
     xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
+    <vertical anchor-pos-x="-30" anchor-pos-y="30">
+        <horizontal horizontal-fit="PreferredSize">
+            <img id="red-avatar" src="~red-avatar-source" preserve-aspect="true" pref-height="10" pref-width="10"/>
+            <text align="MidlineLeft" text="~red-name-text" italics="true" font-size="6.5"/>
+        </horizontal>
+    </vertical>
+
+    <vertical anchor-pos-x="30" anchor-pos-y="-30">
+        <horizontal horizontal-fit="PreferredSize">
+            <img id="blue-avatar" src="~blue-avatar-source" preserve-aspect="true" pref-height="10" pref-width="10"/>
+            <text align="MidlineLeft" text="~blue-name-text" italics="true" font-size="6.5"/>
+        </horizontal>
+    </vertical>
     
+    <vertical>
+        <text text="VS." font-size="10" italics="true"/>
+    </vertical>
 </bg>

@@ -60,16 +60,24 @@ namespace CompCube.UI.FlowCoordinators
 
         public void PopulateData(MatchCreatedPacket packet, Action? onMatchFinishedCallback)
         {
-            _bottomScreenMatchStateViewController.PopulateData(packet.Red, packet.Blue);
-            _bottomScreenMatchStateViewController.SetStatus("Discard Phase");
-            _bottomScreenMatchStateViewController.UpdateHealth(_matchStateManager.RedHealth, _matchStateManager.BlueHealth);
-            _bottomScreenMatchStateViewController.UpdateMultiplier(1f);
-
-            _hasShownFinalCardsToPlayer = false;
-
-            StartCoroutine(WaitForVotingScreenToPresent());
-            
             _onMatchFinishedCallback = onMatchFinishedCallback;
+            
+            _hasShownFinalCardsToPlayer = false;
+            
+            StartCoroutine(StartRoundIntroSequence());
+            return;
+
+            IEnumerator StartRoundIntroSequence()
+            {
+                
+                
+                _bottomScreenMatchStateViewController.PopulateData(packet.Red, packet.Blue);
+                _bottomScreenMatchStateViewController.SetStatus("Discard Phase");
+                _bottomScreenMatchStateViewController.UpdateHealth(_matchStateManager.RedHealth, _matchStateManager.BlueHealth);
+                _bottomScreenMatchStateViewController.UpdateMultiplier(1f);
+
+                yield return WaitForVotingScreenToPresent();
+            }
             return;
             
             IEnumerator WaitForVotingScreenToPresent()
