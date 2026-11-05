@@ -44,6 +44,6 @@ public class MatchPreviewViewController : BSMLAutomaticViewController
         BlueAvatarSource = blue.AvatarUrl;
         
         RedNameText = red.GetFormattedUserName() + $" <size=50%>({red.Elo} ELO)</size>";
-        BlueNameText = $"<size=50%>({red.Elo} ELO) </size>" + blue.GetFormattedUserName();
+        BlueNameText = $"<size=50%>({blue.Elo} ELO) </size>" + blue.GetFormattedUserName();
     }
 }
