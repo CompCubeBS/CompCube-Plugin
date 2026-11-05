@@ -1,17 +1,19 @@
 <bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
     xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
-    <vertical anchor-pos-x="-30" anchor-pos-y="20">
-        <horizontal horizontal-fit="PreferredSize" spacing="3" vertical-fit="PreferredSize" pref-height="10">
-            <img id="red-avatar" src="~red-avatar-source" preserve-aspect="true" pref-height="10" pref-width="10"/>
-            <text align="BottomLeft" text="~red-name-text" italics="true" font-size="6.5"/>
-        </horizontal>
+    <vertical anchor-pos-x="-20" anchor-pos-y="17.5" vertical-fit="PreferredSize" pref-height="10">
+        <text align="BottomLeft" text="~red-name-text" italics="true" font-size="6.5"/>
+    </vertical>
+    
+    <vertical anchor-pos-x="-37.5" anchor-pos-y="20">
+        <img id="red-avatar" src="~red-avatar-source" preserve-aspect="true" pref-height="10" pref-width="10"/>
+    </vertical>
+    
+    <vertical anchor-pos-x="37.5" anchor-pos-y="-20">
+        <img id="blue-avatar" src="~blue-avatar-source" preserve-aspect="true" pref-height="10" pref-width="10"/>
     </vertical>
 
-    <vertical anchor-pos-x="30" anchor-pos-y="-20">
-        <horizontal horizontal-fit="PreferredSize" spacing="3" vertical-fit="PreferredSize" pref-height="10" bg="round-rect-panel">
-            <text align="BottomRight" text="~blue-name-text" italics="true" font-size="6.5"/>
-            <img id="blue-avatar" src="~blue-avatar-source" preserve-aspect="true" pref-height="10" pref-width="10"/>
-        </horizontal>
+    <vertical anchor-pos-x="19" anchor-pos-y="-22.5" vertical-fit="PreferredSize" pref-height="10">
+        <text align="BottomRight" text="~blue-name-text" italics="true" font-size="6.5"/>
     </vertical>
     
     <vertical anchor-pos-y="0" vertical-fit="PreferredSize">
