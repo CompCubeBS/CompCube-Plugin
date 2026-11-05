@@ -31,6 +31,7 @@ namespace CompCube.UI.FlowCoordinators
         [Inject] private readonly MatchResultsViewController _matchResultsViewController = null!;
         [Inject] private readonly WaitingForDiscardPhaseToFinishViewController _waitingForDiscardPhaseToFinishViewController = null!;
         [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
+        [Inject] private readonly MatchPreviewViewController _matchPreviewViewController = null!;
         
         [Inject] private readonly PhasePopupViewController _phasePopupViewController = null!;
          
@@ -60,25 +61,45 @@ namespace CompCube.UI.FlowCoordinators
 
         public void PopulateData(MatchCreatedPacket packet, Action? onMatchFinishedCallback)
         {
-            _bottomScreenMatchStateViewController.PopulateData(packet.Red, packet.Blue);
-            _bottomScreenMatchStateViewController.SetStatus("Discard Phase");
-            _bottomScreenMatchStateViewController.UpdateHealth(_matchStateManager.RedHealth, _matchStateManager.BlueHealth);
-            _bottomScreenMatchStateViewController.UpdateMultiplier(1f);
-
-            _hasShownFinalCardsToPlayer = false;
-
-            StartCoroutine(WaitForVotingScreenToPresent());
-            
             _onMatchFinishedCallback = onMatchFinishedCallback;
+            
+            _hasShownFinalCardsToPlayer = false;
+            
+            StartCoroutine(StartRoundIntroSequence());
             return;
+
+            IEnumerator StartRoundIntroSequence()
+            {
+                yield return new WaitForEndOfFrame();
+                
+                _matchPreviewViewController.PopulateData(packet.Red, packet.Blue);
+                
+                _soundEffectManager.PlayGongSoundEffect();
+
+                yield return new WaitForSeconds(5f);
+
+                SetBottomScreenViewController(_bottomScreenMatchStateViewController, ViewController.AnimationType.In);
+                
+                _bottomScreenMatchStateViewController.PopulateData(packet.Red, packet.Blue);
+                _bottomScreenMatchStateViewController.SetStatus("Discard Phase");
+                _bottomScreenMatchStateViewController.UpdateHealth(_matchStateManager.RedHealth, _matchStateManager.BlueHealth);
+                _bottomScreenMatchStateViewController.UpdateMultiplier(1f);
+                
+                _votingScreenNavigationController = BeatSaberUI.CreateViewController<NavigationController>();
+                this.ReplaceViewControllerSynchronously(_votingScreenNavigationController);
+                
+                _votingScreenNavigationController.PushViewController(_votingScreenViewController, null);
+                
+                yield return WaitForVotingScreenToPresent();
+            }
             
             IEnumerator WaitForVotingScreenToPresent()
             {
-                yield return new WaitUntil(() => !isInTransition && isActivated);
+                yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
                 
                 _votingScreenViewController.EmptyMapList();
                 
-                yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
+                // yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
                 
                 DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(_votingScreenViewController,
                     packet.InitialMaps.Select(i => i.Hash).ToArray(), () => StartCoroutine(PopulateDataCoroutine()));
@@ -113,11 +134,7 @@ namespace CompCube.UI.FlowCoordinators
             showBackButton = true;
 
             // _hasShownFinalCardsToPlayer = false;
-            
-            _votingScreenNavigationController = BeatSaberUI.CreateViewController<NavigationController>();
-            
-            ProvideInitialViewControllers(_votingScreenNavigationController, _gameplaySetupViewManager.ManagedController, bottomScreenViewController: _bottomScreenMatchStateViewController);
-            _votingScreenNavigationController.PushViewController(_votingScreenViewController, null);
+            ProvideInitialViewControllers(_matchPreviewViewController, _gameplaySetupViewManager.ManagedController);
             
             _votingScreenViewController.MapSelected += HandleVotingScreenMapSelected;
             _serverListener.OnPickPhaseStarted += OnPickPhaseStarted;
