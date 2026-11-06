@@ -91,7 +91,7 @@ namespace CompCube.UI.BSML.Leaderboard
             _parserParams.EmitEvent("profileModalShow");
 
             RoleTextActive = profile.Flairs.Length > 0;
-            RoleText = "Role(s): ".FormatWithHtmlColor("#6F6F6F") + string.Join(", ".FormatWithHtmlColor("#6F6F6F"), profile.Flairs.Select(i => $"{i.Name}".FormatWithHtmlColor(i.ColorCode)));
+            RoleText = "Role(s): ".FormatWithHtmlColor("#6F6F6F") + profile.GetFormattedRoles();
             
             ProfilePictureLink = profile.AvatarUrl;
             ProfileNameText = $"{profile.GetFormattedUserName()}'s Profile";
