@@ -16,7 +16,7 @@ public class ContributorsViewController : BSMLAutomaticViewController
     [Inject] private readonly IApi _api = null!;
     [Inject] private readonly SiraLog _siraLog = null!;
     
-    [UIValue("contributors-tab-items")] private List<object> _contributorsTabItems = [new ContributorsTabItem("Owner", "role:admin"), new ContributorsTabItem("Developers", "role:dev")];
+    [UIValue("contributors-tab-items")] private List<object> _contributorsTabItems = [new ContributorsTabItem("Admin", "role:admin"), new ContributorsTabItem("Developers", "role:dev")];
     [UIComponent("contributors-tab-selector")] private readonly TabSelector _tabSelector = null!;
 
     [UIValue("contributor-profiles")] private List<object> _contributorProfiles = [];
@@ -33,8 +33,6 @@ public class ContributorsViewController : BSMLAutomaticViewController
     {
         try
         {
-            _siraLog.Info("test");
-            
             var users = await _api.GetContributors(((ContributorsTabItem)_contributorsTabItems[idx]).Role);
 
             _contributorProfiles = users.Select(i => (object)new ContributorProfile(i)).ToList();
