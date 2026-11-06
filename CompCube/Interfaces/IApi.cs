@@ -14,7 +14,7 @@ public interface IApi
 
     public Task<ServerStatus?> GetServerStatus();
     
-    public Task<Dictionary<string, UserProfile[]>> GetContributors();
+    public Task<UserProfileFull[]> GetContributors(string role);
 
     public Task<string[]?> GetMapHashes();
 

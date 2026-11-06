@@ -52,13 +52,13 @@ namespace CompCube.Server
             return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<ServerStatus>(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<Dictionary<string, UserProfile[]>> GetContributors()
+        public async Task<UserProfileFull[]> GetContributors(string role)
         {
-            var response = await _client.GetAsync("/api/contributors");
+            var response = await _client.GetAsync($"/api/contributors?permissionFilter={role}");
 
             response.EnsureSuccessStatusCode();
             
-            return JsonConvert.DeserializeObject<Dictionary<string, UserProfile[]>>(await response.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<UserProfileFull[]>(await response.Content.ReadAsStringAsync());
         }
 
         public async Task<string[]?> GetMapHashes()
