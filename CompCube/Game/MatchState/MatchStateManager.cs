@@ -10,8 +10,8 @@ public class MatchStateManager : IInitializable, IDisposable
     [Inject] private readonly IServerListener _serverListener = null!;
     [Inject] private readonly UserModelWrapper _userModelWrapper = null!;
 
-    public UserStatistics RedPlayer { get; private set; }
-    public UserStatistics BluePlayer { get; private set; }
+    public UserProfile RedPlayer { get; private set; }
+    public UserProfile BluePlayer { get; private set; }
 
     public float RedHealth { get; private set; } = 1f;
     public float BlueHealth { get; private set; } = 1f;
@@ -20,9 +20,9 @@ public class MatchStateManager : IInitializable, IDisposable
 
     public bool IsRedTeam => RedPlayer.PlatformId == _userModelWrapper.UserId;
     
-    public UserStatistics Opponent => !IsRedTeam ? RedPlayer : BluePlayer;
+    public UserProfile Opponent => !IsRedTeam ? RedPlayer : BluePlayer;
     
-    public UserStatistics Self => IsRedTeam ? RedPlayer : BluePlayer;
+    public UserProfile Self => IsRedTeam ? RedPlayer : BluePlayer;
     
     public int CurrentRound { get; private set; } = 0;
     

@@ -150,7 +150,7 @@ namespace CompCube.Networking
                         await HandleAbruptDisconnectionAsync(disconnectPacket!.Reason);
                         break;
                     case ServerPacket.ServerPacketTypes.PlayerDidRequestReplay:
-                        _siraLog.Notice("Replay requested by " + (packet as PlayerDidRequestReplayPacket)!.Requester.Username);
+                        _siraLog.Notice("Replay requested by " + (packet as PlayerDidRequestReplayPacket)!.Requester.UserName);
                         OnReplayRequested?.Invoke(packet as PlayerDidRequestReplayPacket);
                         break;
                     default:

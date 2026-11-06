@@ -49,7 +49,7 @@ public class BottomScreenMatchStateViewController : BSMLAutomaticViewController
         _blueImage.material = material;
     }
     
-    public void PopulateData(UserStatistics red, UserStatistics blue)
+    public void PopulateData(UserProfile red, UserProfile blue)
     {
         RedPlayerText = red.GetFormattedUserName();
         BluePlayerText = blue.GetFormattedUserName();

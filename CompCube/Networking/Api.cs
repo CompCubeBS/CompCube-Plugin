@@ -24,24 +24,24 @@ namespace CompCube.Server
             _client.BaseAddress = new Uri($"{config.ApiIP}/", UriKind.Absolute);
         }
 
-        public async Task<UserStatistics?> GetUserInfo(string id)
+        public async Task<UserProfileFull?> GetUserProfile(string id)
         {
             var response = await _client.GetAsync($"/api/user/id/{id}");
 
-            return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<UserStatistics>(await response.Content.ReadAsStringAsync());
+            return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<UserProfileFull>(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserStatistics[]?> GetLeaderboardRange(int start, int range)
+        public async Task<UserProfile[]?> GetLeaderboardRange(int start, int range)
         {
             var response = await _client.GetAsync($"/api/leaderboard/range?start={start}&range={range}");
             
-            return JsonConvert.DeserializeObject<UserStatistics[]>(await response.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<UserProfile[]>(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<UserStatistics[]?> GetAroundUser(string id)
+        public async Task<UserProfile[]?> GetAroundUser(string id)
         {
             var response = await _client.GetAsync($"/api/leaderboard/aroundUser/{id}");
-            return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<UserStatistics[]>(await response.Content.ReadAsStringAsync());
+            return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<UserProfile[]>(await response.Content.ReadAsStringAsync());
         }
 
         public async Task<ServerStatus?> GetServerStatus()
@@ -80,7 +80,7 @@ namespace CompCube.Server
             return await response.Content.ReadAsByteArrayAsync();
         }
 
-        public async Task<byte[]?> DownloadUserProfilePicture(UserStatistics userInfo)
+        public async Task<byte[]?> DownloadUserProfilePicture(UserProfile userInfo)
         {
             var response = await _client.GetAsync(userInfo.AvatarUrl);
 

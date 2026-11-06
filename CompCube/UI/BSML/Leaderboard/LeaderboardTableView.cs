@@ -36,7 +36,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     public TableView TableView { get; private set; }
 
-    internal List<UserStatistics> Data { get; private set; } = new();
+    internal List<UserProfile> Data { get; private set; } = new();
 
     private LevelListTableCell _tableCellPrefab;
     private bool firstLoad = true;
@@ -48,7 +48,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     #region Data
 
-    internal void SetData(List<UserStatistics> users)
+    internal void SetData(List<UserProfile> users)
     {
         Data = users;
         TableView.ReloadData();
@@ -60,7 +60,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
         }
     }
     
-    internal void AddData(List<UserStatistics> users, CancellationToken token = default) {
+    internal void AddData(List<UserProfile> users, CancellationToken token = default) {
         Data.AddRange(users);
 
         var scrollView = TableView.scrollView;
@@ -189,18 +189,18 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
 
     #region Text
 
-    private void ConfigureText(LevelListTableCell cell, UserStatistics user)
+    private void ConfigureText(LevelListTableCell cell, UserProfile user)
     {
-        string name = $"#{user.Rank} - {user.GetFormattedUserName()}";
-        string divisionText = $"{user.Elo} ELO";// $"<color={user.Division.Color}>{user.Division.Division}</color> {user.Mmr} MMR";
+        string name = $"#{user.CompetitiveStats.Rank} - {user.GetFormattedUserName()}";
+        string divisionText = $"{user.CompetitiveStats.Elo} ELO";// $"<color={user.Division.Color}>{user.Division.Division}</color> {user.Mmr} MMR";
 
-        int losses = user.TotalGames - user.Wins;
-        string recordText = $"{user.Wins}<color=green>W</color> / {losses}<color=red>L</color>";
+        int losses = user.CompetitiveStats.TotalGames - user.CompetitiveStats.Wins;
+        string recordText = $"{user.CompetitiveStats.Wins}<color=green>W</color> / {losses}<color=red>L</color>";
 
         cell._songNameText.SetText(name);
         cell._songAuthorText.SetText(divisionText);
         cell._songDurationText.SetText(recordText);
-        cell._songBpmText.SetText($"WS: {user.Winstreak}");
+        cell._songBpmText.SetText($"WS: {user.CompetitiveStats.Winstreak}");
 
         cell._songAuthorText.richText = true;
         cell._songBpmText.richText = true;
@@ -217,7 +217,7 @@ public class PlayerCellDataSource : MonoBehaviour, TableView.IDataSource
     #region Avatar & Badge Loading
 
     private async Task ConfigureAvatarAsync(LevelListTableCell cell,
-        CompCube_Models.Models.ClientData.UserInfo user,
+        UserProfile user,
         int idx,
         CancellationToken token)
     {

@@ -1,12 +1,8 @@
-using System.ComponentModel;
 using CompCube.Configuration;
 using CompCube.Game;
 using CompCube.Game.MatchState;
 using CompCube.Server;
-using CompCube.Server.Debug;
-using CompCube.Interfaces;
 using CompCube.Networking;
-using CompCube.Networking.Debug;
 // using CompCube.Networking.ReplayStreaming;
 using CompCube.UI;
 using Zenject;
@@ -36,13 +32,6 @@ namespace CompCube.Installers
 			// Container.BindInterfacesAndSelfTo<ReplayPublisher>().AsSingle();
 
             Container.BindInterfacesAndSelfTo<SharedCoroutineStarter>().FromNewComponentOnNewGameObject().AsSingle();
-
-            if (_config.SkipServer)
-            {
-                Container.BindInterfacesAndSelfTo<DebugServerListener>().AsSingle();
-                Container.BindInterfacesAndSelfTo<DebugApi>().AsSingle();
-                return;
-            }
 
             Container.BindInterfacesAndSelfTo<ServerListener>().AsSingle();
             Container.BindInterfacesAndSelfTo<Api>().AsSingle();

@@ -38,12 +38,12 @@ public class MatchPreviewViewController : BSMLAutomaticViewController
         _blueAvatar.material = material;
     }
     
-    public void PopulateData(UserStatistics red, UserStatistics blue)
+    public void PopulateData(UserProfile red, UserProfile blue)
     {
         RedAvatarSource = red.AvatarUrl;
         BlueAvatarSource = blue.AvatarUrl;
         
-        RedNameText = red.GetFormattedUserName() + $" <size=50%>({red.Elo} ELO)</size>";
-        BlueNameText = $"<size=50%>({blue.Elo} ELO) </size>" + blue.GetFormattedUserName();
+        RedNameText = red.GetFormattedUserName() + $" <size=50%>({red.CompetitiveStats.Elo} ELO)</size>";
+        BlueNameText = $"<size=50%>({blue.CompetitiveStats.Elo} ELO) </size>" + blue.GetFormattedUserName();
     }
 }

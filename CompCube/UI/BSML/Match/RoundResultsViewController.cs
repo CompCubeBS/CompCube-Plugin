@@ -105,7 +105,7 @@ namespace CompCube.UI.BSML.Match
             }
         }
 
-        private string FormatScore(Score score, UserStatistics user, int placement) =>
+        private string FormatScore(Score score, UserProfile user, int placement) =>
             $"{(placement)}. {user.GetFormattedUserName()} - " +
             $"{(score.RelativeScore * 100):F}% " +
             $"{(score.FullCombo ? "FC".FormatWithHtmlColor("#90EE90") : $"{score.Misses}x".FormatWithHtmlColor("#FF7F7F"))}" +

@@ -86,19 +86,19 @@ namespace CompCube.UI.BSML.Leaderboard
         [UIValue("winRate")] private string WinRateText { get; set; } = string.Empty;
         [UIValue("winStreak")] private string WinStreakText { get; set; } = string.Empty;
         
-        private void OnUserInfoButtonClicked(UserStatistics userInfo)
+        private void OnUserInfoButtonClicked(UserProfile profile)
         {
             _parserParams.EmitEvent("profileModalShow");
 
-            RoleTextActive = userInfo.Flairs.Length > 0;
-            RoleText = "Role(s): ".FormatWithHtmlColor("#6F6F6F") + string.Join(", ".FormatWithHtmlColor("#6F6F6F"), userInfo.Flairs.Select(i => $"{i.Name}".FormatWithHtmlColor(i.ColorCode)));
+            RoleTextActive = profile.Flairs.Length > 0;
+            RoleText = "Role(s): ".FormatWithHtmlColor("#6F6F6F") + string.Join(", ".FormatWithHtmlColor("#6F6F6F"), profile.Flairs.Select(i => $"{i.Name}".FormatWithHtmlColor(i.ColorCode)));
             
-            ProfilePictureLink = userInfo.AvatarUrl;
-            ProfileNameText = $"{userInfo.GetFormattedUserName()}'s Profile";
-            ProfileMmrText = "ELO: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Elo.ToString()}";
-            ProfileRankText = "Rank: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Rank}";
-            WinRateText = "Wins: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Wins}" + "/".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.TotalGames}";
-            WinStreakText = "Win Streak: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.Winstreak}" + " (Best: ".FormatWithHtmlColor("#6F6F6F") + $"{userInfo.HighestWinstreak}" + ")".FormatWithHtmlColor("#6F6F6F");
+            ProfilePictureLink = profile.AvatarUrl;
+            ProfileNameText = $"{profile.GetFormattedUserName()}'s Profile";
+            ProfileMmrText = "ELO: ".FormatWithHtmlColor("#6F6F6F") + $"{profile.CompetitiveStats.Elo.ToString()}";
+            ProfileRankText = "Rank: ".FormatWithHtmlColor("#6F6F6F") + $"{profile.CompetitiveStats.Rank}";
+            WinRateText = "Wins: ".FormatWithHtmlColor("#6F6F6F") + $"{profile.CompetitiveStats.Wins}" + "/".FormatWithHtmlColor("#6F6F6F") + $"{profile.CompetitiveStats.TotalGames}";
+            WinStreakText = "Win Streak: ".FormatWithHtmlColor("#6F6F6F") + $"{profile.CompetitiveStats.Winstreak}" + " (Best: ".FormatWithHtmlColor("#6F6F6F") + $"{profile.CompetitiveStats.HighestWinstreak}" + ")".FormatWithHtmlColor("#6F6F6F");
             
             NotifyPropertyChanged(null);
         }
@@ -138,18 +138,18 @@ namespace CompCube.UI.BSML.Leaderboard
 
         [UIValue("cell-data")] private readonly List<IconSegmentedControl.DataItem> _cellData = new(){};
 
-        private void SetLeaderboardData(UserStatistics[] userInfo, bool isAppend = false)
+        private void SetLeaderboardData(UserProfile[] profiles, bool isAppend = false)
         {
-            if (userInfo == null || userInfo.Length == 0)
+            if (profiles == null || profiles.Length == 0)
             {
                 _noMorePlayers = true;
                 return;
             }
 
             if (isAppend)
-                _playerCellDataSource.AddData(userInfo.ToList());
+                _playerCellDataSource.AddData(profiles.ToList());
             else
-                _playerCellDataSource.SetData(userInfo.ToList());
+                _playerCellDataSource.SetData(profiles.ToList());
 
             IsLoaded = true;
         }
@@ -204,7 +204,7 @@ namespace CompCube.UI.BSML.Leaderboard
 
                 int start = _pageNumber * PageSize;
 
-                UserStatistics[] result;
+                UserProfile[] result;
 
                 result = await _api.GetLeaderboardRange(start, PageSize);
 
