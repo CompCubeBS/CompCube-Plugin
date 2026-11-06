@@ -288,6 +288,5 @@
       <None Remove="UI\BSML\Match\MatchPreviewView.bsml" />
       <EmbeddedResource Include="UI\BSML\Match\MatchPreviewView.bsml" />
       <None Remove="UI\BSML\Info\ContributorsView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Info\ContributorsView.bsml" />
     </ItemGroup>
 </Project>
