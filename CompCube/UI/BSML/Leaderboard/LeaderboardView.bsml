@@ -12,7 +12,7 @@
         </vertical>
         <vertical active='~is-loading' pref-width='80' pref-height='10'>
             <vertical pref-width='10'>
-                <loading-indicator preserve-aspect='true'/>
+                <loading-indicator preserve-aspect='true' pref-width="7.5" pref-height="7.5"/>
             </vertical>
         </vertical>
     </horizontal>

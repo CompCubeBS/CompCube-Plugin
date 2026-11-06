@@ -37,7 +37,7 @@ public class ContributorsViewController : BSMLAutomaticViewController
 
             _contributorProfiles = users.Select(i => (object)new ContributorProfile(i)).ToList();
             
-            NotifyPropertyChanged(null);
+            
         }
         catch (Exception e)
         {
@@ -46,7 +46,7 @@ public class ContributorsViewController : BSMLAutomaticViewController
     }
 }
 
-public class ContributorProfile(UserProfileFull userProfile)
+public class ContributorProfile(UserProfileFull userProfile) : CustomCellListTableData
 {
     [UIValue("avatar-source")] private string AvatarSource => userProfile.AvatarUrl;
 

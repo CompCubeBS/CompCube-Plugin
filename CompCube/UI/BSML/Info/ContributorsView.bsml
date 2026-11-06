@@ -12,13 +12,7 @@
     </macro.for-each>
     
     <vertical bg="round-rect-panel" pref-width="80" preferred-height="55" vertical-fit="PreferredSize" horizontal-fit="PreferredSize" anchor-pos-y="-5">
-        <grid cell-size-x="20" cell-size-y="10">
-            <macro.for-each hosts="contributor-profiles" pass-back-tags="true">
-                <horizontal child-expand-width="false">
-                    <clickable-image preserve-aspect="true" src="~avatar-source" pref-height="7.5" pref-width="7.5"/>
-                    <text align="MidlineLeft" text="~contributor-text"/>
-                </horizontal>
-            </macro.for-each>
-        </grid>
+        <list data="contributor-list-contents" active="~is-not-loading" select-cell="contributor-list-cell-selected" show-scrollbar="true"/>
+        <loading active="~is-loading" preserve-aspect="true" pref-width="7.5" pref-height="7.5"/>
     </vertical>
 </bg>
