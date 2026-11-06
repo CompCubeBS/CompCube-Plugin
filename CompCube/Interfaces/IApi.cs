@@ -13,6 +13,8 @@ public interface IApi
     public Task<UserProfile[]?> GetAroundUser(string id);
 
     public Task<ServerStatus?> GetServerStatus();
+    
+    public Task<Dictionary<string, UserProfile[]>> GetContributors();
 
     public Task<string[]?> GetMapHashes();
 

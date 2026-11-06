@@ -1,0 +1,5 @@
+<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
+    <horizontal pref-width="90" pref-height="8" anchor-pos-y="41.5" horizontal-fit="PreferredSize" background="title-gradient" bg-color="#444444" anchor-pos-x="10">
+        <text text="Contributors" font-size="6" italics="true" all-uppercase="true" align="Midline"/>
+    </horizontal>
+</bg>

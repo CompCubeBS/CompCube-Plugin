@@ -52,6 +52,15 @@ namespace CompCube.Server
             return response.StatusCode == HttpStatusCode.NotFound ? null : JsonConvert.DeserializeObject<ServerStatus>(await response.Content.ReadAsStringAsync());
         }
 
+        public async Task<Dictionary<string, UserProfile[]>> GetContributors()
+        {
+            var response = await _client.GetAsync("/api/contributors");
+
+            response.EnsureSuccessStatusCode();
+            
+            return JsonConvert.DeserializeObject<Dictionary<string, UserProfile[]>>(await response.Content.ReadAsStringAsync());
+        }
+
         public async Task<string[]?> GetMapHashes()
         {
             var response = await _client.GetAsync("/api/maps/hashes");
