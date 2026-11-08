@@ -9,14 +9,6 @@ namespace CompCube.UI.BSML.EarlyLeaveWarning;
 
 public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, Action yesButtonOnClick, Action noButtonOnClick) : ReactiveComponent
 {
-    public string Text { get; set; } = text;
-
-    public bool ClickerinoOfferinoCloserino { get; set; } = clickerinoOfferinoCloserino;
-
-    public Action? NoButtonOnClick { get; set; } = noButtonOnClick;
-
-    public Action? YesButtonOnClick { get; set; } = yesButtonOnClick;
-
     private Dialog _dialogModal = null!;
 
     protected override GameObject Construct()
@@ -41,12 +33,12 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
                 OnClick = () =>
                 {
                     Hide();
-                    NoButtonOnClick?.Invoke();
+                    noButtonOnClick?.Invoke();
                 },
             },
             OnClickOutside = () =>
             {
-                if (!ClickerinoOfferinoCloserino)
+                if (!clickerinoOfferinoCloserino)
                     return;
 
                 _dialogModal.IsPushed = false;
@@ -58,14 +50,14 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
                 OnClick = () =>
                 {
                     Hide();
-                    YesButtonOnClick?.Invoke();
+                    yesButtonOnClick?.Invoke();
                 },
             },
             Children =
             {
                 new Label()
                 {
-                    Text = Text,
+                    Text = text,
                     RichText = true,
                     EnableWrapping = true,
                     FontStyle = FontStyles.Italic,

@@ -20,15 +20,71 @@ namespace CompCube.UI.BSML.Menu;
 
 public class MatchmakingMenuViewController : ViewController
 {
+    [Inject] private readonly ServerChecker _serverChecker = null!;
+    [Inject] private readonly IServerListener _serverListener = null!;
+    [Inject] private readonly SiraLog _siraLog = null!;
+    [Inject] private readonly PluginConfig _config = null!;
     
+    private MatchmakingMenuView _view = null!;
+    
+    public Action? OnAboutButtonPressedCallback { get; set; }
     
     private void Awake()
     {
-        new MatchmakingMenuView().Use(transform);
+        _view = new MatchmakingMenuView(_config);
+
+        _view.Use(transform);
     }
-    
-    public void SetButtonCallbacks(Action? onAboutButtonPressed)
+
+    protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
+        _view.ShouldFindMatch += HandleShouldConnectToServer;
+        _view.CancelButtonPressed += HandleCancelButtonPressed;
+        _view.AboutButtonPressed += HandleAboutButtonPressed;
+    }
+
+    private void HandleAboutButtonPressed()
+    {
+        OnAboutButtonPressedCallback?.Invoke();
+    }
+
+    protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+    {
+        _view.ShouldFindMatch -= HandleShouldConnectToServer;
+        _view.CancelButtonPressed -= HandleCancelButtonPressed;
+    }
+
+    private async void HandleCancelButtonPressed()
+    {
+        try
+        {
+            await _serverListener.DisconnectAsync();
         
+            _view.ChangeState(false);
+        }
+        catch (Exception e)
+        {
+            _siraLog.Error(e);
+        }
+    }
+
+    private async void HandleShouldConnectToServer()
+    {
+        try
+        {
+            var canConnectToServer = await _serverChecker.CanConnectToServer();
+            
+            if (!canConnectToServer.CanConnect)
+            {
+                new OkDialogModal($"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true).Use(transform);
+                return;
+            }
+            
+            await _serverListener.ConnectAsync(_view.GetActiveQueueOptionState().QueueEndpoint);
+        }
+        catch (Exception e)
+        {
+            _siraLog.Error(e);
+        }
     }
 }

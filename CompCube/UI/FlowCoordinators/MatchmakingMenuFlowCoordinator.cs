@@ -55,10 +55,10 @@ namespace CompCube.UI.FlowCoordinators
         
         public void Initialize()
         {
-            _matchmakingMenuViewController.SetButtonCallbacks(() =>
+            _matchmakingMenuViewController.OnAboutButtonPressedCallback = () =>
             {
                 this.PresentFlowCoordinatorSynchronously(_infoFlowCoordinator);
-            });
+            };
             
             _serverListener.OnMatchCreated += OnMatchCreated;
             _infoFlowCoordinator.OnBackButtonPressed += OnInfoFlowCoordinatorBackButtonPressed;
