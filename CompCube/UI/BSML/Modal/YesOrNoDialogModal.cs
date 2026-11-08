@@ -25,6 +25,7 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
                 Size = new YogaVector(70, 45),
                 MaxSize = new YogaVector(70, 45)
             },
+            IsPushed = true,
             Animated = true,
             CancelButton =
             {

@@ -38,9 +38,29 @@ public class MatchmakingMenuViewController : ViewController
 
     protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
-        _view.ShouldFindMatch += HandleShouldConnectToServer;
+        _view.OnFindMatchButtonPressed += HandleFindMatchButtonPressed;
         _view.CancelButtonPressed += HandleCancelButtonPressed;
         _view.AboutButtonPressed += HandleAboutButtonPressed;
+    }
+
+    private void HandleFindMatchButtonPressed()
+    {
+        new YesOrNoDialogModal(
+            "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
+            true,
+            async void () =>
+            {
+                try
+                {
+                    _view.ChangeState(true);
+                    await HandleShouldConnectToServer();
+                }
+                catch (Exception e)
+                {
+                    _siraLog.Error(e);
+                }
+            },
+            () => { }).Use(transform);
     }
 
     private void HandleAboutButtonPressed()
@@ -50,8 +70,9 @@ public class MatchmakingMenuViewController : ViewController
 
     protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
     {
-        _view.ShouldFindMatch -= HandleShouldConnectToServer;
+        _view.OnFindMatchButtonPressed -= HandleFindMatchButtonPressed;
         _view.CancelButtonPressed -= HandleCancelButtonPressed;
+        _view.AboutButtonPressed -= HandleAboutButtonPressed;
     }
 
     private async void HandleCancelButtonPressed()
@@ -68,23 +89,17 @@ public class MatchmakingMenuViewController : ViewController
         }
     }
 
-    private async void HandleShouldConnectToServer()
+    private async Task HandleShouldConnectToServer()
     {
-        try
+        var canConnectToServer = await _serverChecker.CanConnectToServer();
+
+        if (!canConnectToServer.CanConnect)
         {
-            var canConnectToServer = await _serverChecker.CanConnectToServer();
-            
-            if (!canConnectToServer.CanConnect)
-            {
-                new OkDialogModal($"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true).Use(transform);
-                return;
-            }
-            
-            await _serverListener.ConnectAsync(_view.GetActiveQueueOptionState().QueueEndpoint);
+            new OkDialogModal($"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true)
+                .Use(transform);
+            return;
         }
-        catch (Exception e)
-        {
-            _siraLog.Error(e);
-        }
+
+        await _serverListener.ConnectAsync(_view.GetActiveQueueOptionState().QueueEndpoint);
     }
 }

@@ -18,7 +18,7 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
     
     public event Action? CancelButtonPressed;
     
-    public event Action? ShouldFindMatch;
+    public event Action? OnFindMatchButtonPressed;
 
     private readonly Dictionary<QueueOptionTab, BsSegmentedControlItem> _optionTabs = new()
     {
@@ -36,8 +36,6 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
     private BsTextButton _cancelButton = null!;
 
     private BsTextButton _aboutButton = null!;
-
-    private YesOrNoDialogModal _competitiveIntegrityModal = null!;
 
     private BsSegmentedControl<QueueOptionTab> _segmentedControl = null!;
     
@@ -88,17 +86,6 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
             OnClick = () => CancelButtonPressed?.Invoke()
         };
         
-        _competitiveIntegrityModal = new YesOrNoDialogModal(
-            "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
-            true,
-            () =>
-            {
-                ChangeState(true);
-                ShouldFindMatch?.Invoke();
-            },
-            () => {}
-        );
-        
         _findMatchButton = new BsPrimaryTextButton()
         {
             Text = "Find Match",
@@ -106,7 +93,7 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
             Interactable = true,
             OnClick = () =>
             {
-                _competitiveIntegrityModal.Show();
+                OnFindMatchButtonPressed?.Invoke();
             },
             FlexItem = {
                 Size = new YogaVector(40, 11)
@@ -127,7 +114,6 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                 _segmentedControl,
                 _findMatchButton,
                 _cancelButton,
-                _competitiveIntegrityModal,
                 
                 new Layout()
                 {
