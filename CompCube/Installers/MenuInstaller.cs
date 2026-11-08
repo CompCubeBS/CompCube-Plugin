@@ -61,8 +61,6 @@ namespace CompCube.Installers
             
             Container.BindInterfacesAndSelfTo<MatchResultsViewController>().FromNewComponentAsViewController()
                 .AsSingle();
-            Container.BindInterfacesAndSelfTo<WarningModalViewController>().FromNewComponentAsViewController()
-                .AsSingle();
 
             Container.Bind<BSMLTag>().To<LevelBarTag>().AsSingle();
             Container.Bind<TypeHandler<CustomLevelBar>>().To<LevelBarHandler>().AsSingle();

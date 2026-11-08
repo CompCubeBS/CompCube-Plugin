@@ -30,7 +30,6 @@ namespace CompCube.UI.FlowCoordinators
         [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
         [Inject] private readonly MatchResultsViewController _matchResultsViewController = null!;
         [Inject] private readonly WaitingForDiscardPhaseToFinishViewController _waitingForDiscardPhaseToFinishViewController = null!;
-        [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         [Inject] private readonly MatchPreviewViewController _matchPreviewViewController = null!;
         
         [Inject] private readonly PhasePopupViewController _phasePopupViewController = null!;
@@ -440,20 +439,25 @@ namespace CompCube.UI.FlowCoordinators
 
         protected override void BackButtonWasPressed(ViewController viewController)
         {
-            _warningModalViewController.ParseOntoViewController(viewController, "Are you sure you want to leave the match early?\nLeaving the match early could result in penalties!", async void () =>
-            {
-                try
+            new YesOrNoDialogModal(
+                "Are you sure you want to leave the match early? Leaving the match early could result in penalties",
+                true, 
+                async void () =>
                 {
-                    _soundEffectManager.CrossfadeToDefault();
-                    _onMatchFinishedCallback?.Invoke();
-                    _fireworksManager.StopFireworks();
-                    await _serverListener.DisconnectAsync();
-                }
-                catch (Exception e)
-                {
-                    _siraLog.Error(e);
-                }
-            }, _warningModalViewController.Hide);
+                    try
+                    {
+                        _soundEffectManager.CrossfadeToDefault();
+                        _onMatchFinishedCallback?.Invoke();
+                        _fireworksManager.StopFireworks();
+                        await _serverListener.DisconnectAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        _siraLog.Error(e);
+                    }
+                },
+                () => {}
+                ).Use(viewController.transform);
         }
     }
 }

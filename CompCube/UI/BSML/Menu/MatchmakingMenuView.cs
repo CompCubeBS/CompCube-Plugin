@@ -1,4 +1,5 @@
 ﻿using CompCube.UI.BSML.Components;
+using CompCube.UI.BSML.EarlyLeaveWarning;
 using Reactive;
 using Reactive.BeatSaber.Components;
 using Reactive.Yoga;
@@ -22,11 +23,20 @@ public class MatchmakingMenuView : ReactiveComponent
             Size = new YogaVector(24, 8)
         }
     };
+
+    private YesOrNoDialogModal _competitiveIntegrityModal = null!;
     
     public event Action? OnAboutButtonPressed;
     
     protected override GameObject Construct()
     {
+        _competitiveIntegrityModal = new YesOrNoDialogModal(
+            "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
+            true,
+            () => ChangeState(true),
+            () => {}
+        );
+        
         _findMatchButton = new BsPrimaryTextButton()
         {
             Text = "Find Match",
@@ -34,7 +44,7 @@ public class MatchmakingMenuView : ReactiveComponent
             Interactable = true,
             OnClick = () =>
             {
-                ChangeState(true);
+                _competitiveIntegrityModal.Show();
             },
             FlexItem = {
                 Size = new YogaVector(40, 11)
@@ -52,7 +62,8 @@ public class MatchmakingMenuView : ReactiveComponent
             Children =
             {
                 _findMatchButton,
-                _cancelButton
+                _cancelButton,
+                _competitiveIntegrityModal
             }
         }.Use();
     }

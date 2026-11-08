@@ -26,7 +26,6 @@ namespace CompCube.UI.FlowCoordinators
 
         [Inject] private readonly GameplaySetupViewManager _gameplaySetupViewManager = null!;
         [Inject] private readonly CompCubeLeaderboardViewController _leaderboardViewController = null!;
-        [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         
         [Inject] private readonly DisconnectHandler _disconnectHandler = null!;
         
@@ -79,7 +78,7 @@ namespace CompCube.UI.FlowCoordinators
                 
                 yield return new WaitUntil(() => isActivated && !isInTransition);
                 
-                _warningModalViewController.ParseOntoViewController(topViewController, $"Disconnected from server.\nReason: {reason}", _warningModalViewController.Hide);
+                // _warningModalViewController.ParseOntoViewController(topViewController, $"Disconnected from server.\nReason: {reason}", _warningModalViewController.Hide);
             }
         }
 
@@ -94,12 +93,23 @@ namespace CompCube.UI.FlowCoordinators
         {
             if (_serverListener.Connected)
             {
-                _warningModalViewController.ParseOntoViewController(viewController, "Are you sure you want to leave the matchmaking queue?", () =>
-                {
-                    _serverListener.DisconnectAsync();
-                    _mainFlowCoordinator.DismissFlowCoordinator(this);
-                }, _warningModalViewController.Hide);
-                return;
+                // _warningModalViewController.ParseOntoViewController(viewController, "Are you sure you want to leave the matchmaking queue?", () =>
+                // {
+                //     _serverListener.DisconnectAsync();
+                //     _mainFlowCoordinator.DismissFlowCoordinator(this);
+                // }, _warningModalViewController.Hide);
+                // return;
+
+                new YesOrNoDialogModal(
+                    "Are you sure you want to leave the matchmaking queue?",
+                    true,
+                    () =>
+                    {
+                        _serverListener.DisconnectAsync();
+                        _mainFlowCoordinator.DismissFlowCoordinator(this);
+                    },
+                    () => {}
+                ).Use(viewController.transform);
             }
                 
             _mainFlowCoordinator.DismissFlowCoordinator(this);
