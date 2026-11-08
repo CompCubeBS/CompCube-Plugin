@@ -49,24 +49,6 @@ namespace CompCube.UI.BSML.Match
         [UIAction("replayButtonOnClick")]
         void ReplayButtonOnClick()
         {
-            /*_warningModalViewController.ParseOntoViewController(this, "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
-                async void () =>
-                {
-                    try
-                    {
-                        _warningModalViewController.Hide();
-                        ReplayButtonInteractable = false;
-                
-                        NotifyPropertyChanged(nameof(ReplayButtonInteractable));
-
-                        await _matchStateManager.UseReplay();
-                    }
-                    catch (Exception e)
-                    {
-                        _siraLog.Error(e);
-                    }
-                }, _warningModalViewController.Hide);*/
-
             new YesOrNoDialogModal(
                 "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
                 true , 

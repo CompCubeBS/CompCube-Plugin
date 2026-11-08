@@ -2,6 +2,7 @@
 using Reactive.BeatSaber.Components;
 using Reactive.Components;
 using Reactive.Yoga;
+using TMPro;
 using UnityEngine;
 
 namespace CompCube.UI.BSML.EarlyLeaveWarning;
@@ -22,23 +23,38 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
     {
         _dialogModal = new Dialog()
         {
+            FlexController =
+            {
+                Padding = 3f,
+                ConstrainHorizontal = true
+            },
             FlexItem =
             {
-                Size = new YogaVector(70, 45)
+                Size = new YogaVector(70, 45),
+                MaxSize = new YogaVector(70, 45)
             },
             Animated = true,
             CancelButton =
             {
                 Text = "No",
+                FontStyle = FontStyles.Italic,
                 OnClick = () =>
                 {
                     Hide();
                     NoButtonOnClick?.Invoke();
                 },
             },
+            OnClickOutside = () =>
+            {
+                if (!ClickerinoOfferinoCloserino)
+                    return;
+
+                _dialogModal.IsPushed = false;
+            },
             OkButton =
             {
                 Text = "Yes",
+                FontStyle = FontStyles.Italic,
                 OnClick = () =>
                 {
                     Hide();
@@ -51,7 +67,9 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
                 {
                     Text = Text,
                     RichText = true,
-                    EnableWrapping = true
+                    EnableWrapping = true,
+                    FontStyle = FontStyles.Italic,
+                    FlexItem = { MaxSize = new YogaVector(70, 45) }
                 }
             }
         };
