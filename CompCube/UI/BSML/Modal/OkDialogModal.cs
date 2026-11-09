@@ -1,4 +1,5 @@
-﻿using Reactive;
+﻿using HMUI;
+using Reactive;
 using Reactive.BeatSaber.Components;
 using Reactive.Yoga;
 using TMPro;
@@ -9,8 +10,7 @@ namespace CompCube.UI.BSML.EarlyLeaveWarning;
 public class OkDialogModal(string text, bool clickerinoOfferinoCloserino, Action? okButtonOnClick = null) : ReactiveComponent
 {
     private Dialog _dialogModal = null!;
-
-
+    
     protected override GameObject Construct()
     {
         _dialogModal = new Dialog()
@@ -57,6 +57,13 @@ public class OkDialogModal(string text, bool clickerinoOfferinoCloserino, Action
         };
         
         return _dialogModal.Use();
+    }
+
+    public static void CreateOnViewController(ViewController viewController, string text, bool clickerinoOfferinoCloserino, Action? okButtonOnClick = null)
+    {
+        var modal = new OkDialogModal(text, clickerinoOfferinoCloserino, okButtonOnClick);
+        modal.Use(viewController.transform);
+        modal.Show();
     }
 
     public void Show()

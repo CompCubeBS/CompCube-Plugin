@@ -78,7 +78,7 @@ namespace CompCube.UI.FlowCoordinators
                 
                 yield return new WaitUntil(() => isActivated && !isInTransition);
                 
-                // _warningModalViewController.ParseOntoViewController(topViewController, $"Disconnected from server.\nReason: {reason}", _warningModalViewController.Hide);
+                OkDialogModal.CreateOnViewController(topViewController, $"Disconnected from server.\nReason: {reason}", true);
             }
         }
 
@@ -93,7 +93,7 @@ namespace CompCube.UI.FlowCoordinators
         {
             if (_serverListener.Connected)
             {
-                var modal = new YesOrNoDialogModal(
+                YesOrNoDialogModal.CreateOnViewController(viewController, 
                     "Are you sure you want to leave the matchmaking queue?",
                     true,
                     () =>
@@ -103,10 +103,6 @@ namespace CompCube.UI.FlowCoordinators
                     },
                     () => { }
                 );
-                
-                modal.Use(viewController.transform);
-                
-                modal.Show();
             }
                 
             _mainFlowCoordinator.DismissFlowCoordinator(this);

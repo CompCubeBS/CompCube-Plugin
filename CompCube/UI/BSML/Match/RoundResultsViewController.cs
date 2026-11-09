@@ -49,7 +49,7 @@ namespace CompCube.UI.BSML.Match
         [UIAction("replayButtonOnClick")]
         void ReplayButtonOnClick()
         {
-            var modal = new YesOrNoDialogModal(
+            YesOrNoDialogModal.CreateOnViewController(this,
                 "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
                 true,
                 async void () =>
@@ -69,10 +69,6 @@ namespace CompCube.UI.BSML.Match
                 },
                 () => { }
             );
-
-            modal.Use(transform);
-            
-            modal.Show();
         }
         
         public void PopulateData(Score redScore, Score blueScore, float damageAmount, float multiplier, VotingMap votingMap)

@@ -439,7 +439,7 @@ namespace CompCube.UI.FlowCoordinators
 
         protected override void BackButtonWasPressed(ViewController viewController)
         {
-            var modal = new YesOrNoDialogModal(
+            YesOrNoDialogModal.CreateOnViewController(viewController, 
                 "Are you sure you want to leave the match early? Leaving the match early could result in penalties",
                 true,
                 async void () =>
@@ -458,10 +458,6 @@ namespace CompCube.UI.FlowCoordinators
                 },
                 () => { }
             );
-            
-            modal.Use(viewController.transform);
-            
-            modal.Show();
         }
     }
 }

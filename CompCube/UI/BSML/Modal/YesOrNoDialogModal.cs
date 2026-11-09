@@ -1,4 +1,5 @@
-﻿using Reactive;
+﻿using HMUI;
+using Reactive;
 using Reactive.BeatSaber.Components;
 using Reactive.Components;
 using Reactive.Yoga;
@@ -65,6 +66,15 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
                 }
             }
         }.Bind(ref _dialogModal).Use();
+    }
+
+    public static void CreateOnViewController(ViewController viewController, string text, bool clickOffCloses, Action yesButtonOnClick, Action noButtonOnClick)
+    {
+        var modal = new YesOrNoDialogModal(text, clickOffCloses, yesButtonOnClick, noButtonOnClick);
+        
+        modal.Use(viewController.transform);
+        
+        modal.Show();
     }
 
     public void Show()

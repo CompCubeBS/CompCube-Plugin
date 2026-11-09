@@ -45,7 +45,7 @@ public class MatchmakingMenuViewController : ViewController
 
     private void HandleFindMatchButtonPressed()
     {
-        var modal = new YesOrNoDialogModal(
+        YesOrNoDialogModal.CreateOnViewController(this, 
             "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
             true,
             async void () =>
@@ -61,9 +61,6 @@ public class MatchmakingMenuViewController : ViewController
                 }
             },
             () => { });
-        modal.Use(transform);
-        
-        modal.Show();
     }
 
     private void HandleAboutButtonPressed()
@@ -98,9 +95,7 @@ public class MatchmakingMenuViewController : ViewController
 
         if (!canConnectToServer.CanConnect)
         {
-            var modal = new OkDialogModal($"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true);
-            modal.Use(transform);
-            modal.Show();
+            OkDialogModal.CreateOnViewController(this, $"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true);
             return;
         }
 
