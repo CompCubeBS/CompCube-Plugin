@@ -28,11 +28,33 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
             
             Children =
             {
-                new Label()
+                new Layout()
                 {
-                    Text = profile.GetFormattedUserName(),
-                    RichText = true,
-                    Alignment = !depleteFromLeft ? TextAlignmentOptions.BaselineLeft :  TextAlignmentOptions.BaselineRight,
+                    FlexController =
+                    {
+                        FlexDirection = !depleteFromLeft ? FlexDirection.Row : FlexDirection.RowReverse,
+                    },
+                    
+                    Children =
+                    {
+                        new WebImage()
+                        {
+                            Src = profile.AvatarUrl,
+                            Material = Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.name == "UINoGlowRoundEdge"),
+                            PreserveAspect = true,
+                            FlexItem =
+                            {
+                                Size = 10
+                            }
+                        },
+                        
+                        new Label()
+                        {
+                            Text = profile.GetFormattedUserName(),
+                            RichText = true,
+                            Alignment = !depleteFromLeft ? TextAlignmentOptions.BaselineLeft :  TextAlignmentOptions.BaselineRight,
+                        },
+                    }
                 },
                 
                 new Background()
