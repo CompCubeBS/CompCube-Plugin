@@ -42,13 +42,9 @@ public class BottomScreenMatchStateView(MatchStateManager matchStateManager) : R
                     {
                         FlexDirection = FlexDirection.Row,
                         JustifyContent = Justify.Center,
-                        AlignItems = Align.Center,
+                        AlignItems = Align.FlexEnd,
                         AlignContent = Align.Center,
                         Gap = new YogaVector(30f, 0),
-                    },
-                    FlexItem =
-                    {
-                        // Position = new YogaFrame(-100, 0)
                     },
                     
                     Children =
