@@ -78,7 +78,7 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                     FlexItem = {
                         Size = new YogaVector(40, 11)
                     }
-                },
+                }.Bind(ref _findMatchButton),
                 
                 new BsTextButton()
                 {
