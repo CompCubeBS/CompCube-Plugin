@@ -49,8 +49,6 @@ namespace CompCube.UI.FlowCoordinators
         
         [Inject] private readonly PlatformLeaderboardViewController _platformLeaderboardViewController = null!;
         [Inject] private readonly FireworksManager _fireworksManager = null!;
-
-        [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         
         private NavigationController _votingScreenNavigationController;
 
@@ -441,29 +439,9 @@ namespace CompCube.UI.FlowCoordinators
 
         protected override void BackButtonWasPressed(ViewController viewController)
         {
-            _warningModalViewController.ParseOntoViewController(
-                viewController, 
-                "Are you sure you want to leave the match early?\nLeaving the match early could result in penalties",
-                async void () =>
-                {
-                    try
-                    {
-                        _soundEffectManager.CrossfadeToDefault();
-                        _onMatchFinishedCallback?.Invoke();
-                        _fireworksManager.StopFireworks();
-                        await _serverListener.DisconnectAsync();
-                    }
-                    catch (Exception e)
-                    {
-                        _siraLog.Error(e);
-                    }
-                },
-                _warningModalViewController.Hide
-                );
-            
-            /*new YesOrNoDialogModal(
+            var modal = new YesOrNoDialogModal(
                 "Are you sure you want to leave the match early? Leaving the match early could result in penalties",
-                true, 
+                true,
                 async void () =>
                 {
                     try
@@ -478,8 +456,12 @@ namespace CompCube.UI.FlowCoordinators
                         _siraLog.Error(e);
                     }
                 },
-                () => {}
-                ).Use(viewController.transform);*/
+                () => { }
+            );
+            
+            modal.Use(viewController.transform);
+            
+            modal.Show();
         }
     }
 }

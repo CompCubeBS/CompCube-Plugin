@@ -10,6 +10,7 @@ public class OkDialogModal(string text, bool clickerinoOfferinoCloserino, Action
 {
     private Dialog _dialogModal = null!;
 
+
     protected override GameObject Construct()
     {
         _dialogModal = new Dialog()
@@ -55,13 +56,7 @@ public class OkDialogModal(string text, bool clickerinoOfferinoCloserino, Action
             }
         };
         
-        return new Layout()
-        {
-            Children =
-            {
-                _dialogModal
-            }
-        }.Use();
+        return _dialogModal.Use();
     }
 
     public void Show()

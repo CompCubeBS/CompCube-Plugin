@@ -13,7 +13,7 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
 
     protected override GameObject Construct()
     {
-        _dialogModal = new Dialog()
+        return new Dialog()
         {
             FlexController =
             {
@@ -25,7 +25,6 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
                 Size = new YogaVector(70, 45),
                 MaxSize = new YogaVector(70, 45)
             },
-            IsPushed = true,
             Animated = true,
             CancelButton =
             {
@@ -65,15 +64,7 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
                     FlexItem = { MaxSize = new YogaVector(70, 45) }
                 }
             }
-        };
-        
-        return new Layout()
-        {
-            Children =
-            {
-                _dialogModal
-            }
-        }.Use();
+        }.Bind(ref _dialogModal).Use();
     }
 
     public void Show()

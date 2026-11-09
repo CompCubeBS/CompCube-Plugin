@@ -287,7 +287,4 @@
       <EmbeddedResource Include="UI\BSML\Match\MatchPreviewView.bsml" />
       <None Remove="UI\BSML\Info\ContributorsView.bsml" />
     </ItemGroup>
-    <ItemGroup>
-      <EmbeddedResource Include="UI\BSML\Modal\WarningModalView.bsml" />
-    </ItemGroup>
 </Project>

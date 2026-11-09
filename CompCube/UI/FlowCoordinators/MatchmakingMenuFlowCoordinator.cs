@@ -28,8 +28,6 @@ namespace CompCube.UI.FlowCoordinators
         [Inject] private readonly CompCubeLeaderboardViewController _leaderboardViewController = null!;
         
         [Inject] private readonly DisconnectHandler _disconnectHandler = null!;
-
-        [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -95,15 +93,7 @@ namespace CompCube.UI.FlowCoordinators
         {
             if (_serverListener.Connected)
             {
-                _warningModalViewController.ParseOntoViewController(viewController, "Are you sure you want to leave the matchmaking queue?", () =>
-                {
-                    _serverListener.DisconnectAsync();
-                    _mainFlowCoordinator.DismissFlowCoordinator(this);
-                }, _warningModalViewController.Hide);
-                return;
-
-/*
-                new YesOrNoDialogModal(
+                var modal = new YesOrNoDialogModal(
                     "Are you sure you want to leave the matchmaking queue?",
                     true,
                     () =>
@@ -111,9 +101,12 @@ namespace CompCube.UI.FlowCoordinators
                         _serverListener.DisconnectAsync();
                         _mainFlowCoordinator.DismissFlowCoordinator(this);
                     },
-                    () => {}
-                ).Use(viewController.transform);
-*/
+                    () => { }
+                );
+                
+                modal.Use(viewController.transform);
+                
+                modal.Show();
             }
                 
             _mainFlowCoordinator.DismissFlowCoordinator(this);
