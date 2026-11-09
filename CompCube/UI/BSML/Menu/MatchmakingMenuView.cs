@@ -16,12 +16,9 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
 
     private readonly Dictionary<string, BsSegmentedControlItem> _optionTabs = new()
         {
-            {
-                "standard_competitive_1v1",
-                new BsSegmentedControlItem()
-                {
-                    Text = "Competitive",
-                }
+            ["standard_competitive_1v1"] = new BsSegmentedControlItem()
+            { 
+                Text = "Competitive",
             }
         };
 
