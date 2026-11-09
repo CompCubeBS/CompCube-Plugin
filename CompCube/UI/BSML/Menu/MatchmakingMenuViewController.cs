@@ -3,6 +3,7 @@ using CompCube.Interfaces;
 using CompCube.Server;
 using CompCube.UI.BSML.EarlyLeaveWarning;
 using HMUI;
+using Reactive;
 using SiraUtil.Logging;
 using Zenject;
 
@@ -21,9 +22,7 @@ public class MatchmakingMenuViewController : ViewController
     
     private void Awake()
     {
-        _view = new MatchmakingMenuView(_config);
-
-        _view.Use(transform);
+        new MatchmakingMenuView(_config).Bind(ref _view).Use();
     }
 
     protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -33,7 +32,7 @@ public class MatchmakingMenuViewController : ViewController
         _view.AboutButtonPressed += HandleAboutButtonPressed;
     }
 
-    private void HandleFindMatchButtonPressed()
+    private void HandleFindMatchButtonPressed(string queue)
     {
         var modal = new YesOrNoDialogModal(
             "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
@@ -42,8 +41,8 @@ public class MatchmakingMenuViewController : ViewController
             {
                 try
                 {
-                    _view.ChangeState(true);
-                    await HandleShouldConnectToServer();
+                    
+                    await HandleShouldConnectToServer(queue);
                 }
                 catch (Exception e)
                 {
@@ -73,8 +72,8 @@ public class MatchmakingMenuViewController : ViewController
         try
         {
             await _serverListener.DisconnectAsync();
-        
-            _view.ChangeState(false);
+
+            _view.IsConnected = false;
         }
         catch (Exception e)
         {
@@ -82,7 +81,7 @@ public class MatchmakingMenuViewController : ViewController
         }
     }
 
-    private async Task HandleShouldConnectToServer()
+    private async Task HandleShouldConnectToServer(string queue)
     {
         var canConnectToServer = await _serverChecker.CanConnectToServer();
 
@@ -94,6 +93,8 @@ public class MatchmakingMenuViewController : ViewController
             return;
         }
 
-        await _serverListener.ConnectAsync(_view.GetActiveQueueOptionState());
+        await _serverListener.ConnectAsync(queue);
+
+        _view.IsConnected = true;
     }
 }

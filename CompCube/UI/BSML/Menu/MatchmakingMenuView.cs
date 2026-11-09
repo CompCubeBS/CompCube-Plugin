@@ -12,7 +12,13 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
     
     public event Action? CancelButtonPressed;
     
-    public event Action? OnFindMatchButtonPressed;
+    public event Action<string>? OnFindMatchButtonPressed;
+
+    public bool IsConnected
+    {
+        get => _isConnected.Value;
+        set => _isConnected.Value = value;
+    }
 
     private readonly Dictionary<string, BsSegmentedControlItem> _optionTabs = new()
         {
@@ -21,17 +27,15 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                 Text = "Competitive",
             }
         };
-
-    private BsPrimaryTextButton _findMatchButton = null!;
-
-    private BsTextButton _cancelButton = null!;
-
-    private BsTextButton _aboutButton = null!;
-
+    
     private BsSegmentedControl<string> _segmentedControl = null!;
+
+    private State<bool> _isConnected = null!;
     
     protected override GameObject Construct()
     {
+        _isConnected = Remember(false);
+        
         if (pluginConfig.ShowDebugQueue)
         {
             _optionTabs["debug"] = new BsSegmentedControlItem()
@@ -59,7 +63,8 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                     },
                     Skew = .1f,
                     Items = _optionTabs,
-                    Key = _optionTabs.First().Key
+                    Key = _optionTabs.First().Key,
+                    sInteractable = _isConnected.Map(x => !x)
                 }.Bind(ref _segmentedControl),
                 
                 
@@ -67,26 +72,26 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                 {
                     Text = "Find Match",
                     RichText = true,
-                    Interactable = true,
+                    sInteractable = _isConnected.Map(x => !x),
                     OnClick = () =>
                     {
-                        OnFindMatchButtonPressed?.Invoke();
+                        OnFindMatchButtonPressed?.Invoke(_segmentedControl.Key);
                     },
                     FlexItem = {
                         Size = new YogaVector(40, 11)
                     }
-                }.Bind(ref _findMatchButton),
+                },
                 
                 new BsTextButton()
                 {
                     Text = "Cancel",
-                    Enabled = false,
+                    sEnabled = _isConnected.Map(x => x),
                     FlexItem =
                     {
                         Size = new YogaVector(24, 8),
                     },
                     OnClick = () => CancelButtonPressed?.Invoke()
-                }.Bind(ref _cancelButton),
+                },
                 
                 
                 
@@ -107,22 +112,11 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
 
                             Text = "About",
                             OnClick = () => AboutButtonPressed?.Invoke(),
-                        }.Bind(ref _aboutButton)
+                            sInteractable = _isConnected.Map(x => !x)
+                        }
                     }
                 }
             }
         }.Use();
-    }
-
-    public void ChangeState(bool isConnected)
-    {
-        _findMatchButton.Interactable = !isConnected;
-        _cancelButton.Enabled = isConnected;
-        _aboutButton.Interactable = !isConnected;
-    }
-
-    public string GetActiveQueueOptionState()
-    {
-        return _segmentedControl.Key;
     }
 }
