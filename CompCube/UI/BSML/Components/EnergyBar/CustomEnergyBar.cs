@@ -17,6 +17,9 @@ namespace CompCube.UI.BSML.Components.EnergyBar;
 
 public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromLeft) : ReactiveComponent
 {
+    private Background _healthBar = null!;
+    private Label _healthText = null!;
+    
     protected override GameObject Construct()
     {
         return new Layout()
@@ -33,6 +36,10 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                     FlexController =
                     {
                         FlexDirection = !depleteFromLeft ? FlexDirection.Row : FlexDirection.RowReverse,
+                        Gap = new YogaVector()
+                        {
+                            x = 1.5f
+                        }
                     },
                     
                     Children =
@@ -44,7 +51,7 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                             PreserveAspect = true,
                             FlexItem =
                             {
-                                Size = 10
+                                Size = 7.5f
                             }
                         },
                         
@@ -52,7 +59,8 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                         {
                             Text = profile.GetFormattedUserName(),
                             RichText = true,
-                            Alignment = !depleteFromLeft ? TextAlignmentOptions.BaselineLeft :  TextAlignmentOptions.BaselineRight,
+                            Alignment = !depleteFromLeft ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
+                            FontStyle = FontStyles.Italic
                         },
                     }
                 },
@@ -98,10 +106,23 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                             Sprite = BeatSaberResources.Sprites.background,
                             Color = color,
                             PixelsPerUnit = 30f,
-                        }
+                        }.Bind(ref _healthBar),
                     }
-                }
+                },
+                new Label()
+                {
+                    Text = "100.00%",
+                    Color = color,
+                    Alignment = !depleteFromLeft ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
+                    FontStyle = FontStyles.Italic,
+                    FontSize = 4f
+                }.Bind(ref _healthText),
             }
         }.Use();
+    }
+    
+    public void SetHealth(float health)
+    {
+        // animations
     }
 }

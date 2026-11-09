@@ -1,3 +1,4 @@
+using System.Globalization;
 using CompCube.Game.MatchState;
 using CompCube.UI.BSML.Components.EnergyBar;
 using CompCube.Utils;
@@ -44,12 +45,38 @@ public class BottomScreenMatchStateView(MatchStateManager matchStateManager) : R
                         JustifyContent = Justify.Center,
                         AlignItems = Align.FlexEnd,
                         AlignContent = Align.Center,
-                        Gap = new YogaVector(30f, 0),
+                        Gap = new YogaVector(15f, 0),
                     },
                     
                     Children =
                     {
                         new CustomEnergyBar(matchStateManager.RedPlayer, ColorConstants.RedTeamColor, false),
+                        new Layout()
+                        {
+                            FlexController =
+                            {
+                                FlexDirection = FlexDirection.Column,
+                                JustifyContent = Justify.Center,
+                            },
+                            
+                            Children =
+                            {
+                                new Label()
+                                {
+                                    Text = "Damage Multiplier",
+                                    FontStyle = FontStyles.Italic,
+                                    FontSize = 3,
+                                    Alignment = TextAlignmentOptions.Midline
+                                },
+                                new Label()
+                                {
+                                    Text = $"{matchStateManager.DamageMultiplier:F1}x",
+                                    FontStyle = FontStyles.Italic,
+                                    Alignment = TextAlignmentOptions.Midline,
+                                    FontSize = 7,
+                                }.Bind(ref _roundTextLabel),
+                            }
+                        },
                         new CustomEnergyBar(matchStateManager.BluePlayer, ColorConstants.BlueTeamColor, true)
                     }
                 }
