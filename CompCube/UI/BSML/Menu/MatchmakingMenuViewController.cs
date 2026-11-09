@@ -24,6 +24,7 @@ public class MatchmakingMenuViewController : ViewController
     [Inject] private readonly IServerListener _serverListener = null!;
     [Inject] private readonly SiraLog _siraLog = null!;
     [Inject] private readonly PluginConfig _config = null!;
+    [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
     
     private MatchmakingMenuView _view = null!;
     
@@ -45,7 +46,24 @@ public class MatchmakingMenuViewController : ViewController
 
     private void HandleFindMatchButtonPressed()
     {
-        new YesOrNoDialogModal(
+        _warningModalViewController.ParseOntoViewController(
+            this, 
+            "Competitive matches may take a long time.\nOnly queue when you can finish the match and protect\ncompetitive integrity.\nAre you sure you want to continue?",
+            async void () =>
+            {
+                try
+                {
+                    _view.ChangeState(true);
+                    await HandleShouldConnectToServer();
+                }
+                catch (Exception e)
+                {
+                    _siraLog.Error(e);
+                }
+            },
+            _warningModalViewController.Hide);
+        
+        /*new YesOrNoDialogModal(
             "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
             true,
             async void () =>
@@ -60,7 +78,7 @@ public class MatchmakingMenuViewController : ViewController
                     _siraLog.Error(e);
                 }
             },
-            () => { }).Use(transform);
+            () => { }).Use(transform);*/
     }
 
     private void HandleAboutButtonPressed()
@@ -95,8 +113,10 @@ public class MatchmakingMenuViewController : ViewController
 
         if (!canConnectToServer.CanConnect)
         {
-            new OkDialogModal($"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true)
-                .Use(transform);
+            _warningModalViewController.ParseOntoViewController(this, $"Failed to connect to server!\nReason: {canConnectToServer.Reason}", () => _warningModalViewController.Hide());
+            
+            // new OkDialogModal($"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true)
+            //     .Use(transform);
             return;
         }
 

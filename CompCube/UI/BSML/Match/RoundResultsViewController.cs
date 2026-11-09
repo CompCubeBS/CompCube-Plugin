@@ -24,6 +24,7 @@ namespace CompCube.UI.BSML.Match
         [Inject] private readonly MatchStateManager _matchStateManager = null!;
         [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
         [Inject] private readonly SiraLog _siraLog = null!;
+        [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         
         [UIValue("titleBgColor")] private string TitleBgColor { get; set; } = "#FFA500";
         [UIValue("titleText")] private string TitleText { get; set; } = "";
@@ -49,7 +50,26 @@ namespace CompCube.UI.BSML.Match
         [UIAction("replayButtonOnClick")]
         void ReplayButtonOnClick()
         {
-            new YesOrNoDialogModal(
+            _warningModalViewController.ParseOntoViewController(this, 
+                "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
+            async void () =>
+            {
+                try
+                {
+                    ReplayButtonInteractable = false;
+                
+                    NotifyPropertyChanged(nameof(ReplayButtonInteractable));
+
+                    await _matchStateManager.UseReplay();
+                }
+                catch (Exception e)
+                {
+                    _siraLog.Error(e);
+                }
+            },
+                _warningModalViewController.Hide);
+            
+            /*new YesOrNoDialogModal(
                 "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
                 true , 
                 async void () =>
@@ -68,7 +88,7 @@ namespace CompCube.UI.BSML.Match
                     }
                 },
                 () => {}
-            ).Use(transform);
+            ).Use(transform);*/
         }
         
         public void PopulateData(Score redScore, Score blueScore, float damageAmount, float multiplier, VotingMap votingMap)
