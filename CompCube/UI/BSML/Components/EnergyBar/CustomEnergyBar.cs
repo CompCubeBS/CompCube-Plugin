@@ -18,20 +18,36 @@ using Object = UnityEngine.Object;
 
 namespace CompCube.UI.BSML.Components.EnergyBar;
 
-public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromLeft) : ReactiveComponent
+public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveComponent
 {
-    private Label _healthText = null!;
-
+    public string PlayerName
+    {
+        get => _playerName.Value;
+        set => _playerName.Value = value;
+    }
+    
+    public string AvatarSource
+    {
+        get => _avatarSource.Value;
+        set => _avatarSource.Value = value;
+    }
+    
     public float Health
     {
         get => _barLength.TargetValue;
         set => _barLength.TargetValue = value;
     }
     
-    private AnimatedState<float> _barLength;
+    private AnimatedState<float> _barLength = null!;
+
+    private State<string> _avatarSource = null!;
+    private State<string> _playerName = null!;
     
     protected override GameObject Construct()
     {
+        _avatarSource = Remember("https://cdn.scoresaber.com/avatars/oculus.png");
+        _playerName = Remember("default");
+        
         _barLength = RememberAnimated(1f, 300.ms, AnimationCurve.EaseInOutCubic);
         
         return new Layout()
@@ -58,7 +74,7 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                     {
                         new WebImage()
                         {
-                            Src = profile.AvatarUrl,
+                            sSrc = _avatarSource.Map(x => x),
                             Material = Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.name == "UINoGlowRoundEdge"),
                             PreserveAspect = true,
                             FlexItem =
@@ -69,7 +85,7 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                         
                         new Label()
                         {
-                            Text = profile.GetFormattedUserName(),
+                            sText = _playerName.Map(x => x),
                             RichText = true,
                             Alignment = !depleteFromLeft ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
                             FontStyle = FontStyles.Italic
@@ -133,7 +149,7 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                     Alignment = !depleteFromLeft ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
                     FontStyle = FontStyles.Italic,
                     FontSize = 4f
-                }.Bind(ref _healthText),
+                },
             }
         }.Use();
     }
