@@ -19,6 +19,8 @@ namespace CompCube.UI.BSML.Components.EnergyBar;
 
 public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromLeft) : ReactiveComponent
 {
+    private Label _healthText = null!;
+    
     private AnimatedState<float> _barLength;
     
     protected override GameObject Construct()
