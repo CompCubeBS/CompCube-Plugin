@@ -277,7 +277,6 @@
       <EmbeddedResource Include="UI\BSML\Match\Modal\PhasePopupView.bsml" />
       <None Remove="UI\BSML\Modal\WarningModalView.bsml" />
       <None Remove="UI\BSML\Match\BottomScreenMatchStateView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\BottomScreenMatchStateView.bsml" />
       <None Remove="UI\BSML\Components\CustomMapList\CustomMapList.bsml" />
       <EmbeddedResource Include="UI\BSML\Components\CustomMapList\CustomMapList.bsml" />
       <None Remove="UI\BSML\Match\WaitingForDiscardPhaseToFinishViewController.bsml" />
