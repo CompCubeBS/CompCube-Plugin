@@ -67,15 +67,17 @@ public class BottomScreenMatchStateView : ReactiveComponent
         
         return new Layout()
         {
+            FlexController =
+            {
+                FlexDirection = FlexDirection.Column,
+                Gap = 10,
+                AlignContent = Align.FlexEnd,
+                JustifyContent = Justify.Center,
+            },
             Children =
             {
                 new Label()
                 {
-                    IgnoreLayout = true,
-                    FlexItem =
-                    {
-                        Position = new YogaFrame(-10, 0)
-                    },
                     sText = _statusText.Map(x => x),
                     RichText = true,
                     FontStyle = FontStyles.Italic,
