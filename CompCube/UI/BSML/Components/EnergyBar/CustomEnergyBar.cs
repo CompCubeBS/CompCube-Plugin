@@ -125,12 +125,10 @@ public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveCompon
                             FlexItem =
                             {
                                 sSize = _barLength.Map(x => new YogaVector((48 * x).pt, 2.pt)),
-                                
-                            },
-                            
-                            ContentTransform =
-                            {
-                                // slocalScale = _barLength.Map(x => new Vector3(x, 1f)),
+                                sPosition = _barLength.Map(x => new YogaFrame()
+                                {
+                                    right = depleteFromLeft ? 0 : new YogaValue(x, Unit.Percent)
+                                })
                             },
                             
                             Sprite = BeatSaberResources.Sprites.background,

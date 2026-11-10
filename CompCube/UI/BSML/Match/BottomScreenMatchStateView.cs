@@ -95,7 +95,7 @@ public class BottomScreenMatchStateView : ReactiveComponent
                     
                     Children =
                     {
-                        new CustomEnergyBar(false, ColorConstants.RedTeamColor)
+                        new CustomEnergyBar(true/*false*/, ColorConstants.RedTeamColor)
                         {
                             sPlayerName = _redPlayer.Map(x => x.GetFormattedUserName()),
                             sAvatarSource = _redPlayer.Map(x => x.AvatarUrl),
