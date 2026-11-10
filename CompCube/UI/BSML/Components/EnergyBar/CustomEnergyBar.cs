@@ -6,10 +6,12 @@ using HMUI;
 using Reactive;
 using Reactive.BeatSaber;
 using Reactive.BeatSaber.Components;
+using Reactive.Compiler;
 using Reactive.Yoga;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using AnimationCurve = Reactive.AnimationCurve;
 using Image = Reactive.Components.Basic.Image;
 using Object = UnityEngine.Object;
 
@@ -17,11 +19,12 @@ namespace CompCube.UI.BSML.Components.EnergyBar;
 
 public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromLeft) : ReactiveComponent
 {
-    private Background _healthBar = null!;
-    private Label _healthText = null!;
+    private AnimatedState<float> _barLength;
     
     protected override GameObject Construct()
     {
+        _barLength = RememberAnimated(1f, 300.ms, AnimationCurve.EaseInOutCubic);
+        
         return new Layout()
         {
             FlexController =
@@ -102,11 +105,16 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                                     y = 2.pt
                                 }
                             },
-                    
+                            
+                            ContentTransform =
+                            {
+                                slocalScale = _barLength.Map(x => new Vector3(x, 1f))
+                            },
+                            
                             Sprite = BeatSaberResources.Sprites.background,
                             Color = color,
                             PixelsPerUnit = 30f,
-                        }.Bind(ref _healthBar),
+                        }
                     }
                 },
                 new Label()
@@ -120,9 +128,6 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
             }
         }.Use();
     }
-    
-    public void SetHealth(float health)
-    {
-        // animations
-    }
+
+    public void SetHealth(float health) => _barLength.TargetValue = health;
 }
