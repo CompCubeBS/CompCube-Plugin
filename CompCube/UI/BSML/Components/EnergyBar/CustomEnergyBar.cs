@@ -48,7 +48,7 @@ public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveCompon
         _avatarSource = Remember("https://cdn.scoresaber.com/avatars/oculus.png");
         _playerName = Remember("default");
         
-        _barLength = RememberAnimated(1f, 300.ms, AnimationCurve.EaseInOutCubic);
+        _barLength = RememberAnimated(1f, 300.ms, AnimationCurve.EaseOutCubic);
         
         return new Layout()
         {
