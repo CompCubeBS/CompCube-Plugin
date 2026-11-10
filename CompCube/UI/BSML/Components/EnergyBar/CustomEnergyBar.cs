@@ -127,7 +127,7 @@ public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveCompon
                                 sSize = _barLength.Map(x => new YogaVector((48 * x).pt, 2.pt)),
                                 sPosition = _barLength.Map(x => new YogaFrame()
                                 {
-                                    right = depleteFromLeft ? 0 : new YogaValue(x, Unit.Percent)
+                                    right = !depleteFromLeft ? 0 : new YogaValue((x * 48) - 48, Unit.Point)
                                 })
                             },
                             
