@@ -1,4 +1,5 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System.Globalization;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CompCube_Models.Models.ClientData;
 using CompCube.Extensions;
@@ -20,6 +21,12 @@ namespace CompCube.UI.BSML.Components.EnergyBar;
 public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromLeft) : ReactiveComponent
 {
     private Label _healthText = null!;
+
+    public float Health
+    {
+        get => _barLength.TargetValue;
+        set => _barLength.TargetValue = value;
+    }
     
     private AnimatedState<float> _barLength;
     
@@ -121,7 +128,7 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
                 },
                 new Label()
                 {
-                    Text = "100.00%",
+                    sText = _barLength.Map(x => x.ToString("P", CultureInfo.InvariantCulture)),
                     Color = color,
                     Alignment = !depleteFromLeft ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
                     FontStyle = FontStyles.Italic,
@@ -130,6 +137,4 @@ public class CustomEnergyBar(UserProfile profile, Color color, bool depleteFromL
             }
         }.Use();
     }
-
-    public void SetHealth(float health) => _barLength.TargetValue = health;
 }
