@@ -22,7 +22,7 @@ public class MatchmakingMenuViewController : ViewController
     
     private void Awake()
     {
-        new MatchmakingMenuView(_config).Bind(ref _view).Use();
+        new MatchmakingMenuView(_config).Bind(ref _view).Use(transform);
     }
 
     protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
