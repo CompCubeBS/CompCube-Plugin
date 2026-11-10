@@ -64,7 +64,11 @@ namespace CompCube.Networking
                 _client.Options.SetRequestHeader("UserName", _userModelWrapper.UserName);
                 
                 _cancellationTokenSource = new CancellationTokenSource();
-                await _client.ConnectAsync(new Uri($"{_config.WebsocketIp}/{queueEndpoint}", UriKind.Absolute), _cancellationTokenSource.Token);
+                
+                var endpoint = $"{_config.WebsocketIp}/{queueEndpoint}";
+                
+                _siraLog.Notice("Connecting to " + endpoint + "...");
+                await _client.ConnectAsync(new Uri(endpoint, UriKind.Absolute), _cancellationTokenSource.Token);
                 
                 onConnectedCallback?.Invoke();
                 

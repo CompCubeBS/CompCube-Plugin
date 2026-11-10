@@ -41,12 +41,12 @@ public class MatchmakingMenuViewController : ViewController
             {
                 try
                 {
-                    
                     await HandleShouldConnectToServer(queue);
                 }
                 catch (Exception e)
                 {
                     _siraLog.Error(e);
+                    OkDialogModal.CreateOnViewController(this, $"Failed to connect to server!\nPlease check your logs for more info.", true);
                 }
             },
             () => { });
@@ -88,7 +88,7 @@ public class MatchmakingMenuViewController : ViewController
             return;
         }
 
-        await _serverListener.ConnectAsync(queue);
+        await _serverListener.ConnectAsync($"queue/{queue}");
 
         _view.IsConnected = true;
     }
