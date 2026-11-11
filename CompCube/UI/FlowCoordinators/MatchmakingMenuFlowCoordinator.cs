@@ -103,6 +103,7 @@ namespace CompCube.UI.FlowCoordinators
                     },
                     () => { }
                 );
+                return;
             }
                 
             _mainFlowCoordinator.DismissFlowCoordinator(this);
