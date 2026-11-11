@@ -18,7 +18,7 @@ using Object = UnityEngine.Object;
 
 namespace CompCube.UI.BSML.Components.EnergyBar;
 
-public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveComponent
+public class CustomEnergyBar(bool reverseAlign, Color color) : ReactiveComponent
 {
     public string PlayerName
     {
@@ -63,7 +63,7 @@ public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveCompon
                 {
                     FlexController =
                     {
-                        FlexDirection = !depleteFromLeft ? FlexDirection.Row : FlexDirection.RowReverse,
+                        FlexDirection = !reverseAlign ? FlexDirection.Row : FlexDirection.RowReverse,
                         Gap = new YogaVector()
                         {
                             x = 1.5f
@@ -87,7 +87,7 @@ public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveCompon
                         {
                             sText = _playerName.Map(x => x),
                             RichText = true,
-                            Alignment = !depleteFromLeft ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
+                            Alignment = !reverseAlign ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
                             FontStyle = FontStyles.Italic
                         },
                     }
@@ -127,7 +127,7 @@ public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveCompon
                                 sSize = _barLength.Map(x => new YogaVector((48 * x).pt, 2.pt)),
                                 sPosition = _barLength.Map(x => new YogaFrame()
                                 {
-                                    right = !depleteFromLeft ? 0 : new YogaValue((x * 48) - 48, Unit.Point)
+                                    right = !reverseAlign ? 0 : new YogaValue((x * 48) - 48, Unit.Point)
                                 })
                             },
                             
@@ -141,7 +141,7 @@ public class CustomEnergyBar(bool depleteFromLeft, Color color) : ReactiveCompon
                 {
                     sText = _barLength.Map(x => x.ToString("P", CultureInfo.InvariantCulture)),
                     Color = color,
-                    Alignment = !depleteFromLeft ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
+                    Alignment = !reverseAlign ? TextAlignmentOptions.BottomLeft :  TextAlignmentOptions.BottomRight,
                     FontStyle = FontStyles.Italic,
                     FontSize = 4f
                 },

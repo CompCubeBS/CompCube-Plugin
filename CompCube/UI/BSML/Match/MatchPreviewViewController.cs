@@ -35,6 +35,8 @@ public class MatchPreviewViewController : ViewController
             
             _view.RedPlayer = red;
             _view.BluePlayer = blue;
+            
+            _view.StartAnimation();
         }
     }
 }
