@@ -100,7 +100,7 @@ namespace CompCube.UI.FlowCoordinators
                 
                 yield return new WaitUntil(() => !_votingScreenViewController.isInTransition && _votingScreenViewController.isActivated);
                 
-                DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(_votingScreenViewController,
+                DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(_votingScreenViewController.transform,
                     packet.InitialMaps.Select(i => i.Hash).ToArray(), () => StartCoroutine(PopulateDataCoroutine()));
             }
 
@@ -147,7 +147,7 @@ namespace CompCube.UI.FlowCoordinators
 
         private void HandleCardsUpdated(UpdateCardsPacket packet)
         {
-            DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(_waitingForDiscardPhaseToFinishViewController,
+            DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(_waitingForDiscardPhaseToFinishViewController.transform,
                 packet.Maps.Select(i => i.Hash).ToArray(), () => StartCoroutine(PopulateDataCoroutine()));
             return;
 
@@ -199,7 +199,7 @@ namespace CompCube.UI.FlowCoordinators
             {
                 yield return new WaitForEndOfFrame();
                 
-                DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(_waitingViewController, 
+                DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(_waitingViewController.transform, 
                     [packet.Map.Hash], ()=> StartCoroutine(ShowMapPreviewViewAndStartMatch(packet.Map)));
             }
         }
@@ -239,7 +239,7 @@ namespace CompCube.UI.FlowCoordinators
 
             IEnumerator ShowFinalCardsToPlayerCoroutine()
             {
-                DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(topViewController, packet.AvailableMaps.Select(i => i.Hash).ToArray());
+                DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(topViewController.transform, packet.AvailableMaps.Select(i => i.Hash).ToArray());
                 yield return new WaitUntil(() => !_beatmapDownloader.IsDownloadingBeatmaps);
                 
                 this.ReplaceViewControllerSynchronously(_waitingForDiscardPhaseToFinishViewController);
@@ -377,7 +377,7 @@ namespace CompCube.UI.FlowCoordinators
         {
             yield return new WaitForEndOfFrame();
             
-            DownloadingBeatmapsModal.DownloadLevelsAndParseModalOntoGameObject(topViewController, [map.Hash], () => StartCoroutine(WaitForSecondsAndStartMatch()));
+            DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(topViewController.transform, [map.Hash], () => StartCoroutine(WaitForSecondsAndStartMatch()));
             yield break;
             
             IEnumerator WaitForSecondsAndStartMatch()
