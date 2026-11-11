@@ -54,7 +54,11 @@ namespace CompCube.Networking
 
             try
             {
+                _siraLog.Notice("Authenticating with BeatKhana...");
+                
                 var auth = await _beatKhanaGameAuth.RequestTokenAsync();
+                
+                _siraLog.Notice("Authenticated as " + auth.PlatformId);
                 
                 _client = new ClientWebSocket();
                 
@@ -69,6 +73,8 @@ namespace CompCube.Networking
                 
                 _siraLog.Notice("Connecting to " + endpoint + "...");
                 await _client.ConnectAsync(new Uri(endpoint, UriKind.Absolute), _cancellationTokenSource.Token);
+                
+                _siraLog.Notice("Connected to server!");
                 
                 onConnectedCallback?.Invoke();
                 
@@ -193,16 +199,21 @@ namespace CompCube.Networking
         private async Task StopListeningToServerAsync()
         {
             _shouldListenToServer = false;
-            _cancellationTokenSource.Cancel();
             await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal Closure", CancellationToken.None);
+            _cancellationTokenSource.Cancel();
             _client.Dispose();
         }
 
         public async Task DisconnectAsync()
         {
+            if (!Connected)
+                return;
+            
             await SendPacketAsync(new ClientDisconnectPacket());
             await StopListeningToServerAsync();
             OnDisconnected?.Invoke();
+            
+            _siraLog.Notice("Disconnected from server!");
         }
 
         public async Task HandleAbruptDisconnectionAsync(string reason)
