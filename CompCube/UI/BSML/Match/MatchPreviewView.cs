@@ -61,6 +61,7 @@ public class MatchPreviewView : ReactiveComponent
                 {
                     FlexItem =
                     {
+                        PositionType = PositionType.Absolute,
                         AlignSelf = Align.Center,
                     },
                     
@@ -68,6 +69,42 @@ public class MatchPreviewView : ReactiveComponent
                     FontSize = 10f,
                     Alignment = TextAlignmentOptions.Midline,
                     FontStyle = FontStyles.Italic
+                },
+                
+                new Layout()
+                {
+                    FlexController =
+                    {
+                        FlexDirection = FlexDirection.Row,
+                        JustifyContent = Justify.Center,
+                        AlignContent = Align.Center,
+                        Gap = 1
+                    },
+                    
+                    FlexItem =
+                    {
+                        Position = new YogaFrame(10f, 0)
+                    },
+                    
+                    Children =
+                    {
+                        new Spinner()
+                        {
+                            RotationSpeed = 15,
+                            FlexItem =
+                            {
+                                Size = 5f
+                            }
+                        },
+                        
+                        new Label()
+                        {
+                            Text = "Preparing match...",
+                            FontSize = 5f,
+                            Alignment = TextAlignmentOptions.MidlineLeft,
+                            FontStyle = FontStyles.Italic
+                        }
+                    }
                 },
                 
                 new Layout()
