@@ -37,7 +37,7 @@ public class MatchPreviewView : ReactiveComponent
 
     private AnimatedState<float> _barAnimationState = null!;
 
-    private AnimatedState<float> _settingUpMatchAnimationState = null!;
+    // private AnimationPlayer<> _settingUpMatchAnimationState = null!;
 
     protected override GameObject Construct()
     {
@@ -45,17 +45,31 @@ public class MatchPreviewView : ReactiveComponent
         _bluePlayer = new State<UserProfile>(Constants.EmptyUser);
 
         _barAnimationState = RememberAnimated(0f, 5.sec, AnimationCurve.Linear);
-        _settingUpMatchAnimationState = RememberAnimated(0f, 1.5f.sec, AnimationCurve.Linear);
+        // _settingUpMatchAnimationState = RememberAnimationPlayer();
         
         return new Layout()
         {
             FlexController =
             {
+                JustifyContent = Justify.Center,
                 AlignItems = Align.Center,
             },
             
             Children =
             {
+                new Label()
+                {
+                    FlexItem =
+                    {
+                        AlignSelf = Align.Center,
+                    },
+                    
+                    Text = "vs.",
+                    FontSize = 10f,
+                    Alignment = TextAlignmentOptions.Midline,
+                    FontStyle = FontStyles.Italic
+                },
+                
                 new Layout()
                 {
                     FlexItem =
@@ -122,8 +136,12 @@ public class MatchPreviewView : ReactiveComponent
             FlexController =
             {
                 FlexDirection = FlexDirection.Column,
-                
                 Gap = 5
+            },
+            
+            FlexItem =
+            {
+                Size = new YogaVector(70, 10)
             },
             
             Children =
@@ -178,7 +196,10 @@ public class MatchPreviewView : ReactiveComponent
                 
                 new Background()
                 {
-                    Color = color,
+                    GradientColor0 = reverseAlign ? Color.white with {a = 0f} : color with {a  = 0.6f},
+                    GradientColor1 = !reverseAlign ? Color.white with {a = 0f} : color with {a  = 0.6f},
+                    UseGradient = true,
+                    
                     PixelsPerUnit = 30f,
                     Sprite = BeatSaberResources.Sprites.background,
                     
