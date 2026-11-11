@@ -439,7 +439,7 @@ namespace CompCube.UI.FlowCoordinators
 
         protected override void BackButtonWasPressed(ViewController viewController)
         {
-            YesOrNoDialogModal.CreateOnViewController(viewController, 
+            YesOrNoDialogModal.CreateOnTransform(viewController.transform, 
                 "Are you sure you want to leave the match early? Leaving the match early could result in penalties",
                 true,
                 async void () =>

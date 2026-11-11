@@ -59,10 +59,10 @@ public class OkDialogModal(string text, bool clickerinoOfferinoCloserino, Action
         return _dialogModal.Use();
     }
 
-    public static void CreateOnViewController(ViewController viewController, string text, bool clickerinoOfferinoCloserino, Action? okButtonOnClick = null)
+    public static void CreateOnTransform(Transform transform, string text, bool clickerinoOfferinoCloserino, Action? okButtonOnClick = null)
     {
         var modal = new OkDialogModal(text, clickerinoOfferinoCloserino, okButtonOnClick);
-        modal.Use(viewController.transform);
+        modal.Use(transform);
         modal.Show();
     }
 

@@ -62,8 +62,8 @@ public class BottomScreenMatchStateView : ReactiveComponent
         _multiplierText = Remember(0f);
         _statusText = Remember("Default");
         
-        _redPlayer = Remember(new UserProfile("0", "default", "0", "", false, [], new(0, 0, 0, 0, 0, 0, 0)));
-        _bluePlayer = Remember(new UserProfile("0", "default", "0", "", false, [], new(0, 0, 0, 0, 0, 0, 0)));
+        _redPlayer = Remember(Constants.EmptyUser);
+        _bluePlayer = Remember(Constants.EmptyUser);
         
         return new Layout()
         {
@@ -97,7 +97,7 @@ public class BottomScreenMatchStateView : ReactiveComponent
                     
                     Children =
                     {
-                        new CustomEnergyBar(false, ColorConstants.RedTeamColor)
+                        new CustomEnergyBar(false, Constants.RedTeamColor)
                         {
                             sPlayerName = _redPlayer.Map(x => x.GetFormattedUserName()),
                             sAvatarSource = _redPlayer.Map(x => x.AvatarUrl),
@@ -129,7 +129,7 @@ public class BottomScreenMatchStateView : ReactiveComponent
                                 },
                             }
                         },
-                        new CustomEnergyBar(true, ColorConstants.BlueTeamColor)
+                        new CustomEnergyBar(true, Constants.BlueTeamColor)
                         {
                             sPlayerName = _bluePlayer.Map(x => x.GetFormattedUserName()),
                             sAvatarSource = _bluePlayer.Map(x => x.AvatarUrl),

@@ -27,29 +27,9 @@ public class MatchmakingMenuViewController : ViewController
 
     protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
-        _view.OnFindMatchButtonPressed += HandleFindMatchButtonPressed;
+        _view.OnShouldConnectToServer += HandleShouldConnectToServer;
         _view.CancelButtonPressed += HandleCancelButtonPressed;
         _view.AboutButtonPressed += HandleAboutButtonPressed;
-    }
-
-    private void HandleFindMatchButtonPressed(string queue)
-    {
-        YesOrNoDialogModal.CreateOnViewController(this, 
-            "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
-            true,
-            async void () =>
-            {
-                try
-                {
-                    await HandleShouldConnectToServer(queue);
-                }
-                catch (Exception e)
-                {
-                    _siraLog.Error(e);
-                    OkDialogModal.CreateOnViewController(this, $"Failed to connect to server!\nPlease check your logs for more info.", true);
-                }
-            },
-            () => { });
     }
 
     private void HandleAboutButtonPressed()
@@ -59,7 +39,7 @@ public class MatchmakingMenuViewController : ViewController
 
     protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
     {
-        _view.OnFindMatchButtonPressed -= HandleFindMatchButtonPressed;
+        _view.OnShouldConnectToServer -= HandleShouldConnectToServer;
         _view.CancelButtonPressed -= HandleCancelButtonPressed;
         _view.AboutButtonPressed -= HandleAboutButtonPressed;
     }
@@ -69,7 +49,7 @@ public class MatchmakingMenuViewController : ViewController
         try
         {
             await _serverListener.DisconnectAsync();
-
+            
             _view.IsConnected = false;
         }
         catch (Exception e)
@@ -78,18 +58,26 @@ public class MatchmakingMenuViewController : ViewController
         }
     }
 
-    private async Task HandleShouldConnectToServer(string queue)
+    private async void HandleShouldConnectToServer(string queue)
     {
-        var canConnectToServer = await _serverChecker.CanConnectToServer();
-
-        if (!canConnectToServer.CanConnect)
+        try
         {
-            OkDialogModal.CreateOnViewController(this, $"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true);
-            return;
+            var canConnectToServer = await _serverChecker.CanConnectToServer();
+
+            if (!canConnectToServer.CanConnect)
+            {
+                OkDialogModal.CreateOnTransform(transform, $"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true);
+                return;
+            }
+
+            await _serverListener.ConnectAsync($"queue/{queue}");
+
+            _view.IsConnected = true;
         }
-
-        await _serverListener.ConnectAsync($"queue/{queue}");
-
-        _view.IsConnected = true;
+        catch (Exception e)
+        {
+            _siraLog.Error(e);
+            OkDialogModal.CreateOnTransform(transform, "Failed to connect to server:\n" + e.Message, true);
+        }
     }
 }

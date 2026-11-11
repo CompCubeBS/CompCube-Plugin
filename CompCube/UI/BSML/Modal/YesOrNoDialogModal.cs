@@ -68,11 +68,11 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
         }.Bind(ref _dialogModal).Use();
     }
 
-    public static void CreateOnViewController(ViewController viewController, string text, bool clickOffCloses, Action yesButtonOnClick, Action noButtonOnClick)
+    public static void CreateOnTransform(Transform transform, string text, bool clickOffCloses, Action yesButtonOnClick, Action noButtonOnClick)
     {
         var modal = new YesOrNoDialogModal(text, clickOffCloses, yesButtonOnClick, noButtonOnClick);
         
-        modal.Use(viewController.transform);
+        modal.Use(transform);
         
         modal.Show();
     }

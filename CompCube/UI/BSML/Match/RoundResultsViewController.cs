@@ -49,8 +49,8 @@ namespace CompCube.UI.BSML.Match
         [UIAction("replayButtonOnClick")]
         void ReplayButtonOnClick()
         {
-            YesOrNoDialogModal.CreateOnViewController(this,
-                "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
+            YesOrNoDialogModal.CreateOnTransform(transform,
+                "NOTE:\nYou can only call one replay per match, and the highest scores from either player will be used.\n\nWould you like to call a replay?",
                 true,
                 async void () =>
                 {

@@ -1,4 +1,5 @@
 ﻿using CompCube.Configuration;
+using CompCube.UI.BSML.EarlyLeaveWarning;
 using Reactive;
 using Reactive.BeatSaber.Components;
 using Reactive.Yoga;
@@ -12,7 +13,7 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
     
     public event Action? CancelButtonPressed;
     
-    public event Action<string>? OnFindMatchButtonPressed;
+    public event Action<string>? OnShouldConnectToServer;
 
     public bool IsConnected
     {
@@ -73,10 +74,14 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                     Text = "Find Match",
                     RichText = true,
                     sInteractable = _isConnected.Map(x => !x),
-                    OnClick = () =>
-                    {
-                        OnFindMatchButtonPressed?.Invoke(_segmentedControl.Key);
-                    },
+                    OnClick = () => YesOrNoDialogModal.CreateOnTransform(ContentTransform, 
+                        "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
+                        true, () =>
+                        {
+                            _isConnected.Value = true;
+                            OnShouldConnectToServer?.Invoke(_segmentedControl.Key);
+                        },
+                        () => { }),
                     FlexItem = {
                         Size = new YogaVector(40, 11)
                     }
@@ -90,7 +95,10 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                     {
                         Size = new YogaVector(24, 8),
                     },
-                    OnClick = () => CancelButtonPressed?.Invoke()
+                    OnClick = () =>
+                    {
+                        CancelButtonPressed?.Invoke();
+                    }
                 },
                 
                 

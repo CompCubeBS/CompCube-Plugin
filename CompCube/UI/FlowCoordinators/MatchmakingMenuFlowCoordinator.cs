@@ -72,28 +72,26 @@ namespace CompCube.UI.FlowCoordinators
             
             IEnumerator HandleShouldShowDisconnectScreenCoroutine()
             {
+                if (isActivated)
+                    yield return null;
+                
                 // this will break if the flow coordinator hierarchy ever gets more than 1 deeper after this flow coordinator
                 if (childFlowCoordinator)
                     DismissFlowCoordinator(childFlowCoordinator);
                 
                 yield return new WaitUntil(() => isActivated && !isInTransition);
                 
-                OkDialogModal.CreateOnViewController(topViewController, $"Disconnected from server.\nReason: {reason}", true);
+                OkDialogModal.CreateOnTransform(_matchmakingMenuViewController.transform, $"Disconnected from server.\nReason: {reason}", true);
             }
         }
 
         private void OnInfoFlowCoordinatorBackButtonPressed() => DismissFlowCoordinator(_infoFlowCoordinator);
 
-        private void OnAboutButtonClicked()
-        {
-            this.PresentFlowCoordinatorSynchronously(_infoFlowCoordinator);
-        }
-
         protected override void BackButtonWasPressed(ViewController viewController)
         {
             if (_serverListener.Connected)
             {
-                YesOrNoDialogModal.CreateOnViewController(viewController, 
+                YesOrNoDialogModal.CreateOnTransform(viewController.transform, 
                     "Are you sure you want to leave the matchmaking queue?",
                     true,
                     () =>
