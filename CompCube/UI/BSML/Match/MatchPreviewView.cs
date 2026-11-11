@@ -135,7 +135,13 @@ public class MatchPreviewView : ReactiveComponent
                         FlexDirection = reverseAlign
                             ? FlexDirection.RowReverse
                             : FlexDirection.Row,
-                        Gap = 3
+                        Gap = 3,
+                        AlignItems = Align.Center,
+                    },
+                    
+                    FlexItem =
+                    {
+                        Size = new YogaVector(70, 5)
                     },
 
                     Children =
