@@ -3,7 +3,7 @@
         <ProductVersion>8.0.30703</ProductVersion>
         <ProjectGuid>{A5710D75-1F96-46D6-9B64-5C6DEC84C561}</ProjectGuid>
         <AssemblyName>CompCube</AssemblyName>
-        <TargetFramework>net48</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <DebugSymbols>true</DebugSymbols>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
         <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
