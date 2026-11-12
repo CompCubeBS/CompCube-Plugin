@@ -1,8 +1,0 @@
-<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
-    <modal move-to-center="true" show-event="showModal" clickerino-offerino-closerino="false" hide-event="hideModal" size-delta-y="35" size-delta-x="50">
-        <vertical pad-top="5">
-            <text text="~modalText" align="Midline" italics="true"/>
-            <loading preserve-aspect="true" pref-width="5"/>
-        </vertical>
-    </modal>
-</bg>

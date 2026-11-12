@@ -283,7 +283,6 @@
       <None Remove="UI\BSML\Match\WaitingForDiscardPhaseToFinishViewController.bsml" />
       <EmbeddedResource Include="UI\BSML\Match\WaitingForDiscardPhaseToFinishView.bsml" />
       <None Remove="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
       <None Remove="UI\BSML\Match\MatchPreviewView.bsml" />
       <None Remove="UI\BSML\Info\ContributorsView.bsml" />
     </ItemGroup>
