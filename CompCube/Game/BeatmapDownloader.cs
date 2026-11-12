@@ -14,11 +14,9 @@ public class BeatmapDownloader
 
     private readonly BeatSaver _beatSaver = new BeatSaver("CompCube", new Version(1, 0, 0));
     
-    public event Action<int, int>? OnMapDownloaded;
-    
     public bool IsDownloadingBeatmaps { get; private set; } = false;
 
-    public async Task DownloadMaps(string[] mapHashes)
+    public async Task DownloadMaps(string[] mapHashes, Action<int> onMapDownloaded, Action onBeatmapsFinishedDownloading)
     {
         IsDownloadingBeatmaps = true;
         var mapsDownloaded = 0;
@@ -46,7 +44,7 @@ public class BeatmapDownloader
             zippedBeatmap.ExtractToDirectory(Path.Combine(UnityGame.InstallPath, "Beat Saber_Data", "CustomLevels", mapHash));
             
             mapsDownloaded++;
-            OnMapDownloaded?.Invoke(mapsDownloaded, mapHashes.Length);
+            onMapDownloaded?.Invoke(mapsDownloaded);
         }
         
         Loader.Instance.RefreshSongs(false);
@@ -55,5 +53,6 @@ public class BeatmapDownloader
             await Task.Delay(25);
         
         IsDownloadingBeatmaps = false;
+        onBeatmapsFinishedDownloading?.Invoke();
     }
 }

@@ -36,6 +36,10 @@ public class OkDialogModal(string text, bool clickerinoOfferinoCloserino, Action
                     okButtonOnClick?.Invoke();
                 },
             },
+            CancelButton =
+            {
+                Enabled = false
+            },
             OnClickOutside = () =>
             {
                 if (!clickerinoOfferinoCloserino)

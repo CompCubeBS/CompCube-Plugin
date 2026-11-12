@@ -1,87 +1,128 @@
-﻿using System.Collections;
-using System.Reflection;
-using System.Windows.Forms;
-using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Parser;
-using BeatSaberMarkupLanguage.ViewControllers;
+﻿using BeatSaberMarkupLanguage;
 using CompCube.Game;
-using HMUI;
-using SiraUtil.Logging;
+using Reactive;
+using Reactive.BeatSaber.Components;
+using Reactive.Yoga;
 using SongCore;
+using TMPro;
 using UnityEngine;
 using Zenject;
+using Label = Reactive.Components.Basic.Label;
 
 namespace CompCube.UI.BSML.EarlyLeaveWarning;
 
-[ViewDefinition("CompCube.UI.BSML.Modal.DownloadingBeatmapsModalView.bsml")]
-public class DownloadingBeatmapsModal : BSMLAutomaticViewController
+public class DownloadingBeatmapsModal : ReactiveComponent
 {
     [Inject] private readonly BeatmapDownloader _beatmapDownloader = null!;
-    [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
-    
-    [UIParams] private readonly BSMLParserParams _parserParams = null!;
 
-    [UIValue("modalText")] private string ModalText { get; set; } = "";
-    
-    public static void DownloadLevelsAndParseModalOntoGameObject(ViewController viewController, string[] hashes, Action? callback = null)
+    public int BeatmapsToDownload { get; set; } = 0;
+
+    private int BeatmapsDownloaded
     {
-        var hashesToDownload = hashes.Distinct().ToList();
+        get => _beatmapsDownloaded.Value;
+        set => _beatmapsDownloaded.Value = value;
+    }
+    
+    private State<int> _beatmapsDownloaded = null!;
 
-        foreach (var hash in hashes)
-            if (Collections.songWithHashPresent(hash))
-                hashesToDownload.Remove(hash);
-
-        if (hashesToDownload.Count == 0)
+    private Modal _modal = null!;
+    
+    protected override GameObject Construct()
+    {
+        _beatmapsDownloaded = Remember(0);
+        
+        return new Modal()
         {
-            callback?.Invoke();
+            FlexItem =
+            {
+                Size = new YogaVector(50.pt, 35.pt)
+            },
+            
+            Animated = true,
+
+            FlexController =
+            {
+                AlignItems = Align.Center,
+                JustifyContent = Justify.Center,
+            },
+
+            Children =
+            {
+                new Background()
+                {
+                    FlexController =
+                    {
+                        FlexDirection = FlexDirection.Column,
+                        AlignContent = Align.Center,
+                        JustifyContent = Justify.Center,
+                        Gap = 3
+                    },
+                    FlexItem =
+                    {
+                        MinSize = new YogaVector()
+                        {
+                            x = 50,
+                            y = 35
+                        }
+                    },
+                    
+                    Children =
+                    {
+                        new Label()
+                        {
+                            sText = _beatmapsDownloaded.Map(x => $"Downloading beatmaps... ({x}/{BeatmapsToDownload})"),
+                            FontStyle = FontStyles.Italic,
+                            Alignment = TextAlignmentOptions.Midline
+                        },
+                        new Spinner()
+                        {
+                            FlexItem =
+                            {
+                                Size = 6,
+                                AlignSelf = Align.Center,
+                            }
+                        }
+                    }
+                }.AsBlurBackground()
+            }
+        }.Bind(ref _modal).Use();
+    }
+
+    public static async Task CreateOnTransformAndDownloadBeatmaps(Transform transform, string[] hashes, Action? callBack = null)
+    {
+        hashes = hashes.Distinct().Where(i => !Collections.songWithHashPresent(i)).ToArray();
+
+        if (hashes.Length == 0)
+        {
+            callBack?.Invoke();
             return;
         }
-        
-        DownloadLevelsAndParseModalOntoGameObjectInternal(viewController, hashesToDownload.ToArray(), callback);
-    }
 
-    private static async Task DownloadLevelsAndParseModalOntoGameObjectInternal(ViewController viewController,
-        string[] hashesToDownload, Action? callback = null)
-    {
-        var controller = BeatSaberUI.CreateViewController<DownloadingBeatmapsModal>();
-        
-        Parse(viewController, controller);
-        
-        controller._sharedCoroutineStarter.Run(controller.UpdateModalText(0, hashesToDownload.Length));
+        var modal = BeatSaberUI.DiContainer.Instantiate<DownloadingBeatmapsModal>();
 
-        controller._beatmapDownloader.OnMapDownloaded += controller.HandleMapDownloaded;
-        await controller._beatmapDownloader.DownloadMaps(hashesToDownload);
-        controller._beatmapDownloader.OnMapDownloaded -= controller.HandleMapDownloaded;
-        
-        controller.Hide();
-        
-        callback?.Invoke();
-    }
+        modal.BeatmapsToDownload = hashes.Length;
 
-    private IEnumerator UpdateModalText(int downloaded, int lengthOfBatch)
-    {
-        yield return new WaitForEndOfFrame();
-        
-        ModalText = $"Downloading beatmaps... ({downloaded}/{lengthOfBatch})";
-        NotifyPropertyChanged(nameof(ModalText));
-    }
+        modal.Use(transform);
 
-    private void HandleMapDownloaded(int downloaded, int lengthOfBatch) => _sharedCoroutineStarter.Run(UpdateModalText(downloaded, lengthOfBatch));
-    
-    private static void Parse(ViewController viewControllerToParseOnto, DownloadingBeatmapsModal controller)
-    {
-        BSMLParser.Instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "CompCube.UI.BSML.Modal.DownloadingBeatmapsModalView.bsml"), viewControllerToParseOnto.gameObject, controller);
-        controller.Show();
-    }
+        modal.Show();
 
-    private void Hide()
-    {
-        _parserParams.EmitEvent("hideModal");
+        await modal._beatmapDownloader.DownloadMaps(
+            hashes, 
+            (count) => modal.BeatmapsDownloaded = count,
+            () =>
+            {
+                modal.Hide();
+                callBack?.Invoke();
+            });
     }
 
     private void Show()
     {
-        _parserParams.EmitEvent("showModal");
+        _modal.IsPushed = true;
+    }
+
+    private void Hide()
+    {
+        _modal.IsPushed = false;
     }
 }
