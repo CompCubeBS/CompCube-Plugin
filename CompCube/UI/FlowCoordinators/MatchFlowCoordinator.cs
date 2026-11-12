@@ -32,8 +32,6 @@ namespace CompCube.UI.FlowCoordinators
         [Inject] private readonly WaitingForDiscardPhaseToFinishViewController _waitingForDiscardPhaseToFinishViewController = null!;
         [Inject] private readonly MatchPreviewViewController _matchPreviewViewController = null!;
         
-        [Inject] private readonly PhasePopupViewController _phasePopupViewController = null!;
-         
         [Inject] private readonly IServerListener _serverListener = null!;
         [Inject] private readonly TransitionToLevelManager _transitionToLevelManager = null!;
         [Inject] private readonly MatchStateManager _matchStateManager = null!;
@@ -124,7 +122,7 @@ namespace CompCube.UI.FlowCoordinators
         {
             yield return new WaitUntil(() => !isInTransition && !topViewController.isInTransition);
                 
-            _phasePopupViewController.ParseOntoObject(topViewController.gameObject, topText, subText);
+            PhasePopupModal.CreateOnTransform(topViewController.transform, topText, subText);
         }
         
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
