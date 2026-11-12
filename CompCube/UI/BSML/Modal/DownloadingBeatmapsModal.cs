@@ -70,7 +70,7 @@ public class DownloadingBeatmapsModal : ReactiveComponent
                     {
                         new Label()
                         {
-                            sText = _beatmapsDownloaded.Map(x => $"Downloading beatmaps... ({x}/{BeatmapsToDownload})"),
+                            sText = _beatmapsDownloaded.Map(x => BeatmapsToDownload == 0 ? "Downloading beatmaps..." : $"Downloading beatmaps... ({x}/{BeatmapsToDownload})"),
                             FontStyle = FontStyles.Italic,
                             Alignment = TextAlignmentOptions.Midline
                         },
