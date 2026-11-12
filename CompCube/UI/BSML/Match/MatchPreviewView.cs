@@ -83,7 +83,7 @@ public class MatchPreviewView : ReactiveComponent
                     
                     FlexItem =
                     {
-                        Position = new YogaFrame(10f, 0)
+                        Position = new YogaFrame(35f, 0)
                     },
                     
                     Children =
