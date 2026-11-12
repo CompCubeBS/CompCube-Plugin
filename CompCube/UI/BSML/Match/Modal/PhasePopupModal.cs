@@ -6,6 +6,7 @@ using Reactive.Yoga;
 using TMPro;
 using UnityEngine;
 using Zenject;
+using AnimationCurve = Reactive.AnimationCurve;
 using Background = Reactive.BeatSaber.Components.Background;
 using Label = Reactive.Components.Basic.Label;
 
@@ -23,8 +24,8 @@ public class PhasePopupModal : ReactiveComponent
 
     public string SubText
     {
-        get => _text.Value;
-        set => _text.Value = value;
+        get => _subText.Value;
+        set => _subText.Value = value;
     }
 
     private State<string> _text = null!;
@@ -34,8 +35,8 @@ public class PhasePopupModal : ReactiveComponent
     
     protected override GameObject Construct()
     {
-        _text = Remember(Text);
-        _subText = Remember(SubText);
+        _text = Remember("text");
+        _subText = Remember("");
         
         _modal = new Reactive.BeatSaber.Components.Modal()
         {
@@ -51,6 +52,9 @@ public class PhasePopupModal : ReactiveComponent
                 AlignItems = Align.Center,
                 JustifyContent = Justify.Center,
             },
+            
+            OpenAnimation = new Animation<IReactiveComponent>(AnimationTracks.Fade(1f, 1f) + AnimationTracks.Scale(1f, 1f), 0.ms),
+            CloseAnimation = new Animation<IReactiveComponent>(AnimationTracks.Fade(1f, 0f) + AnimationTracks.Scale(Vector3.one, new Vector3(.7f, .7f, 1f)), 200.ms, AnimationCurve.EaseOutCubic),
 
             Children =
             {
@@ -76,9 +80,11 @@ public class PhasePopupModal : ReactiveComponent
                     {
                         new Label()
                         {
-                            sText = _text.Map(x => x),
+                            sText = _text.Map(x => $"<u>{x}</u>"),
+                            RichText = true,
                             FontStyle = FontStyles.Italic,
-                            Alignment = TextAlignmentOptions.Midline
+                            Alignment = TextAlignmentOptions.Midline,
+                            FontSize = 7,
                         },
                         new Label()
                         {
@@ -95,6 +101,9 @@ public class PhasePopupModal : ReactiveComponent
     public static void CreateOnTransform(Transform transform, string text, string subText = "")
     {
         var modal = BeatSaberUI.DiContainer.Instantiate<PhasePopupModal>();
+        
+        modal.Text = text;
+        modal.SubText = subText;
         
         modal.Use(transform);
 
