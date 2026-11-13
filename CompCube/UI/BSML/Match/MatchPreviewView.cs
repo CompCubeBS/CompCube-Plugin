@@ -232,7 +232,7 @@ public class MatchPreviewView : ReactiveComponent
                             FontSize = 6.5f,
                             Alignment = !reverseAlign
                                 ? TextAlignmentOptions.TopLeft
-                                : TextAlignmentOptions.BottomRight,
+                                : TextAlignmentOptions.TopRight,
                         }
                     }
                 },
