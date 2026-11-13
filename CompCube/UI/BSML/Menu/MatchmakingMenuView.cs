@@ -119,7 +119,7 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                     }
                 },
                 
-                new BsAeroButton()
+                new BsButton()
                 {
                     sEnabled = _isConnected.Map(x => x),
                     FlexItem =
@@ -135,11 +135,11 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                     
                     ConstructContent = (color , skew) => new Label()
                     {
-                        Text = "Cancel",
+                        Text = "CANCEL",
+                        FontStyle =  FontStyles.Italic,
+                        
                     }
                 },
-                
-                
                 
                 new Layout()
                 {
@@ -166,9 +166,9 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
         }.Use();
     }
 
-    private BsAeroButtonColors GetHoveredColorScheme(Color hovered)
+    private BsButtonColors GetHoveredColorScheme(Color hovered)
     {
-        var colors = BeatSaberStyle.BsAeroButtonColors;
+        var colors = BeatSaberStyle.BsButtonColors;
 
         return colors with
         {

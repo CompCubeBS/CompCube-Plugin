@@ -85,7 +85,10 @@ namespace CompCube.Networking
             }
             catch (OperationCanceledException)
             {
-                // do nothing
+                _siraLog.Notice("Connection cancelled!");
+                
+                if (Connected)
+                    _client.Abort();
             }
         }
 

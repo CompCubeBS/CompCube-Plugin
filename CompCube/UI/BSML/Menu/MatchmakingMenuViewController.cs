@@ -76,6 +76,7 @@ public class MatchmakingMenuViewController : ViewController
 
             if (!canConnectToServer.CanConnect)
             {
+                _view.IsConnected = false;
                 OkDialogModal.CreateOnTransform(transform, $"Failed to connect to server!\nReason: {canConnectToServer.Reason}", true);
                 return;
             }
