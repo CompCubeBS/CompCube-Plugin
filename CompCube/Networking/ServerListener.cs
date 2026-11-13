@@ -44,7 +44,7 @@ namespace CompCube.Networking
         
         private CancellationTokenSource _cancellationTokenSource = new();
         
-        public async Task ConnectAsync(string queueEndpoint, Action? onConnectedCallback)
+        public async Task ConnectAsync(string queueEndpoint, CancellationToken token, Action? onConnectedCallback)
         {
             if (Connected)
             {
@@ -56,7 +56,7 @@ namespace CompCube.Networking
             {
                 _siraLog.Notice("Authenticating with BeatKhana...");
                 
-                var auth = await _beatKhanaGameAuth.RequestTokenAsync();
+                var auth = await _beatKhanaGameAuth.RequestTokenAsync(token);
                 
                 _siraLog.Notice("Authenticated as " + auth.PlatformId);
                 

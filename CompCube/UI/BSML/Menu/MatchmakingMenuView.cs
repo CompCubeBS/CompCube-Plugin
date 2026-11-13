@@ -1,8 +1,11 @@
 ﻿using CompCube.Configuration;
 using CompCube.UI.BSML.EarlyLeaveWarning;
 using Reactive;
+using Reactive.BeatSaber;
 using Reactive.BeatSaber.Components;
+using Reactive.Components;
 using Reactive.Yoga;
+using TMPro;
 using UnityEngine;
 
 namespace CompCube.UI.BSML.Menu;
@@ -69,10 +72,9 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                 }.Bind(ref _segmentedControl),
                 
                 
-                new BsPrimaryTextButton()
+                new BsPrimaryButton()
                 {
-                    Text = "Find Match",
-                    RichText = true,
+                    
                     sInteractable = _isConnected.Map(x => !x),
                     OnClick = () => YesOrNoDialogModal.CreateOnTransform(ContentTransform, 
                         "Competitive matches may take a long time. Only queue when you can finish the match and protect competitive integrity. Are you sure you want to continue?",
@@ -84,12 +86,41 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                         () => { }),
                     FlexItem = {
                         Size = new YogaVector(40, 11)
+                    },
+                    
+                    ConstructContent = (color, skew) => new Layout()
+                    {
+                        FlexController =
+                        {
+                            FlexDirection = FlexDirection.Row,
+                            AlignContent = Align.Center,
+                            JustifyContent = Justify.Center,
+                            Gap = 1
+                        },
+                        
+                        Children =
+                        {
+                            new Spinner()
+                            {
+                                sEnabled = _isConnected.Map(x => x),
+                                FlexItem =
+                                {
+                                    Size = 3
+                                }
+                            },
+                            
+                            new Label()
+                            {
+                                sText = _isConnected.Map(x => x ? "FINDING MATCH..." : "FIND MATCH"),
+                                RichText = true,
+                                FontStyle = FontStyles.Italic
+                            }
+                        }
                     }
                 },
                 
-                new BsTextButton()
+                new BsAeroButton()
                 {
-                    Text = "Cancel",
                     sEnabled = _isConnected.Map(x => x),
                     FlexItem =
                     {
@@ -98,6 +129,13 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                     OnClick = () =>
                     {
                         CancelButtonPressed?.Invoke();
+                    },
+
+                    Colors = GetHoveredColorScheme(Color.red),
+                    
+                    ConstructContent = (color , skew) => new Label()
+                    {
+                        Text = "Cancel",
                     }
                 },
                 
@@ -126,5 +164,21 @@ public class MatchmakingMenuView(PluginConfig pluginConfig) : ReactiveComponent
                 }
             }
         }.Use();
+    }
+
+    private BsAeroButtonColors GetHoveredColorScheme(Color hovered)
+    {
+        var colors = BeatSaberStyle.BsAeroButtonColors;
+
+        return colors with
+        {
+            BackgroundColors = colors.BackgroundColors with
+            {
+                Colors = colors.BackgroundColors.Colors with
+                {
+                    HoveredColor = hovered
+                }
+            }
+        };
     }
 }

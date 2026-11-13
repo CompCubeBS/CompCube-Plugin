@@ -20,6 +20,8 @@ public class MatchmakingMenuViewController : ViewController
     
     public Action? OnAboutButtonPressedCallback { get; set; }
     
+    private CancellationTokenSource _cts = new();
+    
     private void Awake()
     {
         new MatchmakingMenuView(_config).Bind(ref _view).Use(transform);
@@ -48,13 +50,17 @@ public class MatchmakingMenuViewController : ViewController
     {
         try
         {
-            await _serverListener.DisconnectAsync();
+            _cts.Cancel();
             
             _view.IsConnected = false;
+            
+            await _serverListener.DisconnectAsync();
         }
         catch (Exception e)
         {
             _siraLog.Error(e);
+            
+            _view.IsConnected = false;
         }
     }
 
@@ -62,6 +68,10 @@ public class MatchmakingMenuViewController : ViewController
     {
         try
         {
+            _cts = new CancellationTokenSource();
+            
+            _view.IsConnected = true;
+            
             var canConnectToServer = await _serverChecker.CanConnectToServer();
 
             if (!canConnectToServer.CanConnect)
@@ -70,13 +80,12 @@ public class MatchmakingMenuViewController : ViewController
                 return;
             }
 
-            await _serverListener.ConnectAsync($"queue/{queue}");
-
-            _view.IsConnected = true;
+            await _serverListener.ConnectAsync($"queue/{queue}", _cts.Token);
         }
         catch (Exception e)
         {
             _siraLog.Error(e);
+            _view.IsConnected = false;
             OkDialogModal.CreateOnTransform(transform, "Failed to connect to server:\n" + e.Message, true);
         }
     }
