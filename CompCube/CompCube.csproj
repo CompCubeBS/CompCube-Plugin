@@ -275,7 +275,6 @@
       <None Remove="UI\BSML\EarlyLeaveWarning\EarlyLeaveWarningModalView.bsml" />
       <None Remove="UI\BSML\Match\WaitingForOpponentsPickView.bsml" />
       <None Remove="UI\BSML\Match\Modal\PhasePopupView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\Modal\PhasePopupView.bsml" />
       <None Remove="UI\BSML\Modal\WarningModalView.bsml" />
       <None Remove="UI\BSML\Match\BottomScreenMatchStateView.bsml" />
       <None Remove="UI\BSML\Components\CustomMapList\CustomMapList.bsml" />
@@ -285,5 +284,8 @@
       <None Remove="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
       <None Remove="UI\BSML\Match\MatchPreviewView.bsml" />
       <None Remove="UI\BSML\Info\ContributorsView.bsml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="UI\BSML\Match\Modal\" />
     </ItemGroup>
 </Project>

@@ -25,13 +25,13 @@ public class DownloadingBeatmapsModal : ReactiveComponent
     
     private State<int> _beatmapsDownloaded = null!;
 
-    private Modal _modal = null!;
+    private Reactive.BeatSaber.Components.Modal _modal = null!;
     
     protected override GameObject Construct()
     {
         _beatmapsDownloaded = Remember(0);
         
-        return new Modal()
+        return new Reactive.BeatSaber.Components.Modal()
         {
             FlexItem =
             {

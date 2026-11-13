@@ -10,7 +10,7 @@ using AnimationCurve = Reactive.AnimationCurve;
 using Background = Reactive.BeatSaber.Components.Background;
 using Label = Reactive.Components.Basic.Label;
 
-namespace CompCube.UI.BSML.Match.Modal;
+namespace CompCube.UI.BSML.Modal;
 
 public class PhasePopupModal : ReactiveComponent
 {

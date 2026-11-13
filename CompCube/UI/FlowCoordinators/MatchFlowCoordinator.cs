@@ -13,7 +13,7 @@ using HMUI;
 using CompCube.Extensions;
 using CompCube.Game.MatchState;
 using CompCube.UI.BSML.EarlyLeaveWarning;
-using CompCube.UI.BSML.Match.Modal;
+using CompCube.UI.BSML.Modal;
 using SiraUtil.Logging;
 using SongCore;
 using UnityEngine;
