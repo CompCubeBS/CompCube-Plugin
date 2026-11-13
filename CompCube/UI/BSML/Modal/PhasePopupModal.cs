@@ -89,6 +89,8 @@ public class PhasePopupModal : ReactiveComponent
                         new Label()
                         {
                             sText = _subText.Map(x => x),
+                            Alignment = TextAlignmentOptions.Midline,
+                            FontStyle = FontStyles.Italic,
                         }
                     }
                 }.AsBlurBackground()

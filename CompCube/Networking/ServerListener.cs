@@ -125,12 +125,15 @@ namespace CompCube.Networking
                     return;
                 }
 
+                
                 var json = Encoding.UTF8.GetString(data);
 
                 if (json == "")
                     return;
                 
+                #if DEBUG
                 _siraLog.Info(json);
+                #endif
 
                 var packet = ServerPacket.Deserialize(json);
 
