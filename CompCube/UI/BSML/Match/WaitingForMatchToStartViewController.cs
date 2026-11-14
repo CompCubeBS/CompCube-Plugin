@@ -33,7 +33,7 @@ namespace CompCube.UI.BSML.Match
         [UIComponent("difficultySegmentData")] private readonly TextSegmentedControl _difficultySegmentData = null!;
         [UIComponent("categorySegmentData")] private readonly TextSegmentedControl _categorySegmentData = null!;
 
-        private CustomLevelBar? _customLevelBar = null;
+        private BsLevelBar? _customLevelBar = null;
          
         private DateTime? _startTime;
 
@@ -42,7 +42,7 @@ namespace CompCube.UI.BSML.Match
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            _customLevelBar ??= Resources.FindObjectsOfTypeAll<CustomLevelBar>()
+            _customLevelBar ??= Resources.FindObjectsOfTypeAll<BsLevelBar>()
                 .First(i => i.name == "WaitingForMatchStartLevelBar");
             
             _postParseCallback?.Invoke();

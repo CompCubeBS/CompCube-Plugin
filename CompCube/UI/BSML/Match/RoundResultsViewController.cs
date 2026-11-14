@@ -12,20 +12,18 @@ using CompCube.Game;
 using CompCube.Game.MatchState;
 using CompCube.UI.BSML.Components.CustomLevelBar;
 using CompCube.UI.BSML.EarlyLeaveWarning;
+using HMUI;
 using SiraUtil.Logging;
 using UnityEngine;
 using Zenject;
 
 namespace CompCube.UI.BSML.Match
 {
-    [ViewDefinition("CompCube.UI.BSML.Match.RoundResultsView.bsml")]
-    public class RoundResultsViewController : BSMLAutomaticViewController
+    public class RoundResultsViewController : ViewController
     {
         [Inject] private readonly MatchStateManager _matchStateManager = null!;
         [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
         [Inject] private readonly SiraLog _siraLog = null!;
-        
-        [UIValue("titleBgColor")] private string TitleBgColor { get; set; } = "#FFA500";
         [UIValue("titleText")] private string TitleText { get; set; } = "";
 
         [UIValue("winnerScoreText")] private string WinnerScoreText { get; set; } = "";
@@ -37,13 +35,11 @@ namespace CompCube.UI.BSML.Match
         
         [UIValue("replayButtonInteractable")] private bool ReplayButtonInteractable { get; set; } = false;
 
-        private CustomLevelBar? _customLevelbar;
+        private BsLevelBar? _customLevelbar;
 
-        [UIAction("#post-parse")]
-        void PostParse()
+        void Awake()
         {
-            _customLevelbar ??= Resources.FindObjectsOfTypeAll<CustomLevelBar>()
-                .First(i => i.name == "RoundResultsLevelBar");
+            new RoundResultsView().Use(transform);
         }
 
         [UIAction("replayButtonOnClick")]
@@ -102,15 +98,7 @@ namespace CompCube.UI.BSML.Match
                 LoserScoreText = FormatScore(loserScore, loser, 2);
             
                 DamageText = (damageAmount * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
-            
-                NotifyPropertyChanged(null);
             }
         }
-
-        private string FormatScore(Score score, UserProfile user, int placement) =>
-            $"{(placement)}. {user.GetFormattedUserName()} - " +
-            $"{(score.RelativeScore * 100):F}% " +
-            $"{(score.FullCombo ? "FC".FormatWithHtmlColor("#90EE90") : $"{score.Misses}x".FormatWithHtmlColor("#FF7F7F"))}" +
-            $"{(score.ProMode ? " (PM)" : "")}";
     }
 }

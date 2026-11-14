@@ -1,19 +1,15 @@
 using CompCube_Models.Models.ClientData;
 using CompCube.Extensions;
 using CompCube.Utils;
-using HMUI;
 using Reactive;
 using Reactive.BeatSaber;
 using Reactive.BeatSaber.Components;
 using Reactive.Compiler;
-using Reactive.Components.Basic;
 using Reactive.Yoga;
 using TMPro;
 using UnityEngine;
-using Zenject;
 using AnimationCurve = Reactive.AnimationCurve;
 using Background = Reactive.BeatSaber.Components.Background;
-using Image = UnityEngine.UI.Image;
 using Label = Reactive.BeatSaber.Components.Label;
 
 namespace CompCube.UI.BSML.Match;
