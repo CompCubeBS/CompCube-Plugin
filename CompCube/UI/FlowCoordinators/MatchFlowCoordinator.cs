@@ -206,7 +206,7 @@ namespace CompCube.UI.FlowCoordinators
         {
             this.ReplaceViewControllerSynchronously(_roundResultsViewController);
                 
-            _roundResultsViewController.PopulateData(results.RedScore, results.BlueScore, results.DamageAmount, _matchStateManager.DamageMultiplier, _lastPlayed!);
+            _roundResultsViewController.PopulateData(new(_matchStateManager.RedPlayer, results.RedScore), new(_matchStateManager.BluePlayer, results.BlueScore), results.DamageAmount, _matchStateManager.DamageMultiplier, _lastPlayed!);
         }
 
         private void OnPickPhaseStarted(StartPickPhasePacket packet)

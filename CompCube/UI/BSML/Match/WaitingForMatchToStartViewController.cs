@@ -42,8 +42,8 @@ namespace CompCube.UI.BSML.Match
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            _customLevelBar ??= Resources.FindObjectsOfTypeAll<BsLevelBar>()
-                .First(i => i.name == "WaitingForMatchStartLevelBar");
+            // _customLevelBar ??= Resources.FindObjectsOfTypeAll<BsLevelBar>()
+            //     .First(i => i.name == "WaitingForMatchStartLevelBar");
             
             _postParseCallback?.Invoke();
         }
@@ -84,7 +84,7 @@ namespace CompCube.UI.BSML.Match
                 
                 _startTime = startTime;
             
-                _customLevelBar?.Setup(votingMap);
+                // _customLevelBar?.Setup(votingMap);
 
                 var beatmap = votingMap.GetBeatmapLevel();
                 var key = votingMap.GetBeatmapKey();

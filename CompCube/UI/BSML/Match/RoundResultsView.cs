@@ -1,4 +1,5 @@
 ﻿using CompCube_Models.Models.ClientData;
+using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube.Extensions;
 using CompCube.UI.BSML.Components.CustomLevelBar;
@@ -34,16 +35,27 @@ public class RoundResultsView : ReactiveComponent
         set => _loserMatchScore.Value = value;
     }
 
+    public VotingMap MapPlayed
+    {
+        get => _mapPlayed.Value;
+        set => _mapPlayed.Value = value;
+    }
+
     private State<bool> _didWin = null!;
 
     private BsLevelBar _bsLevelBar = null!;
 
     private State<MatchScore> _winnerMatchScore = null!;
     private State<MatchScore> _loserMatchScore = null!;
+
+    private State<VotingMap> _mapPlayed = null!;
     
     protected override GameObject Construct()
     {
         _didWin = Remember(true);
+        _winnerMatchScore = Remember(new MatchScore(Constants.EmptyUser, Score.Empty));
+        _loserMatchScore = Remember(new MatchScore(Constants.EmptyUser, Score.Empty));
+        _mapPlayed = Remember(null as VotingMap);
         
         return new Layout()
         {
@@ -52,11 +64,36 @@ public class RoundResultsView : ReactiveComponent
                 AlignItems = Align.Center,
                 JustifyContent = Justify.Center,
                 FlexDirection = FlexDirection.Column,
+                
+                Gap = 15
             },
+            
+            FlexItem =
+            {
+                Size = new YogaVector()
+                {
+                    y = 100
+                }
+            },
+            
+            // Sprite = BeatSaberResources.Sprites.background,
+            // Color = new Color(0.5f, 0.5f, 0.5f, 1f),
             
             Children =
             {
-                new BsLevelBar().Bind(ref _bsLevelBar),
+                new BsLevelBar()
+                {
+                    FlexItem =
+                    {
+                        Position = new YogaFrame()
+                        {
+                            left = -85,
+                            top = -10
+                        }
+                    },
+                    
+                    sData = _mapPlayed.Map(x => x)
+                }.Bind(ref _bsLevelBar),
                 
                 new Background()
                 {
@@ -69,7 +106,9 @@ public class RoundResultsView : ReactiveComponent
                         }
                     },
                     
-                    Sprite = BeatSaberResources.Sprites.backgroundRight,
+                    Sprite = BeatSaberResources.Sprites.background,
+                    
+                    PixelsPerUnit = 15,
                     
                     GradientColor0 = Constants.WinningBgColor,
                     GradientColor1 = new Color(0f, 0f, 0f, 0f),
@@ -81,7 +120,8 @@ public class RoundResultsView : ReactiveComponent
                         {
                             Alignment = TextAlignmentOptions.Midline,
                             Text = "RESULTS",
-                            FontSize = 10
+                            FontSize = 10,
+                            FontStyle = FontStyles.Italic,
                         }
                     }
                 },
@@ -93,6 +133,7 @@ public class RoundResultsView : ReactiveComponent
                         Gap = 1.5f,
                         AlignItems = Align.Center,
                         JustifyContent = Justify.Center,
+                        FlexDirection = FlexDirection.Column,
                     },
                     
                     Children =

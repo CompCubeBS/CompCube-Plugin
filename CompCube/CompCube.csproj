@@ -238,7 +238,6 @@
       <EmbeddedResource Include="UI\BSML\Match\MatchResultsView.bsml" />
       <None Remove="UI\BSML\MatchmakingMenuView.bsml" />
       <None Remove="UI\BSML\VotingScreenView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\WaitingView.bsml" />
       <EmbeddedResource Include="UI\BSML\Match\RoundResultsView.bsml" />
       <EmbeddedResource Include="UI\BSML\Match\VotingScreenView.bsml" />
       <EmbeddedResource Include="UI\BSML\Match\WaitingForMatchToStartView.bsml" />
