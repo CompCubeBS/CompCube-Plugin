@@ -341,6 +341,8 @@ namespace CompCube.UI.FlowCoordinators
 
             IEnumerator HandleReplayRequestedCoroutine()
             {
+                _bottomScreenMatchStateViewController.UpdateHealth(_matchStateManager.RedHealth, _matchStateManager.BlueHealth);
+                
                 StartCoroutine(ShowMapPreviewViewAndStartMatch(packet.MapToReplay!));
 
                 yield return new WaitUntil(() =>

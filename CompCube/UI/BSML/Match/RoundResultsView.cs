@@ -1,4 +1,5 @@
-﻿using CompCube_Models.Models.ClientData;
+﻿using System.Globalization;
+using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube.Extensions;
@@ -7,15 +8,17 @@ using CompCube.Utils;
 using Reactive;
 using Reactive.BeatSaber;
 using Reactive.Compiler;
-using Reactive.Components.Basic;
 using Reactive.Yoga;
 using TMPro;
 using UnityEngine;
 using Background = Reactive.BeatSaber.Components.Background;
+using Reactive.BeatSaber.Components;
+using AnimationCurve = Reactive.AnimationCurve;
+using Label = Reactive.Components.Basic.Label;
 
 namespace CompCube.UI.BSML.Match;
 
-public class RoundResultsView : ReactiveComponent
+public class RoundResultsView(float damageTextAnimationTime) : ReactiveComponent
 {
     public bool DidWin
     {
@@ -41,6 +44,30 @@ public class RoundResultsView : ReactiveComponent
         set => _mapPlayed.Value = value;
     }
 
+    public float Damage
+    {
+        get => _damage.Value;
+        set
+        {
+            _damage.SetValueImmediate(0f);
+            _damage.TargetValue = value;
+        }
+    }
+
+    public bool ReplayButtonActive
+    {
+        get => _replayButtonActive.Value;
+        set => _replayButtonActive.Value = value;
+    }
+    
+    public bool ReplayButtonInteractable
+    {
+        get => _replayButtonInteractable.Value;
+        set => _replayButtonInteractable.Value = value;
+    }
+
+    public Action? ReplayButtonClickedCallback { get; set; } = null;
+
     private State<bool> _didWin = null!;
 
     private BsLevelBar _bsLevelBar = null!;
@@ -49,6 +76,11 @@ public class RoundResultsView : ReactiveComponent
     private State<MatchScore> _loserMatchScore = null!;
 
     private State<VotingMap> _mapPlayed = null!;
+
+    private AnimatedState<float> _damage = null!;
+
+    private State<bool> _replayButtonActive = null!;
+    private State<bool> _replayButtonInteractable = null!;
     
     protected override GameObject Construct()
     {
@@ -56,6 +88,9 @@ public class RoundResultsView : ReactiveComponent
         _winnerMatchScore = Remember(new MatchScore(Constants.EmptyUser, Score.Empty));
         _loserMatchScore = Remember(new MatchScore(Constants.EmptyUser, Score.Empty));
         _mapPlayed = Remember(null as VotingMap);
+        _damage = RememberAnimated(0f, damageTextAnimationTime.sec, AnimationCurve.EaseOutExpo);
+        _replayButtonActive = Remember(true);
+        _replayButtonInteractable = Remember(true);
         
         return new Layout()
         {
@@ -65,7 +100,7 @@ public class RoundResultsView : ReactiveComponent
                 JustifyContent = Justify.Center,
                 FlexDirection = FlexDirection.Column,
                 
-                Gap = 15
+                Gap = 2.5f
             },
             
             FlexItem =
@@ -88,7 +123,7 @@ public class RoundResultsView : ReactiveComponent
                         Position = new YogaFrame()
                         {
                             left = -85,
-                            top = -10
+                            top = -17.5f
                         }
                     },
                     
@@ -141,10 +176,74 @@ public class RoundResultsView : ReactiveComponent
                         CreateScoreText(_winnerMatchScore, 1),
                         CreateScoreText(_loserMatchScore, 2)
                     }
+                },
+                
+                new Background()
+                {
+                    FlexController =
+                    {
+                        AlignContent = Align.Center,
+                        AlignItems = Align.Center,
+                        JustifyContent = Justify.Center,
+                        FlexDirection = FlexDirection.Column,
+                        Gap = 0f,
+                        Padding = 3f
+                    },
+                    
+                    FlexItem =
+                    {
+                        Size = new YogaVector()
+                        {
+                            x = 30,
+                            y = 12.5f
+                        }
+                    },
+                    
+                    Children =
+                    {
+                        new Label()
+                        {
+                            Text = "Damage",
+                            
+                            Alignment = TextAlignmentOptions.Midline,
+                            FontStyle = FontStyles.Italic,
+                        },
+                        new Label()
+                        {
+                            sText = _damage.Map(x => x.ToString("P", CultureInfo.InvariantCulture)),
+                            FontStyle = FontStyles.Italic,
+                            Alignment = TextAlignmentOptions.Midline,
+                            FontSize = 8,
+                        }
+                    }
+                }.AsBlurBackground(),
+                
+                new BsTextButton()
+                {
+                    Text = "REPLAY",
+                    
+                    FlexItem =
+                    {
+                        Size = new YogaVector()
+                        {
+                            x = 34,
+                            y = 10
+                        }
+                    },
+                    
+                    OnClick = () =>
+                    {
+                        ReplayButtonClickedCallback?.Invoke();
+                    },
+                    
+                    sInteractable = _replayButtonInteractable.Map(x => x),
+                    sEnabled = _replayButtonActive.Map(x => x)
                 }
             }
         }.Use();
     }
+
+    public void ResetDamageAmountImmediate() => _damage.SetValueImmediate(0f);
 
     [StateGen]
     private Label CreateScoreText(State<MatchScore> score, int placement)

@@ -1,16 +1,7 @@
 ﻿using System.Collections;
-using System.Globalization;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
-using CompCube_Models.Models.Packets.ServerPackets;
-using JetBrains.Annotations;
-using CompCube.Extensions;
-using CompCube.Game;
 using CompCube.Game.MatchState;
-using CompCube.UI.BSML.Components.CustomLevelBar;
 using CompCube.UI.BSML.EarlyLeaveWarning;
 using HMUI;
 using Reactive;
@@ -22,14 +13,19 @@ namespace CompCube.UI.BSML.Match
 {
     public class RoundResultsViewController : ViewController
     {
+        private const float DamageTextAnimationTimeSeconds = 3f;
+        
+        [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
         [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
         [Inject] private readonly MatchStateManager _matchStateManager = null!;
+
+        [Inject] private readonly SiraLog _siraLog = null!;
         
         private RoundResultsView _roundResultsView = null!;
 
         void Awake()
         {
-            new RoundResultsView().Bind(ref _roundResultsView).Use(transform);
+            new RoundResultsView(DamageTextAnimationTimeSeconds).Bind(ref _roundResultsView).Use(transform);
         }
         
         public void PopulateData(MatchScore redScore, MatchScore blueScore, float damageAmount, float multiplier, VotingMap votingMap)
@@ -55,6 +51,24 @@ namespace CompCube.UI.BSML.Match
                 _roundResultsView.WinningScore = winnerScore;
                 _roundResultsView.LosingScore = loserScore;
                 _roundResultsView.MapPlayed = votingMap;
+                
+                _roundResultsView.ReplayButtonActive = winner.PlatformId != _matchStateManager.Self.PlatformId;
+                _roundResultsView.ReplayButtonInteractable = _matchStateManager.RemainingReplays > 0;
+
+                _roundResultsView.ReplayButtonClickedCallback = HandleReplayButtonClicked;
+                
+                _roundResultsView.ResetDamageAmountImmediate();
+                
+                yield return new WaitForSeconds(1f);
+                
+                _roundResultsView.Damage = damageAmount * multiplier;
+                
+                yield return new WaitForSeconds(DamageTextAnimationTimeSeconds + 2f);
+
+                if (!isActivated)
+                    yield return null;
+                
+                _bottomScreenMatchStateViewController.UpdateHealth(redWon ? _matchStateManager.RedHealth : _matchStateManager.RedHealth - damageAmount * multiplier, !redWon ? _matchStateManager.BlueHealth : _matchStateManager.BlueHealth - damageAmount * multiplier);
 
                 /*_customLevelbar?.Setup(votingMap);
 
@@ -70,6 +84,25 @@ namespace CompCube.UI.BSML.Match
 
                 DamageText = (damageAmount * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);*/
             }
+        }
+
+        private void HandleReplayButtonClicked()
+        {
+            YesOrNoDialogModal.CreateOnTransform(transform, "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
+                true, 
+                async void () =>
+                {
+                    try
+                    {
+                        _roundResultsView.ReplayButtonInteractable = false;
+
+                        await _matchStateManager.UseReplay();
+                    }
+                    catch (Exception e)
+                    {
+                        _siraLog.Error(e);
+                    }
+                });
         }
     }
 }

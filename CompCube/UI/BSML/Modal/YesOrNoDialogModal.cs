@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace CompCube.UI.BSML.EarlyLeaveWarning;
 
-public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, Action yesButtonOnClick, Action noButtonOnClick) : ReactiveComponent
+public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, Action yesButtonOnClick, Action? noButtonOnClick) : ReactiveComponent
 {
     private Dialog _dialogModal = null!;
 
@@ -68,7 +68,7 @@ public class YesOrNoDialogModal(string text, bool clickerinoOfferinoCloserino, A
         }.Bind(ref _dialogModal).Use();
     }
 
-    public static void CreateOnTransform(Transform transform, string text, bool clickOffCloses, Action yesButtonOnClick, Action noButtonOnClick)
+    public static void CreateOnTransform(Transform transform, string text, bool clickOffCloses, Action yesButtonOnClick, Action? noButtonOnClick = null)
     {
         var modal = new YesOrNoDialogModal(text, clickOffCloses, yesButtonOnClick, noButtonOnClick);
         
