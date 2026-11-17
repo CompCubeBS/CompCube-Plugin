@@ -13,6 +13,7 @@ using CompCube.UI.FlowCoordinators;
 using CompCube.UI.Sound;
 using CompCube.UI.ViewManagers;
 using CompCube.UI.BSML.EarlyLeaveWarning;
+using CompCube.UI.Dev;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Zenject;
@@ -60,6 +61,10 @@ namespace CompCube.Installers
                 .AsSingle();
 
             Container.BindInterfacesAndSelfTo<FireworksManager>().AsSingle();
+
+            Container.BindInterfacesAndSelfTo<DevFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+            Container.BindInterfacesAndSelfTo<DevMenuButtonManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<DevViewController>().FromNewComponentAsViewController().AsSingle();
         }
     }
 }
