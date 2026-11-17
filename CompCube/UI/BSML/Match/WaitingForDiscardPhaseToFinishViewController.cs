@@ -25,7 +25,7 @@ public class WaitingForDiscardPhaseToFinishViewController : BSMLAutomaticViewCon
         _customMapListController = CustomMapListController.ParseOntoViewController(this, null, 0f, -10f);
     }
 
-    public void PopulateData(VotingMap[] votingMaps, bool waitingForOpponent = true)
+    public void PopulateData(CCBeatmapData[] votingMaps, bool waitingForOpponent = true)
     {
         _sharedCoroutineStarter.Run(PopulateDataCoroutine());
         return;

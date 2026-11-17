@@ -21,15 +21,15 @@ public class CustomMapListController : BSMLAutomaticViewController
     [UIComponent("mapList")] private readonly CustomListTableData _mapListTableData = null!;
     private VotingListDataSource _votingListDataSource = null!;
 
-    private Action<VotingMap>? _handleMapSelectedCallback;
+    private Action<CCBeatmapData>? _handleMapSelectedCallback;
     
     [UIValue("anchorPosY")] private float AnchorPosY { get; set; }
     [UIValue("anchorPosX")] private float AnchorPosX { get; set; }
 
-    public VotingMap[] MapsInList => _votingListDataSource.Data.ToArray();
+    public CCBeatmapData[] MapsInList => _votingListDataSource.Data.ToArray();
 
     public static CustomMapListController ParseOntoViewController(ViewController viewController,
-        Action<VotingMap>? handleMapSelectedCallback, float xPos = 0f, float yPos = 0f)
+        Action<CCBeatmapData>? handleMapSelectedCallback, float xPos = 0f, float yPos = 0f)
     {
         var controller = BeatSaberUI.CreateViewController<CustomMapListController>();
         
@@ -51,7 +51,7 @@ public class CustomMapListController : BSMLAutomaticViewController
         NotifyPropertyChanged(null);
     }
     
-    public void SetMaps(VotingMap[] maps, bool interactable = true)
+    public void SetMaps(CCBeatmapData[] maps, bool interactable = true)
     {
         _sharedCoroutineStarter.Run(PopulateDataCoroutine());
         return;
@@ -87,7 +87,7 @@ public class CustomMapListController : BSMLAutomaticViewController
     {
         _mapListTableData.TableView.ClearSelection();
     }
-    public void RemoveMapFromList(VotingMap map)
+    public void RemoveMapFromList(CCBeatmapData map)
     {
         _votingListDataSource.Data.Remove(map);
         _votingListDataSource.TableView.ReloadData();
@@ -98,7 +98,7 @@ public class VotingListDataSource : MonoBehaviour, TableView.IDataSource
 {
     public TableView TableView { get; private set; }
         
-    public List<VotingMap> Data { get; private set; } = new();
+    public List<CCBeatmapData> Data { get; private set; } = new();
 
     private LevelListTableCell _tableCellPrefab;
     
@@ -121,7 +121,7 @@ public class VotingListDataSource : MonoBehaviour, TableView.IDataSource
         
     public void Init(TableView tableView) => TableView = tableView;
 
-    public void SetData(List<VotingMap> maps, bool interactable = true)
+    public void SetData(List<CCBeatmapData> maps, bool interactable = true)
     {
         Data = maps;
         _interactable = interactable;

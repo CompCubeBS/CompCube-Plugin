@@ -38,7 +38,7 @@ public class RoundResultsView(float damageTextAnimationTime) : ReactiveComponent
         set => _loserMatchScore.Value = value;
     }
 
-    public VotingMap MapPlayed
+    public CCBeatmapData MapPlayed
     {
         get => _mapPlayed.Value;
         set => _mapPlayed.Value = value;
@@ -75,7 +75,7 @@ public class RoundResultsView(float damageTextAnimationTime) : ReactiveComponent
     private State<MatchScore> _winnerMatchScore = null!;
     private State<MatchScore> _loserMatchScore = null!;
 
-    private State<VotingMap> _mapPlayed = null!;
+    private State<CCBeatmapData> _mapPlayed = null!;
 
     private AnimatedState<float> _damage = null!;
 
@@ -87,7 +87,7 @@ public class RoundResultsView(float damageTextAnimationTime) : ReactiveComponent
         _didWin = Remember(true);
         _winnerMatchScore = Remember(new MatchScore(Constants.EmptyUser, Score.Empty));
         _loserMatchScore = Remember(new MatchScore(Constants.EmptyUser, Score.Empty));
-        _mapPlayed = Remember(null as VotingMap);
+        _mapPlayed = Remember(null as CCBeatmapData);
         _damage = RememberAnimated(0f, damageTextAnimationTime.sec, AnimationCurve.EaseOutExpo);
         _replayButtonActive = Remember(true);
         _replayButtonInteractable = Remember(true);

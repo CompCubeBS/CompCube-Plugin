@@ -34,9 +34,9 @@ public interface IServerListener
 
     public Task ConnectAsync(string queue, CancellationToken token, Action? onConnectedCallback = null);
 
-    public Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps);
+    public Task DiscardMapsAsync(IReadOnlyCollection<CCBeatmapData> maps);
 
-    public Task SelectMapAsync(VotingMap map);
+    public Task SelectMapAsync(CCBeatmapData map);
 
     public Task SubmitScoreAsync(Score score);
 

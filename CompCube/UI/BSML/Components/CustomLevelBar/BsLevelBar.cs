@@ -10,17 +10,17 @@ public class BsLevelBar : ReactiveComponent
 {
     private LevelBar _levelBar = null!;
 
-    public VotingMap? Data
+    public CCBeatmapData? Data
     {
         get => _data.Value;
         set => _data.Value = value;
     }
 
-    private State<VotingMap> _data = null!;
+    private State<CCBeatmapData> _data = null!;
     
     protected override GameObject Construct()
     {
-        _data = Remember(null as VotingMap);
+        _data = Remember(null as CCBeatmapData);
         
         var gameObject = new GameObject("LevelBar");
         
@@ -31,7 +31,7 @@ public class BsLevelBar : ReactiveComponent
         return gameObject;
     }
 
-    private void HandleStateChange(VotingMap? data)
+    private void HandleStateChange(CCBeatmapData? data)
     {
         if (data is null)
         {

@@ -28,7 +28,7 @@ namespace CompCube.UI.BSML.Match
             new RoundResultsView(DamageTextAnimationTimeSeconds).Bind(ref _roundResultsView).Use(transform);
         }
         
-        public void PopulateData(MatchScore redScore, MatchScore blueScore, float damageAmount, float multiplier, VotingMap votingMap)
+        public void PopulateData(MatchScore redScore, MatchScore blueScore, float damageAmount, float multiplier, CCBeatmapData votingMap)
         {
             _sharedCoroutineStarter.Run(PopulateDataCoroutine());
             return;

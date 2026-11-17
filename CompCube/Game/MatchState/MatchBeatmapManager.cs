@@ -9,16 +9,16 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
 {
     [Inject] private readonly IServerListener _serverListener = null!;
     
-    private List<VotingMap> _discardedMaps = [];
+    private List<CCBeatmapData> _discardedMaps = [];
     private bool _discardSubmissionStarted;
     
-    public IReadOnlyList<VotingMap?> DiscardedMaps => _discardedMaps;
+    public IReadOnlyList<CCBeatmapData?> DiscardedMaps => _discardedMaps;
 
     public bool InDiscardPhase { get; private set; } = true;
 
-    private List<VotingMap> _maps = [];
+    private List<CCBeatmapData> _maps = [];
 
-    public IReadOnlyList<VotingMap> AvailablePicks => _maps;
+    public IReadOnlyList<CCBeatmapData> AvailablePicks => _maps;
     
     public bool CanDiscardMaps => InDiscardPhase && DiscardedMaps.Count < 2 && !_discardSubmissionStarted;
 
@@ -26,7 +26,7 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
 
     public event Action? CanNoLongerDiscardMaps;
 
-    public bool DiscardMap(VotingMap map)
+    public bool DiscardMap(CCBeatmapData map)
     {
         if (!CanDiscardMaps || !_maps.Remove(map))
             return false;

@@ -54,7 +54,7 @@ namespace CompCube.UI.FlowCoordinators
 
         private bool _hasShownFinalCardsToPlayer = false;
 
-        private VotingMap? _lastPlayed;
+        private CCBeatmapData? _lastPlayed;
 
         public void PopulateData(MatchCreatedPacket packet, Action? onMatchFinishedCallback)
         {
@@ -288,7 +288,7 @@ namespace CompCube.UI.FlowCoordinators
             _matchBeatmapManager.SkipDiscardingMaps();
         }
 
-        private void HandleVotingScreenMapSelected(VotingMap votingMap)
+        private void HandleVotingScreenMapSelected(CCBeatmapData votingMap)
         {
             if (!_standardLevelDetailViewManager.ManagedController.isActivated)
                 _votingScreenNavigationController.PushViewController(_standardLevelDetailViewManager.ManagedController,
@@ -310,7 +310,7 @@ namespace CompCube.UI.FlowCoordinators
             _soundEffectManager.PlayBeatmapLevelPreview(beatmap);
         }
 
-        private async void HandleStandardLevelDetailButtonPressed(VotingMap votingMap)
+        private async void HandleStandardLevelDetailButtonPressed(CCBeatmapData votingMap)
         {
             try
             {
@@ -354,7 +354,7 @@ namespace CompCube.UI.FlowCoordinators
         }
 
         # region Leaderboard Functions
-        private void ShowLeaderboard(VotingMap votingMap)
+        private void ShowLeaderboard(CCBeatmapData votingMap)
         {
             StartCoroutine(ShowLeaderboardCoroutine());
             return;
@@ -373,7 +373,7 @@ namespace CompCube.UI.FlowCoordinators
         }
 
         #endregion
-        private IEnumerator ShowMapPreviewViewAndStartMatch(VotingMap map)
+        private IEnumerator ShowMapPreviewViewAndStartMatch(CCBeatmapData map)
         {
             yield return new WaitForEndOfFrame();
             

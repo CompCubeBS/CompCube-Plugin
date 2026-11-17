@@ -71,7 +71,7 @@ namespace CompCube.UI.BSML.Match
         [UIValue("songWallCountText")] private string SongWallCountText { get; set; } = "";
         [UIValue("songBombCountText")] private string SongBombCountText { get; set; } = "";
         
-        public void PopulateData(VotingMap votingMap, DateTime? startTime)
+        public void PopulateData(CCBeatmapData votingMap, DateTime? startTime)
         {
             StartCoroutine(PopulateDataCoroutine());
 

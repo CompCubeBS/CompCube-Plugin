@@ -92,12 +92,12 @@ namespace CompCube.Networking
             }
         }
 
-        public async Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps)
+        public async Task DiscardMapsAsync(IReadOnlyCollection<CCBeatmapData> maps)
         {
             await SendPacketAsync(new DiscardMapsPacket(maps.ToArray()));
         }
 
-        public async Task SelectMapAsync(VotingMap map)
+        public async Task SelectMapAsync(CCBeatmapData map)
         {
             await SendPacketAsync(new MapSelectionPacket(map));
         }

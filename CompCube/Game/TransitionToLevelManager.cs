@@ -24,7 +24,7 @@ public class TransitionToLevelManager
     private Action<LevelCompletionResults, StandardLevelScenesTransitionSetupDataSO>? _menuSwitchCallback;
         
     public void StartLevel(
-        VotingMap level, 
+        CCBeatmapData level, 
         DateTime unpauseTime, 
         bool proMode,
         Action<LevelCompletionResults, StandardLevelScenesTransitionSetupDataSO> onLevelCompletedCallback)

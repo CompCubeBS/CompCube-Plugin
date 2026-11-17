@@ -22,7 +22,7 @@ public class VotingScreenViewController : BSMLAutomaticViewController
 {
     [Inject] private readonly SiraLog _log = null!;
     
-    public event Action<VotingMap>? MapSelected;
+    public event Action<CCBeatmapData>? MapSelected;
     private Action? _ranOutOfTimeCallback = null;
 
     [UIValue("timerText")] private string TimerText { get; set; } = "";
@@ -73,12 +73,12 @@ public class VotingScreenViewController : BSMLAutomaticViewController
         _customMapListController.ClearSelection();
     }
 
-    public void RemoveMapFromList(VotingMap map)
+    public void RemoveMapFromList(CCBeatmapData map)
     {
         _customMapListController.SetMaps(_customMapListController.MapsInList.Where(i => i != map).ToArray());
     }
 
-    public void PopulateData(string text, VotingMap[] maps, int waitTime, Action? skipButtonPressedCallback = null, Action? timerRanOutCallback = null)
+    public void PopulateData(string text, CCBeatmapData[] maps, int waitTime, Action? skipButtonPressedCallback = null, Action? timerRanOutCallback = null)
     {
         _log.Notice("Populating maps");
         StartCoroutine(CountDown());
