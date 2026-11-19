@@ -15,8 +15,11 @@ namespace CompCube.AffinityPatches.PausePatches
         {
             if (_levelStartUnpauseController.StillInStartingPauseMenu)
                 return true;
-            
-            __instance._pauseMenuManager.ShowMenu();
+
+            if (__instance._paused == PauseController.PauseState.Playing)
+                __instance._pauseMenuManager.ShowMenu();
+            else
+                __instance._pauseMenuManager.ContinueButtonPressed();
             return false;
         }
         
