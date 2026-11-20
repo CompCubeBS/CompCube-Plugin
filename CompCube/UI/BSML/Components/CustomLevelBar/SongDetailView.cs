@@ -99,7 +99,7 @@ public class SongDetailView : ReactiveComponent
                         {
                             var data = x.GetBeatmapLevel()!.beatmapBasicData[
                                 (x.GetBeatmapKey().beatmapCharacteristic, x.GetBeatmapKey().difficulty)];
-
+                        
                             return data.bombsCount.ToString();
                         }, FindTextureByName("BombIcon")),
                     }
@@ -144,8 +144,12 @@ public class SongDetailView : ReactiveComponent
         {
             FlexController =
             {
+                
+                AlignContent = Align.Center,
+                AlignItems = Align.Center,
+                JustifyContent = Justify.Center,
                 FlexDirection = FlexDirection.Column,
-                Gap = 1f
+                Gap = 3f
             },
 
             Children =
