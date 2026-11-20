@@ -1,6 +1,7 @@
 using CompCube_Models.Models.Map;
 using CompCube.UI.BSML.Components.Card;
 using Reactive;
+using Reactive.Yoga;
 using SongCore;
 using UnityEngine;
 
@@ -16,6 +17,13 @@ public class MapPickingView : ReactiveComponent
 
         return new Layout()
         {
+            FlexController =
+            {
+                AlignContent = Align.Center,
+                AlignItems = Align.Center,
+                JustifyContent = Justify.Center,
+            },
+            
             Children =
             {
                 new CardCollection()
