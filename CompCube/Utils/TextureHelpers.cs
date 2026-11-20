@@ -5,6 +5,16 @@ namespace CompCube.Utils;
 
 public static class TextureHelpers
 {
+    public static Sprite LoadSpriteFromDisk(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        var texture = new Texture2D(1, 1);
+        texture.LoadImage(bytes);
+        texture.Apply();
+        
+        return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+    }
+    
     public static byte[] GetResourceData(string resourceName)
     {
         using var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);

@@ -42,7 +42,7 @@ public class MapPickingView : ReactiveComponent
                 
                 new CardCollection()
                 {
-                    OnCardWasSelected = (beatmap) => _beatmap.Value = beatmap,
+                    OnCardSelectionWasChanged = (beatmap) => _beatmap.Value = beatmap,
                     Data = Loader.CustomLevels.Where(i => i.Value.GetBeatmapKeys().Any(j => j.beatmapCharacteristic.serializedName == "Standard" && j.difficulty == BeatmapDifficulty.ExpertPlus)).Take(5).Select(i => new CCBeatmapData("0", i.Value.levelID.Substring("custom_level_".Length), CCBeatmapData.DifficultyType.ExpertPlus, CCBeatmapData.Category.Accuracy, 0, 0)).ToList()
                 }
             }

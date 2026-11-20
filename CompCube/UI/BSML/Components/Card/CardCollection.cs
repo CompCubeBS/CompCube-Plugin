@@ -1,10 +1,12 @@
 using CompCube_Models.Models.Map;
 using CompCube.Extensions;
+using CompCube.Utils;
 using Reactive;
 using Reactive.BeatSaber;
 using Reactive.Components;
 using Reactive.Components.Basic;
 using Reactive.Yoga;
+using SongCore;
 using UnityEngine;
 using AnimationCurve = Reactive.AnimationCurve;
 using Background = Reactive.BeatSaber.Components.Background;
@@ -13,7 +15,7 @@ namespace CompCube.UI.BSML.Components.Card;
 
 public class CardCollection : ReactiveComponent
 {
-    public Action<CCBeatmapData>? OnCardWasSelected { get; set; } = null;
+    public Action<CCBeatmapData>? OnCardSelectionWasChanged { get; set; } = null;
     
     public List<CCBeatmapData> Data
     {
@@ -30,8 +32,6 @@ public class CardCollection : ReactiveComponent
     private State<List<CCBeatmapData>> _data = null!;
     private State<SelectionMode> _interactable = null!;
     private AnimatedState<float> _marginSize = null!;
-
-    private Repeater<CCBeatmapData, Card> _cardRepeater = null!;
     
     protected override GameObject Construct()
     {
@@ -67,16 +67,7 @@ public class CardCollection : ReactiveComponent
 
                     sSelectionMode = _interactable.Map(x => x),
                     
-                    OnSelectedItemsChanged = x =>
-                    {
-                        if (x.Count != 0)
-                        {
-                            OnCardWasSelected?.Invoke(x.First());
-                            return;
-                        }
-                        
-                        
-                    },
+                    OnSelectedItemsChanged = x => OnCardSelectionWasChanged?.Invoke(x.FirstOrDefault()),
 
                     sItems = _data.Map(x => x),
 
@@ -88,13 +79,14 @@ public class CardCollection : ReactiveComponent
                         },
                         
                         OnSelect = _ => context.Selected = !context.Selected,
-
-                        // Image = context.Item.GetBeatmapLevel()!.previewMediaData.GetCoverSpriteAsync().Result,
+                        
+                        // fuck
+                        sImage = context.Map(x => x.Item.GetBeatmapLevel()!.previewMediaData.GetCoverSpriteAsync().Result),
                         sText = context.Map(x => x.Item.MapCategory.ToString()),
                         sColor = context.Map(x => x.Item.MapCategory.GetColorFromCategory()),
                         Interactable = true,
                     }
-                }.Bind(ref _cardRepeater)
+                }
             }
         }.Use();
     }
