@@ -281,5 +281,7 @@
       <None Remove="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
       <None Remove="UI\BSML\Match\MatchPreviewView.bsml" />
       <None Remove="UI\BSML\Info\ContributorsView.bsml" />
+      <None Remove="Resources\compcube.png" />
+      <EmbeddedResource Include="Resources\compcube.png" />
     </ItemGroup>
 </Project>

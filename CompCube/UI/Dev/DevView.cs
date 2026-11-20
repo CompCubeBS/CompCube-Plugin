@@ -61,7 +61,7 @@ public class DevView : ReactiveComponent
                             CreateViewControllerButton("MatchPreview", BeatSaberUI.DiContainer.Resolve<MatchPreviewViewController>()),
                             CreateViewControllerButton("MatchResults", BeatSaberUI.DiContainer.Resolve<MatchResultsViewController>()),
                             CreateViewControllerButton("RoundResults", BeatSaberUI.DiContainer.Resolve<RoundResultsViewController>()),
-                            CreateViewControllerButton("VotingScreen",  BeatSaberUI.DiContainer.Resolve<VotingScreenViewController>()),
+                            CreateViewControllerButton("PickScreen",  BeatSaberUI.DiContainer.Resolve<MapPickingViewController>()),
                             CreateViewControllerButton("DiscardPhaseWaitingScreen", BeatSaberUI.DiContainer.Resolve<WaitingForDiscardPhaseToFinishViewController>()),
                             CreateViewControllerButton("WaitingForMatchToStart", BeatSaberUI.DiContainer.Resolve<WaitingForMatchToStartViewController>()),
                             CreateViewControllerButton("WaitingView", BeatSaberUI.DiContainer.Resolve<WaitingViewController>()),

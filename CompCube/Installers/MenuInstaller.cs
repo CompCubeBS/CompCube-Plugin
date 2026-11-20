@@ -43,6 +43,7 @@ namespace CompCube.Installers
                 .FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<BottomScreenMatchStateViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<MatchPreviewViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<MapPickingViewController>().FromNewComponentAsViewController().AsSingle();
             
             Container.BindInterfacesAndSelfTo<InfoFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
 
