@@ -15,7 +15,7 @@ using Label = Reactive.Components.Basic.Label;
 
 namespace CompCube.UI.BSML.Components.Card;
 
-public class MapCard : ReactiveComponent
+public class Card : ReactiveComponent
 {
     private const float ScaleModifier = 2.5f;
     

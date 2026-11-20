@@ -16,7 +16,7 @@ public class MapPickingView : ReactiveComponent
         {
             Children =
             {
-                new MapCard()
+                new Card()
                 {
                     
                 }
