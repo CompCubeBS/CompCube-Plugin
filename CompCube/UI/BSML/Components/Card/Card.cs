@@ -45,13 +45,10 @@ public class Card : ReactiveComponent
         set => _text.Value = value;
     }
 
-    private bool _isSelected = false;
-
     public Action<Card>? OnEnter { get; set; } = null;
     public Action<Card>? OnExit { get; set; } = null;
     public Action<Card>? OnSelect { get; set; } = null;
     
-    public Action<Card>? OnDeselect { get; set; } = null;
 
     private State<string> _text = null!;
     private State<Sprite> _image = null!;
@@ -95,18 +92,7 @@ public class Card : ReactiveComponent
             
             Do = x => x.WithPointerEvents(onEnter: _ => OnEnter?.Invoke(this),
                                                     onLeave: _ => OnExit?.Invoke(this),
-                                                    onDown: _ =>
-                                                    {
-                                                        if (_isSelected)
-                                                        {
-                                                            _isSelected = false;
-                                                            OnDeselect?.Invoke(this);
-                                                            return;
-                                                        }
-                                                        
-                                                        _isSelected = true;
-                                                        OnSelect?.Invoke(this);
-                                                    }),
+                                                    onDown: _ => OnSelect?.Invoke(this)),
             
             Children =
             {

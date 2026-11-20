@@ -14,13 +14,13 @@ namespace CompCube.UI.BSML.Components.CustomLevelBar;
 
 public class SongDetailView : ReactiveComponent
 {
-    public CCBeatmapData Beatmap
+    public CCBeatmapData? Beatmap
     {
         get => _beatmap.Value;
         set => _beatmap.Value = value;
     }
     
-    private State<CCBeatmapData> _beatmap = null!;
+    private State<CCBeatmapData?> _beatmap = null!;
     
     protected override GameObject Construct()
     {
@@ -138,7 +138,7 @@ public class SongDetailView : ReactiveComponent
     }
     
     [StateGen]
-    private Layout CreateBeatmapStat(Func<CCBeatmapData, string> dataToDisplay, Sprite image)
+    private Layout CreateBeatmapStat(Func<CCBeatmapData?, string> dataToDisplay, Sprite image)
     {
         return new Layout()
         {

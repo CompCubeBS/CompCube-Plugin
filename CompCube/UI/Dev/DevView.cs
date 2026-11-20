@@ -21,7 +21,9 @@ public class DevView : ReactiveComponent
         {
             FlexController =
             {
-                AlignContent = Align.Stretch,
+                AlignContent = Align.Center,
+                AlignItems = Align.Stretch,
+                JustifyContent = Justify.Center,
                 FlexDirection = FlexDirection.Row,
                 Gap = 2f
             },
@@ -47,6 +49,9 @@ public class DevView : ReactiveComponent
                     {
                         FlexController =
                         {
+                            AlignContent = Align.Center,
+                            AlignItems = Align.Center,
+                            JustifyContent = Justify.Center,
                             FlexDirection = FlexDirection.Column,
                             ConstrainVertical = false
                         },
