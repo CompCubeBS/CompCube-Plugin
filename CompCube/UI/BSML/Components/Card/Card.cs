@@ -2,11 +2,13 @@ using CompCube_Models.Models.Map;
 using CompCube.Utils;
 using Reactive;
 using Reactive.BeatSaber;
+using Reactive.Components;
 using Reactive.Yoga;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Align = Reactive.Yoga.Align;
+using AnimationCurve = Reactive.AnimationCurve;
 using Background = Reactive.BeatSaber.Components.Background;
 using FlexDirection = Reactive.Yoga.FlexDirection;
 using Image = Reactive.BeatSaber.Components.Image;
@@ -37,10 +39,26 @@ public class Card : ReactiveComponent
         set => _interactable.Value = value;
     }
 
+    public string Text
+    {
+        get => _text.Value;
+        set => _text.Value = value;
+    }
+
+    private bool _isSelected = false;
+
+    public Action<Card>? OnEnter { get; set; } = null;
+    public Action<Card>? OnExit { get; set; } = null;
+    public Action<Card>? OnSelect { get; set; } = null;
+    
+    public Action<Card>? OnDeselect { get; set; } = null;
+
     private State<string> _text = null!;
     private State<Sprite> _image = null!;
     private State<Color> _color = null!;
     private State<bool> _interactable = null!;
+
+    private AnimatedState<float> _cardFloatAnimationState = null!;
 
     protected override GameObject Construct()
     {
@@ -48,6 +66,8 @@ public class Card : ReactiveComponent
         _color = Remember(Color.red);
         _interactable = Remember(true);
         _text = Remember("special");
+
+        _cardFloatAnimationState = RememberAnimated(0f, 250.ms, AnimationCurve.EaseOutBack);
         
         return new Background()
         {
@@ -72,6 +92,21 @@ public class Card : ReactiveComponent
             PixelsPerUnit = 10,
             
             sColor = _color.Map(x => x with { a = 1f }),
+            
+            Do = x => x.WithPointerEvents(onEnter: _ => OnEnter?.Invoke(this),
+                                                    onLeave: _ => OnExit?.Invoke(this),
+                                                    onDown: _ =>
+                                                    {
+                                                        if (_isSelected)
+                                                        {
+                                                            _isSelected = false;
+                                                            OnDeselect?.Invoke(this);
+                                                            return;
+                                                        }
+                                                        
+                                                        _isSelected = true;
+                                                        OnSelect?.Invoke(this);
+                                                    }),
             
             Children =
             {
