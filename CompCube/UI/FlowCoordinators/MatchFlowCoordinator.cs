@@ -26,10 +26,14 @@ public class MatchFlowCoordinator : FlowCoordinator
     [Inject] private readonly IServerListener _serverListener = null!;
 
     [Inject] private readonly GameplaySetupViewManager _gameplaySetupViewManager = null!;
+    [Inject] private readonly PlatformLeaderboardViewController _platformLeaderboardViewController = null!;
     
     [Inject] private readonly MatchPreviewViewController _matchPreviewViewController = null!;
     [Inject] private readonly MapPickingViewController _mapPickingViewController = null!;
+    [Inject] private readonly WaitingForMatchToStartViewController _waitingForMatchToStartViewController = null!;
 
+    [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
+    
     [Inject] private readonly SoundEffectManager _soundEffectManager = null!;
     [Inject] private readonly FireworksManager _fireworksManager = null!;
 
@@ -41,6 +45,10 @@ public class MatchFlowCoordinator : FlowCoordinator
     
     protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
+        _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
+        
+        _mapPickingViewController.OnBeatmapCardSelected += ShowLeaderboardOrHide;
+        
         ProvideInitialViewControllers(_matchPreviewViewController, _gameplaySetupViewManager.ManagedController);
         showBackButton = true;
         SetTitle("Match Room");
@@ -53,7 +61,44 @@ public class MatchFlowCoordinator : FlowCoordinator
             yield return new WaitForSeconds(5f);
             
             this.ReplaceViewControllerSynchronously(_mapPickingViewController);
+            
+            this.SetBottomScreenViewController(_bottomScreenMatchStateViewController, ViewController.AnimationType.In);
         }
+    }
+
+    private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet) => ShowMapPreview(packet.Map);
+
+    private void ShowLeaderboardOrHide(CCBeatmapData? beatmap)
+    {
+        StartCoroutine(ShowLeaderboardCoroutine());
+        return;
+        
+        IEnumerator ShowLeaderboardCoroutine()
+        {
+            if (beatmap is null)
+            {
+                SetRightScreenViewController(null, ViewController.AnimationType.Out);
+                yield return null;
+            }
+            
+            _platformLeaderboardViewController.SetData(beatmap!.GetBeatmapKey());
+            yield return new WaitForEndOfFrame();
+            SetRightScreenViewController(_platformLeaderboardViewController, ViewController.AnimationType.In);
+        }
+    }
+
+    private void ShowMapPreview(CCBeatmapData map)
+    {
+        ShowLeaderboardOrHide(map);
+        _soundEffectManager.PlayGongSoundEffect();
+        this.ReplaceViewControllerSynchronously(_waitingForMatchToStartViewController);
+    }
+
+    protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+    {
+        _mapPickingViewController.OnBeatmapCardSelected -= ShowLeaderboardOrHide;
+        
+        _serverListener.OnPlayerSelectedMap -= HandlePlayerSelectedMap;
     }
 
     protected override void BackButtonWasPressed(ViewController viewController)

@@ -33,12 +33,12 @@ public class WaitingForMatchToStartViewController() : ViewController
         _config.ScoreSubmission = toggled;
     }
 
-    public void PopulateData(CCBeatmapData beatmapData, DateTime timerEndTime)
+    public void PopulateDataCoroutine(CCBeatmapData beatmapData, DateTime timerEndTime)
     {
-        StartCoroutine(Enumerator());
+        StartCoroutine(PopulateData());
         return;
 
-        IEnumerator Enumerator()
+        IEnumerator PopulateData()
         {
             yield return new WaitUntil(() => isActivated);
             

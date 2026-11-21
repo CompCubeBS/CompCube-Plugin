@@ -1,4 +1,5 @@
 using System.Collections;
+using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube.Interfaces;
 using CompCube.UI.BSML.EarlyLeaveWarning;
@@ -17,10 +18,14 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
     [Inject] private readonly SiraLog _siraLog = null!;
     
     private MapPickingView _mapPickingView = null!;
+
+    public event Action<CCBeatmapData>? OnBeatmapCardSelected;
     
     private void Awake()
     {
         new MapPickingView().Bind(ref _mapPickingView).Use(transform);
+
+        _mapPickingView.OnBeatmapSelected = (beatmap) => OnBeatmapCardSelected?.Invoke(beatmap);
     }
 
     public void Initialize()
