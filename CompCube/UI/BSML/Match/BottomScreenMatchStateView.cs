@@ -3,10 +3,12 @@ using CompCube.Extensions;
 using CompCube.UI.BSML.Components.EnergyBar;
 using CompCube.Utils;
 using Reactive;
+using Reactive.BeatSaber;
 using Reactive.Components.Basic;
 using Reactive.Yoga;
 using TMPro;
 using UnityEngine;
+using Background = Reactive.BeatSaber.Components.Background;
 
 namespace CompCube.UI.BSML.Match;
 
@@ -57,6 +59,10 @@ public class BottomScreenMatchStateView : ReactiveComponent
         set => _blueHealthBar.Health = value;
     }
     
+    public DateTime TimerEndTime { get; set; }
+
+    private State<float> _timerBarLength = null!;
+    
     protected override GameObject Construct()
     {
         _multiplierText = Remember(0f);
@@ -64,6 +70,8 @@ public class BottomScreenMatchStateView : ReactiveComponent
         
         _redPlayer = Remember(Constants.EmptyUser);
         _bluePlayer = Remember(Constants.EmptyUser);
+
+        _timerBarLength = Remember(0f);
         
         return new Layout()
         {
@@ -76,13 +84,43 @@ public class BottomScreenMatchStateView : ReactiveComponent
             },
             Children =
             {
-                new Label()
+                new Layout()
                 {
-                    sText = _statusText.Map(x => x),
-                    RichText = true,
-                    FontStyle = FontStyles.Italic,
-                    FontSize = 5,
-                    Alignment = TextAlignmentOptions.Center
+                    FlexController =
+                    {
+                        AlignContent = Align.Center,
+                        AlignItems = Align.Center,
+                        JustifyContent = Justify.Center,
+                        
+                        FlexDirection = FlexDirection.Column,
+                        
+                        Gap = 2
+                    },
+                    
+                    Children =
+                    {
+                        new Label()
+                        {
+                            sText = _statusText.Map(x => x),
+                            RichText = true,
+                            FontStyle = FontStyles.Italic,
+                            FontSize = 5,
+                            Alignment = TextAlignmentOptions.Center
+                        },
+                        
+                        new Background()
+                        {
+                            FlexItem =
+                            {
+                                sSize = _timerBarLength.Map(x => new YogaVector(100 * x, 3))
+                            },
+                            
+                            PixelsPerUnit = 10f,
+                            
+                            Sprite = BeatSaberResources.Sprites.background,
+                            Color = Color.white
+                        },
+                    }
                 },
                 new Layout()
                 {
@@ -139,5 +177,10 @@ public class BottomScreenMatchStateView : ReactiveComponent
                 }
             }
         }.Use();
+    }
+
+    protected override void OnUpdate()
+    {
+        _timerBarLength.Value = (float) DateTimeOffset.Now.ToUnixTimeSeconds() / ((DateTimeOffset) TimerEndTime).ToUnixTimeSeconds();
     }
 }

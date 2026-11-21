@@ -1,6 +1,7 @@
 using System.Collections;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Packets.ServerPackets;
+using CompCube.Game.MatchState;
 using CompCube.Interfaces;
 using CompCube.UI.BSML.EarlyLeaveWarning;
 using HMUI;
@@ -15,6 +16,10 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
 {
     [Inject] private readonly SharedCoroutineStarter _coroutineStarter = null!;
     [Inject] private readonly IServerListener _serverListener = null!;
+    [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
+    [Inject] private readonly MatchStateManager _matchStateManager = null!;
+    [Inject] private readonly MatchBeatmapManager _matchBeatmapManager = null!;
+    
     [Inject] private readonly SiraLog _siraLog = null!;
     
     private MapPickingView _mapPickingView = null!;
@@ -44,7 +49,15 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
                 
             DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(transform,
                 packet.InitialMaps.Select(i => i.Hash).ToArray(),
-                () => _mapPickingView.Beatmaps = packet.InitialMaps);
+                () =>
+                {
+                    _bottomScreenMatchStateViewController.CurrentTimer = new(DateTime.Now.AddSeconds(30), "Discard Phase",
+                        () =>
+                        {
+                            _matchBeatmapManager.SkipDiscardingMaps();
+                        });
+                    _mapPickingView.Beatmaps = packet.InitialMaps;
+                });
         }
     }
 

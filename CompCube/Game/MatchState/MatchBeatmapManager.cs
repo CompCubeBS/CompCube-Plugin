@@ -37,6 +37,7 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
         {
             _discardSubmissionStarted = true;
             CanNoLongerDiscardMaps?.Invoke();
+            _serverListener.DiscardMapsAsync(_discardedMaps);
         }
 
         return true;
@@ -50,6 +51,8 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
         DiscardPhaseWasSkipped = true;
         _discardSubmissionStarted = true;
         CanNoLongerDiscardMaps?.Invoke();
+
+        _serverListener.DiscardMapsAsync(_discardedMaps);
     }
 
     public void Initialize()
