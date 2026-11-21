@@ -1,3 +1,4 @@
+using BeatSaberMarkupLanguage;
 using CompCube_Models.Models.Map;
 using CompCube.Extensions;
 using CompCube.Utils;
@@ -81,7 +82,7 @@ public class CardCollection : ReactiveComponent
                         OnSelect = _ => context.Selected = !context.Selected,
                         
                         // fuck
-                        sImage = context.Map(x => x.Item.GetBeatmapLevel()!.previewMediaData.GetCoverSpriteAsync().Result),
+                        sImage = context.Map(x => TextureHelpers.LoadSpriteFromBeatmapFileLocationFresh(x.Item.GetBeatmapLevel()!)),
                         sText = context.Map(x => x.Item.MapCategory.ToString()),
                         sColor = context.Map(x => x.Item.MapCategory.GetColorFromCategory()),
                         Interactable = true,
