@@ -22,11 +22,15 @@ public class MapPickingView : ReactiveComponent
 
     private State<CCBeatmapData?> _activeBeatmap = null!;
     
+    public Action<CCBeatmapData>? OnBeatmapSelected { get; set; }
+    
     protected override GameObject Construct()
     {
         _activeBeatmap = Remember(null as CCBeatmapData);
         _pickButtonText = Remember("");
         _beatmapList = Remember(new CCBeatmapData[]{});
+
+        var songDetailViewDimState = RememberAnimated(0f, 100.ms);
 
         return new Layout()
         {
@@ -42,16 +46,42 @@ public class MapPickingView : ReactiveComponent
             
             Children =
             {
-                new SongDetailView()
+                new Layout()
                 {
-                    sEnabled = _activeBeatmap.Map(x => x is not null),
-                    sBeatmap = _activeBeatmap.Map(x => x),
-                    WithinLayoutIfDisabled = true
-                },
+                    FlexController =
+                    {
+                        AlignItems = Align.Center,
+                        AlignContent = Align.Center,
+                        JustifyContent = Justify.Center,
+                    },
+                    
+                    Children =
+                    {
+                        new SongDetailView()
+                        {
+                            sBeatmap = _activeBeatmap.Map(x =>
+                            {
+                                songDetailViewDimState.TargetValue = x is null ? 0f : 1f;
+                        
+                                return x;
+                            }),
+                            WithinLayoutIfDisabled = true
+                        }
+                    }
+                }.With(x =>
+                {
+                    var g = x.Content.AddComponent<CanvasGroup>();
+                    
+                    songDetailViewDimState.AddCallback(a => g.alpha = a);
+                }),
                 
                 new CardCollection()
                 {
-                    OnCardSelectionWasChanged = (beatmap) => _activeBeatmap.Value = beatmap,
+                    OnCardSelectionWasChanged = (beatmap) =>
+                    {
+                        _activeBeatmap.Value = beatmap;
+                        OnBeatmapSelected?.Invoke(beatmap);
+                    },
                     sData = _beatmapList.Map(x => x.ToList())
                 }
             }
