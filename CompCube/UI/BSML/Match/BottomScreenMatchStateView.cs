@@ -59,9 +59,7 @@ public class BottomScreenMatchStateView : ReactiveComponent
         set => _blueHealthBar.Health = value;
     }
     
-    public DateTime TimerEndTime { get; set; }
-
-    private State<float> _timerBarLength = null!;
+    
     
     protected override GameObject Construct()
     {
@@ -70,8 +68,6 @@ public class BottomScreenMatchStateView : ReactiveComponent
         
         _redPlayer = Remember(Constants.EmptyUser);
         _bluePlayer = Remember(Constants.EmptyUser);
-
-        _timerBarLength = Remember(0f);
         
         return new Layout()
         {
@@ -112,7 +108,7 @@ public class BottomScreenMatchStateView : ReactiveComponent
                         {
                             FlexItem =
                             {
-                                sSize = _timerBarLength.Map(x => new YogaVector(100 * x, 3))
+                                
                             },
                             
                             PixelsPerUnit = 10f,
@@ -120,6 +116,11 @@ public class BottomScreenMatchStateView : ReactiveComponent
                             Sprite = BeatSaberResources.Sprites.background,
                             Color = Color.white
                         },
+                        
+                        new Label()
+                        {
+                            sText = _statusText.Map(x => x),
+                        }
                     }
                 },
                 new Layout()
@@ -181,6 +182,6 @@ public class BottomScreenMatchStateView : ReactiveComponent
 
     protected override void OnUpdate()
     {
-        _timerBarLength.Value = (float) DateTimeOffset.Now.ToUnixTimeSeconds() / ((DateTimeOffset) TimerEndTime).ToUnixTimeSeconds();
+        
     }
 }

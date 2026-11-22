@@ -39,7 +39,7 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
                 _view.TimerEndTime = value.EndTime;
                 _view.StatusText = value.Title;
                 
-                yield return new WaitForSeconds((float) (_view.TimerEndTime - DateTime.Now).TotalSeconds);
+                yield return new WaitForSeconds(value.TimeSpan);
                 
                 value.OnTimerRanOut.Invoke();
             }
@@ -102,9 +102,11 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
         _serverListener.OnMatchCreated -= HandleMatchCreated;
     }
 
-    public class MatchTimerData(DateTime endTime, string title, Action onTimerRanOut)
+    public class MatchTimerData(float timeSpan, string title, Action onTimerRanOut)
     {
-        public readonly DateTime EndTime = endTime;
+        public readonly DateTime StartingTime = DateTime.Now;
+        public readonly float TimeSpan = timeSpan;
+        public DateTime EndTime => StartingTime.AddSeconds(TimeSpan);
         public readonly Action OnTimerRanOut = onTimerRanOut;
         public readonly string Title = title;
     }
