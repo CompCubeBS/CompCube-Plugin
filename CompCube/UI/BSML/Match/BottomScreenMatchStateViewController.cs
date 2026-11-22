@@ -15,6 +15,7 @@ using SiraUtil.Logging;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using Timer = System.Timers.Timer;
 
 namespace CompCube.UI.BSML.Match;
 
@@ -25,25 +26,10 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
     
     private BottomScreenMatchStateView _view = null!;
 
-    public MatchTimerData CurrentTimer
+    public MatchTimerData? Timer
     {
-        set
-        {
-            StartCoroutine(WaitForSecondsAndInvoke());
-            return;
-
-            IEnumerator WaitForSecondsAndInvoke()
-            {
-                yield return new WaitUntil(() => _view != null);
-                
-                _view.TimerEndTime = value.EndTime;
-                _view.StatusText = value.Title;
-                
-                yield return new WaitForSeconds(value.TimeSpan);
-                
-                value.OnTimerRanOut.Invoke();
-            }
-        }
+        get => _view.CurrentTimer;
+        set => _view.CurrentTimer = value;
     }
 
     private void Awake()
@@ -61,13 +47,6 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
     {
         _view.Multiplier = multiplier;
     }
-
-    public void SetStatus(string status)
-    {
-        _view.StatusText = status;
-    }
-    
-    public void UpdateRound(int round) => SetStatus($"Round {round}");
 
     public void PopulateData(UserProfile red, UserProfile blue)
     {
@@ -91,7 +70,6 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
             
             PopulateData(packet.Red, packet.Blue);
         
-            SetStatus("Discard Phase");
             UpdateHealth(1f, 1f);
             UpdateMultiplier(1f);
         }
@@ -102,12 +80,31 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
         _serverListener.OnMatchCreated -= HandleMatchCreated;
     }
 
-    public class MatchTimerData(float timeSpan, string title, Action onTimerRanOut)
+    public class MatchTimerData
     {
-        public readonly DateTime StartingTime = DateTime.Now;
-        public readonly float TimeSpan = timeSpan;
-        public DateTime EndTime => StartingTime.AddSeconds(TimeSpan);
-        public readonly Action OnTimerRanOut = onTimerRanOut;
-        public readonly string Title = title;
+        public readonly Timer Timer;
+        
+        public readonly string Title;
+
+        public readonly DateTime StartTime = DateTime.Now;
+        
+        public readonly TimeSpan Duration;
+
+        public TimeSpan TimeRemaining => (StartTime + Duration) - DateTime.Now;
+
+        public MatchTimerData(TimeSpan timeSpan, string title, Action? onTimerRanOut)
+        {
+            Title = title;
+            Duration = timeSpan;
+            
+            Timer = new Timer()
+            {
+                AutoReset = false,
+                Enabled = true,
+                Interval = timeSpan.TotalMilliseconds
+            };
+            
+            Timer.Elapsed += (_, _) => onTimerRanOut?.Invoke();
+        }
     }
 }

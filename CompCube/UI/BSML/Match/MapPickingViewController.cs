@@ -51,7 +51,7 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
                 packet.InitialMaps.Select(i => i.Hash).ToArray(),
                 () =>
                 {
-                    _bottomScreenMatchStateViewController.CurrentTimer = new(30, "Discard Phase",
+                    _bottomScreenMatchStateViewController.Timer = new(TimeSpan.FromSeconds(30), "Discard Phase",
                         () =>
                         {
                             _matchBeatmapManager.SkipDiscardingMaps();

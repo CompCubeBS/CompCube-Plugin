@@ -1,3 +1,4 @@
+using System.Globalization;
 using CompCube_Models.Models.ClientData;
 using CompCube.Extensions;
 using CompCube.UI.BSML.Components.EnergyBar;
@@ -24,12 +25,6 @@ public class BottomScreenMatchStateView : ReactiveComponent
     {
         get => _multiplierText.Value;
         set => _multiplierText.Value = value;
-    }
-    
-    public string StatusText
-    {
-        get => _statusText.Value;
-        set => _statusText.Value = value;
     }
 
     public UserProfile RedProfile
@@ -58,9 +53,19 @@ public class BottomScreenMatchStateView : ReactiveComponent
         get => _blueHealthBar.Health;
         set => _blueHealthBar.Health = value;
     }
-    
-    
-    
+
+    public BottomScreenMatchStateViewController.MatchTimerData? CurrentTimer
+    {
+        get;
+        set
+        {
+            _statusText.Value = value?.Title ?? "";
+            field = value;
+        }
+    } = null;
+
+    private State<TimeSpan?> _remainingTime = null!;
+
     protected override GameObject Construct()
     {
         _multiplierText = Remember(0f);
@@ -68,6 +73,9 @@ public class BottomScreenMatchStateView : ReactiveComponent
         
         _redPlayer = Remember(Constants.EmptyUser);
         _bluePlayer = Remember(Constants.EmptyUser);
+
+        _remainingTime = Remember(null as TimeSpan?);
+        
         
         return new Layout()
         {
@@ -108,7 +116,17 @@ public class BottomScreenMatchStateView : ReactiveComponent
                         {
                             FlexItem =
                             {
-                                
+                                sSize = _remainingTime.Map(x =>
+                                {
+                                    if (x is null || CurrentTimer is null)
+                                        return new YogaVector(0, 3f);
+                                    
+                                    return new YogaVector()
+                                    {
+                                        y = 3f,
+                                        x = ((float) (x.Value.TotalMilliseconds / 1000) / (float) (CurrentTimer.Duration.TotalSeconds / 1000)) / 10
+                                    };
+                                })
                             },
                             
                             PixelsPerUnit = 10f,
@@ -119,7 +137,15 @@ public class BottomScreenMatchStateView : ReactiveComponent
                         
                         new Label()
                         {
-                            sText = _statusText.Map(x => x),
+                            sText = _remainingTime.Map(x =>
+                            {
+                                if (x is null)
+                                    return "";
+                                
+                                return x.Value.ToString(@"mm\:ss\.fff");
+                            }),
+                            FontStyle = FontStyles.Italic,
+                            Alignment = TextAlignmentOptions.Midline
                         }
                     }
                 },
@@ -182,6 +208,9 @@ public class BottomScreenMatchStateView : ReactiveComponent
 
     protected override void OnUpdate()
     {
-        
+        if (CurrentTimer == null)
+            return;
+
+        _remainingTime.Value = CurrentTimer.TimeRemaining > TimeSpan.Zero ? CurrentTimer.TimeRemaining : TimeSpan.Zero;
     }
 }
