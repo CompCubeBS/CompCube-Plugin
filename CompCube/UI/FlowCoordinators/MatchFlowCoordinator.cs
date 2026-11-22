@@ -52,6 +52,8 @@ public class MatchFlowCoordinator : FlowCoordinator
         ProvideInitialViewControllers(_matchPreviewViewController, _gameplaySetupViewManager.ManagedController);
         showBackButton = true;
         SetTitle("Match Room");
+        
+        _soundEffectManager.PlayGongSoundEffect();
 
         StartCoroutine(WaitForTimeAndPresentCardView());
         return;
