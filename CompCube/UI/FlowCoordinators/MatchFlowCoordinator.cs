@@ -25,17 +25,21 @@ public class MatchFlowCoordinator : FlowCoordinator
 {
     [Inject] private readonly IServerListener _serverListener = null!;
 
+    [Inject] private readonly MatchStateManager _matchStateManager = null!;
+
     [Inject] private readonly GameplaySetupViewManager _gameplaySetupViewManager = null!;
     [Inject] private readonly PlatformLeaderboardViewController _platformLeaderboardViewController = null!;
     
     [Inject] private readonly MatchPreviewViewController _matchPreviewViewController = null!;
     [Inject] private readonly MapPickingViewController _mapPickingViewController = null!;
     [Inject] private readonly WaitingForMatchToStartViewController _waitingForMatchToStartViewController = null!;
+    [Inject] private readonly WaitingViewController _waitingViewController = null!;
 
     [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
     
     [Inject] private readonly SoundEffectManager _soundEffectManager = null!;
     [Inject] private readonly FireworksManager _fireworksManager = null!;
+    [Inject] private readonly TransitionToLevelManager _transitionToLevelManager = null!;
 
     [Inject] private readonly SiraLog _siraLog = null!;
     
@@ -46,6 +50,7 @@ public class MatchFlowCoordinator : FlowCoordinator
     protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
         _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
+        
         
         _mapPickingViewController.OnBeatmapCardSelected += ShowLeaderboardOrHide;
         
@@ -68,7 +73,7 @@ public class MatchFlowCoordinator : FlowCoordinator
         }
     }
 
-    private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet) => ShowMapPreview(packet.Map);
+    private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet) => ShowMapPreviewAndStartMatch(packet.Map);
 
     private void ShowLeaderboardOrHide(CCBeatmapData? beatmap)
     {
@@ -89,11 +94,29 @@ public class MatchFlowCoordinator : FlowCoordinator
         }
     }
 
-    private void ShowMapPreview(CCBeatmapData map)
+    private void ShowMapPreviewAndStartMatch(CCBeatmapData map)
     {
         ShowLeaderboardOrHide(map);
         _soundEffectManager.PlayGongSoundEffect();
         this.ReplaceViewControllerSynchronously(_waitingForMatchToStartViewController);
+
+        StartCoroutine(WaitForSecondsAndStartMatch());
+        return;
+        
+        IEnumerator WaitForSecondsAndStartMatch()
+        {
+            yield return new WaitForSeconds(15f);
+            
+            _transitionToLevelManager.StartLevel(map, DateTime.Now.AddSeconds(15), _gameplaySetupViewManager.ProMode,
+                (results, transitionSetupDataSo) =>
+                {
+                    _serverListener.SubmitScoreAsync(new Score(results.multipliedScore, (float) results.multipliedScore / ScoreModel.ComputeMaxMultipliedScoreForBeatmap(transitionSetupDataSo.transformedBeatmapData), 
+                        results.gameplayModifiers.proMode, results.badCutsCount + results.missedCount + results.notGoodCount, results.fullCombo));
+                    
+                    this.ReplaceViewControllerSynchronously(_waitingViewController, true);
+                    _waitingViewController.SetText($"Waiting for {_matchStateManager.Opponent} to submit a score!");
+                });
+        }
     }
 
     protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)

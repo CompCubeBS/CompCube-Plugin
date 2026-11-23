@@ -23,13 +23,20 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
 {
     [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
     [Inject] private readonly IServerListener _serverListener = null!;
+
+    [Inject] private readonly MatchBeatmapManager _matchBeatmapManager = null!;
+    [Inject] private readonly MatchStateManager _matchStateManager = null!;
     
     private BottomScreenMatchStateView _view = null!;
 
     public MatchTimerData? Timer
     {
         get => _view.CurrentTimer;
-        set => _view.CurrentTimer = value;
+        set
+        {
+            _view.CurrentTimer?.Cancel();
+            _view.CurrentTimer = value;
+        }
     }
 
     private void Awake()
@@ -57,6 +64,20 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
     public void Initialize()
     {
         _serverListener.OnMatchCreated += HandleMatchCreated;
+        _serverListener.OnPickPhaseStarted += HandlePickPhaseStarted;
+    }
+
+    private void HandlePickPhaseStarted(StartPickPhasePacket packet)
+    {
+        var user = _matchStateManager.Self;
+
+        if (!packet.IsOwnPick)
+            user = _matchStateManager.Opponent;
+        
+        Timer = new MatchTimerData(TimeSpan.FromSeconds(30), $"Pick Phase\n<size=50%>{user.GetFormattedUserName()}'s Pick</size>", () =>
+        {
+            _matchBeatmapManager.SelectBeatmap(_matchBeatmapManager.AvailablePicks.First());
+        });
     }
 
     private void HandleMatchCreated(MatchCreatedPacket packet)
@@ -91,6 +112,8 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
         public readonly TimeSpan Duration;
 
         public TimeSpan TimeRemaining => (StartTime + Duration) - DateTime.Now;
+        
+        private bool _isCancelled = false;
 
         public MatchTimerData(TimeSpan timeSpan, string title, Action? onTimerRanOut)
         {
@@ -104,7 +127,17 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
                 Interval = timeSpan.TotalMilliseconds
             };
             
-            Timer.Elapsed += (_, _) => onTimerRanOut?.Invoke();
+            Timer.Elapsed += (_, _) =>
+            {
+                if (_isCancelled)
+                    return;
+                onTimerRanOut?.Invoke();
+            };
+        }
+        
+        public void Cancel()
+        {
+            _isCancelled = true;
         }
     }
 }

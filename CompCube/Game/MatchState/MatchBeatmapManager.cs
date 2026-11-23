@@ -43,6 +43,14 @@ public class MatchBeatmapManager() : IInitializable, IDisposable
         return true;
     }
 
+    public void SelectBeatmap(CCBeatmapData beatmap)
+    {
+        if (!_maps.Remove(beatmap))
+            throw new Exception("Attempted to select a non-existing beatmap");
+        
+        _serverListener.SelectMapAsync(beatmap);
+    }
+
     public void SkipDiscardingMaps()
     {
         if (!InDiscardPhase || _discardSubmissionStarted)

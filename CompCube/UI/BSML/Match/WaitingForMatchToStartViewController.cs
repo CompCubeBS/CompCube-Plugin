@@ -3,10 +3,12 @@ using System.Globalization;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using CompCube_Models.Models.Map;
+using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube.Configuration;
 using CompCube.UI.BSML.Components.CustomLevelBar;
 using HMUI;
 using CompCube.Extensions;
+using CompCube.Interfaces;
 using Reactive;
 using SiraUtil.Logging;
 using UnityEngine;
@@ -15,9 +17,11 @@ using Zenject;
 
 namespace CompCube.UI.BSML.Match;
 
-public class WaitingForMatchToStartViewController() : ViewController
+public class WaitingForMatchToStartViewController() : ViewController, IInitializable, IDisposable
 {
     [Inject] private readonly PluginConfig _config = null!;
+    [Inject] private readonly IServerListener _serverListener = null!;
+    [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
     
     private WaitingForMatchToStartView _view = null!;
     
@@ -35,7 +39,7 @@ public class WaitingForMatchToStartViewController() : ViewController
 
     public void PopulateDataCoroutine(CCBeatmapData beatmapData, DateTime timerEndTime)
     {
-        StartCoroutine(PopulateData());
+        _sharedCoroutineStarter.Run(PopulateData());
         return;
 
         IEnumerator PopulateData()
@@ -45,5 +49,20 @@ public class WaitingForMatchToStartViewController() : ViewController
             _view.Beatmap = beatmapData;
             _view.TimerEndTime = timerEndTime;
         }
+    }
+
+    public void Initialize()
+    {
+        _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
+    }
+
+    private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet)
+    {
+        PopulateDataCoroutine(packet.Map, DateTime.Now.AddSeconds(15));
+    }
+
+    public void Dispose()
+    {
+        throw new NotImplementedException();
     }
 }

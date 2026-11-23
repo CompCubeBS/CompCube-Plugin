@@ -209,7 +209,10 @@ public class BottomScreenMatchStateView : ReactiveComponent
     protected override void OnUpdate()
     {
         if (CurrentTimer == null)
+        {
+            _remainingTime.Value = null;
             return;
+        }
 
         _remainingTime.Value = CurrentTimer.TimeRemaining > TimeSpan.Zero ? CurrentTimer.TimeRemaining : TimeSpan.Zero;
     }
