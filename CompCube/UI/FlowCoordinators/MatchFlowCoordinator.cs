@@ -51,15 +51,17 @@ public class MatchFlowCoordinator : FlowCoordinator
     {
         _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
         
-        
         _mapPickingViewController.OnBeatmapCardSelected += ShowLeaderboardOrHide;
         
         ProvideInitialViewControllers(_matchPreviewViewController, _gameplaySetupViewManager.ManagedController);
         showBackButton = true;
         SetTitle("Match Room");
+
+        if (!addedToHierarchy)
+            return;
         
         _soundEffectManager.PlayGongSoundEffect();
-
+        
         StartCoroutine(WaitForTimeAndPresentCardView());
         return;
 
@@ -73,7 +75,12 @@ public class MatchFlowCoordinator : FlowCoordinator
         }
     }
 
-    private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet) => ShowMapPreviewAndStartMatch(packet.Map);
+    private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet)
+    {
+        _soundEffectManager.CrossfadeToDefault();
+        _bottomScreenMatchStateViewController.Timer = null;
+        ShowMapPreviewAndStartMatch(packet.Map);
+    }
 
     private void ShowLeaderboardOrHide(CCBeatmapData? beatmap)
     {
