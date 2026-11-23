@@ -6,6 +6,7 @@ using CompCube.Game.MatchState;
 using CompCube.Interfaces;
 using CompCube.UI.BSML.EarlyLeaveWarning;
 using CompCube.UI.BSML.Modal;
+using CompCube.UI.Sound;
 using HMUI;
 using Reactive;
 using SiraUtil.Logging;
@@ -21,6 +22,8 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
     [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
     [Inject] private readonly MatchStateManager _matchStateManager = null!;
     [Inject] private readonly MatchBeatmapManager _matchBeatmapManager = null!;
+
+    [Inject] private readonly SoundEffectManager _soundEffectManager = null!;
     
     [Inject] private readonly SiraLog _siraLog = null!;
     
@@ -34,6 +37,13 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
 
         _mapPickingView.OnBeatmapSelected = (beatmap) =>
         {
+            if (beatmap is null)
+            {
+                _soundEffectManager.CrossfadeToDefault();
+                return;
+            }
+            
+            _soundEffectManager.PlayBeatmapLevelPreview(beatmap.GetBeatmapLevel()!);
             _mapPickingView.ActiveBeatmap = beatmap;
             _mapPickingView.Beatmaps = _matchBeatmapManager.AvailablePicks.ToArray();
             OnBeatmapCardSelected?.Invoke(beatmap);
