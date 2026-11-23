@@ -63,6 +63,6 @@ public class WaitingForMatchToStartViewController() : ViewController, IInitializ
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
     }
 }
