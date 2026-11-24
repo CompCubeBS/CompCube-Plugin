@@ -64,8 +64,14 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
     public void Initialize()
     {
         _serverListener.OnMatchCreated += HandleMatchCreated;
+        _serverListener.OnRoundResults += HandleRoundResults;
     }
-    
+
+    private void HandleRoundResults(RoundResultsPacket results)
+    {
+        _view.CurrentTimer = new MatchTimerData(TimeSpan.FromSeconds(10), "Results", null);
+    }
+
     private void HandleMatchCreated(MatchCreatedPacket packet)
     {
         _sharedCoroutineStarter.Run(HandleMatchCreatedCoroutine());
