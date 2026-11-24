@@ -144,7 +144,10 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
         IEnumerator StartMapDownloadAndPopulateData()
         {
             yield return new WaitUntil(() => _mapPickingView != null);
-                
+
+            _mapPickingView.ActiveBeatmap = null;
+            _mapPickingView.CurrentState = State.Discard;
+            
             DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(transform,
                 packet.InitialMaps.Select(i => i.Hash).ToArray(),
                 () =>
