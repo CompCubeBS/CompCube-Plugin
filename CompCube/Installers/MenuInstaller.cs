@@ -28,7 +28,6 @@ namespace CompCube.Installers
             Container.BindInterfacesAndSelfTo<MatchmakingMenuFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
             Container.BindInterfacesAndSelfTo<MatchmakingMenuViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<MatchFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
-            Container.BindInterfacesAndSelfTo<VotingScreenViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<WaitingForMatchToStartViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<WaitingViewController>().FromNewComponentAsViewController()
                 .AsSingle();
@@ -39,8 +38,6 @@ namespace CompCube.Installers
             Container.BindInterfacesAndSelfTo<SettingsViewController>().FromNewComponentAsViewController()
                 .AsSingle();
             Container.BindInterfacesAndSelfTo<UI.BSML.Leaderboard.CompCubeLeaderboardViewController>().FromNewComponentAsViewController().AsSingle();
-            Container.BindInterfacesAndSelfTo<WaitingForDiscardPhaseToFinishViewController>()
-                .FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<BottomScreenMatchStateViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<MatchPreviewViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<MapPickingViewController>().FromNewComponentAsViewController().AsSingle();
