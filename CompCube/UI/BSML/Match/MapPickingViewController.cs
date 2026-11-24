@@ -29,6 +29,8 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
     
     private MapPickingView _mapPickingView = null!;
 
+    private bool _isShowingFinalCards = false;
+
     public event Action<CCBeatmapData>? OnBeatmapCardSelected;
     
     private void Awake()
@@ -84,17 +86,54 @@ public class MapPickingViewController : ViewController, IInitializable, IDisposa
 
     private void HandleCardsUpdated(UpdateCardsPacket packet)
     {
-        _mapPickingView.Beatmaps = packet.Maps;
+        _mapPickingView.ActiveBeatmap = null;
+        
+        _isShowingFinalCards = true;
+        _bottomScreenMatchStateViewController.Timer = null;
+        
+        DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(transform,
+            packet.Maps.Select(i => i.Hash).ToArray(),
+            () =>
+            {
+                _mapPickingView.Beatmaps = packet.Maps;
+                
+                _bottomScreenMatchStateViewController.Timer = new(TimeSpan.FromSeconds(5), "Discard Phase", () =>
+                {
+                    _isShowingFinalCards = false;
+                });
+            });
     }
 
     private void HandlePickPhaseStarted(StartPickPhasePacket packet)
     {
-        PhasePopupModal.CreateOnTransform(transform, "Pick Phase", $"{(packet.IsOwnPick ? _matchStateManager.Self : _matchStateManager.Opponent).GetFormattedUserName()}'s Pick");
-        
-        _mapPickingView.CurrentState = packet.IsOwnPick ? State.Pick : State.OtherPlayerPick;
-        
-        _mapPickingView.Beatmaps = packet.AvailableMaps;
         _mapPickingView.ActiveBeatmap = null;
+        
+        _coroutineStarter.Run(Yeah());
+        return;
+
+        IEnumerator Yeah()
+        {
+            yield return new WaitForSeconds(1f);
+            
+            yield return new WaitUntil(() => !_isShowingFinalCards);
+            
+            PhasePopupModal.CreateOnTransform(transform, "Pick Phase", $"{(packet.IsOwnPick ? _matchStateManager.Self : _matchStateManager.Opponent).GetFormattedUserName()}'s Pick");
+        
+            _mapPickingView.CurrentState = packet.IsOwnPick ? State.Pick : State.OtherPlayerPick;
+        
+            _mapPickingView.Beatmaps = packet.AvailableMaps;
+            _mapPickingView.ActiveBeatmap = null;
+            
+            var user = _matchStateManager.Self;
+
+            if (!packet.IsOwnPick)
+                user = _matchStateManager.Opponent;
+        
+            _bottomScreenMatchStateViewController.Timer = new BottomScreenMatchStateViewController.MatchTimerData(TimeSpan.FromSeconds(30), $"Pick Phase\n<size=50%>{user.GetFormattedUserName()}'s Pick</size>", () =>
+            {
+                _matchBeatmapManager.SelectBeatmap(_matchBeatmapManager.AvailablePicks.First());
+            });
+        }
     }
 
     private void HandleMatchCreated(MatchCreatedPacket packet)

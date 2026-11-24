@@ -34,6 +34,8 @@ public class MatchFlowCoordinator : FlowCoordinator
     [Inject] private readonly MapPickingViewController _mapPickingViewController = null!;
     [Inject] private readonly WaitingForMatchToStartViewController _waitingForMatchToStartViewController = null!;
     [Inject] private readonly WaitingViewController _waitingViewController = null!;
+    [Inject] private readonly RoundResultsViewController _roundResultsViewController = null!;
+    [Inject] private readonly MatchResultsViewController _matchResultsViewController = null!;
 
     [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
     
@@ -50,12 +52,17 @@ public class MatchFlowCoordinator : FlowCoordinator
     protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
         _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
+        _serverListener.OnRoundResults += HandleRoundResults;
+        _serverListener.OnPickPhaseStarted += HandlePickPhaseStarted;
+        _serverListener.OnMatchFinished += HandleMatchResults;
         
         _mapPickingViewController.OnBeatmapCardSelected += ShowLeaderboardOrHide;
         
         ProvideInitialViewControllers(_matchPreviewViewController, _gameplaySetupViewManager.ManagedController);
         showBackButton = true;
         SetTitle("Match Room");
+
+        _matchResultsViewController.OnContinueButtonPressedCallback = OnMatchConcluded;
 
         if (!addedToHierarchy)
             return;
@@ -73,6 +80,21 @@ public class MatchFlowCoordinator : FlowCoordinator
             
             this.SetBottomScreenViewController(_bottomScreenMatchStateViewController, ViewController.AnimationType.In);
         }
+    }
+
+    private void HandleMatchResults(MatchFinishedPacket packet)
+    {
+        this.ReplaceViewControllerSynchronously(_matchResultsViewController);
+    }
+
+    private void HandlePickPhaseStarted(StartPickPhasePacket packet)
+    {
+        this.ReplaceViewControllerSynchronously(_mapPickingViewController);
+    }
+
+    private void HandleRoundResults(RoundResultsPacket packet)
+    {
+        this.ReplaceViewControllerSynchronously(_roundResultsViewController);
     }
 
     private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet)
@@ -131,6 +153,9 @@ public class MatchFlowCoordinator : FlowCoordinator
         _mapPickingViewController.OnBeatmapCardSelected -= ShowLeaderboardOrHide;
         
         _serverListener.OnPlayerSelectedMap -= HandlePlayerSelectedMap;
+        _serverListener.OnRoundResults -= HandleRoundResults;
+        _serverListener.OnPickPhaseStarted -= HandlePickPhaseStarted;
+        _serverListener.OnMatchFinished -= HandleMatchResults;
     }
 
     protected override void BackButtonWasPressed(ViewController viewController)

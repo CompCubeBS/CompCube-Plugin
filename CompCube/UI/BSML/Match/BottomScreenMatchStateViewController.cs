@@ -64,22 +64,8 @@ public class BottomScreenMatchStateViewController : ViewController, IInitializab
     public void Initialize()
     {
         _serverListener.OnMatchCreated += HandleMatchCreated;
-        _serverListener.OnPickPhaseStarted += HandlePickPhaseStarted;
     }
-
-    private void HandlePickPhaseStarted(StartPickPhasePacket packet)
-    {
-        var user = _matchStateManager.Self;
-
-        if (!packet.IsOwnPick)
-            user = _matchStateManager.Opponent;
-        
-        Timer = new MatchTimerData(TimeSpan.FromSeconds(30), $"Pick Phase\n<size=50%>{user.GetFormattedUserName()}'s Pick</size>", () =>
-        {
-            _matchBeatmapManager.SelectBeatmap(_matchBeatmapManager.AvailablePicks.First());
-        });
-    }
-
+    
     private void HandleMatchCreated(MatchCreatedPacket packet)
     {
         _sharedCoroutineStarter.Run(HandleMatchCreatedCoroutine());

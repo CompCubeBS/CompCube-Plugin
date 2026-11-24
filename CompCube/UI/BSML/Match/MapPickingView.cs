@@ -47,6 +47,8 @@ public class MapPickingView : ReactiveComponent
     protected override GameObject Construct()
     {
         _activeBeatmap = Remember(null as CCBeatmapData);
+        _activeBeatmap.AddCallback(x => OnBeatmapSelected?.Invoke(x));
+        
         _beatmapList = Remember(new CCBeatmapData[]{});
 
         _currentState = Remember(State.Discard);

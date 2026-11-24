@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
+using CompCube_Models.Models.Packets.ServerPackets;
 using CompCube.Game.MatchState;
+using CompCube.Interfaces;
 using CompCube.UI.BSML.EarlyLeaveWarning;
 using HMUI;
 using Reactive;
@@ -11,9 +13,11 @@ using Zenject;
 
 namespace CompCube.UI.BSML.Match
 {
-    public class RoundResultsViewController : ViewController
+    public class RoundResultsViewController : ViewController, IInitializable, IDisposable
     {
         private const float DamageTextAnimationTimeSeconds = 3f;
+
+        [Inject] private readonly IServerListener _serverListener = null!;
         
         [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
         [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
@@ -21,11 +25,13 @@ namespace CompCube.UI.BSML.Match
 
         [Inject] private readonly SiraLog _siraLog = null!;
         
-        private RoundResultsView _roundResultsView = null!;
+        private RoundResultsView _view = null!;
+        
+        private CCBeatmapData? _beatmapData = null;
 
         void Awake()
         {
-            new RoundResultsView(DamageTextAnimationTimeSeconds).Bind(ref _roundResultsView).Use(transform);
+            new RoundResultsView(DamageTextAnimationTimeSeconds).Bind(ref _view).Use(transform);
         }
         
         public void PopulateData(MatchScore redScore, MatchScore blueScore, float damageAmount, float multiplier, CCBeatmapData votingMap)
@@ -35,7 +41,7 @@ namespace CompCube.UI.BSML.Match
 
             IEnumerator PopulateDataCoroutine()
             {
-                yield return new WaitUntil(() => isActivated);
+                yield return new WaitUntil(() => _view != null);
             
                 var redWon = redScore.Score.Points >= blueScore.Score.Points;
                 
@@ -47,21 +53,21 @@ namespace CompCube.UI.BSML.Match
                 
                 var selfWon = (redWon && _matchStateManager.IsRedTeam) || (!redWon && !_matchStateManager.IsRedTeam);
 
-                _roundResultsView.DidWin = selfWon;
-                _roundResultsView.WinningScore = winnerScore;
-                _roundResultsView.LosingScore = loserScore;
-                _roundResultsView.MapPlayed = votingMap;
+                _view.DidWin = selfWon;
+                _view.WinningScore = winnerScore;
+                _view.LosingScore = loserScore;
+                _view.MapPlayed = votingMap;
                 
-                _roundResultsView.ReplayButtonActive = winner.PlatformId != _matchStateManager.Self.PlatformId;
-                _roundResultsView.ReplayButtonInteractable = _matchStateManager.RemainingReplays > 0;
+                _view.ReplayButtonActive = winner.PlatformId != _matchStateManager.Self.PlatformId;
+                _view.ReplayButtonInteractable = _matchStateManager.RemainingReplays > 0;
 
-                _roundResultsView.ReplayButtonClickedCallback = HandleReplayButtonClicked;
+                _view.ReplayButtonClickedCallback = HandleReplayButtonClicked;
                 
-                _roundResultsView.ResetDamageAmountImmediate();
+                _view.ResetDamageAmountImmediate();
                 
                 yield return new WaitForSeconds(1f);
                 
-                _roundResultsView.Damage = damageAmount * multiplier;
+                _view.Damage = damageAmount * multiplier;
                 
                 yield return new WaitForSeconds(DamageTextAnimationTimeSeconds + 2f);
 
@@ -69,20 +75,6 @@ namespace CompCube.UI.BSML.Match
                     yield return null;
                 
                 _bottomScreenMatchStateViewController.UpdateHealth(redWon ? _matchStateManager.RedHealth : _matchStateManager.RedHealth - damageAmount * multiplier, !redWon ? _matchStateManager.BlueHealth : _matchStateManager.BlueHealth - damageAmount * multiplier);
-
-                /*_customLevelbar?.Setup(votingMap);
-
-
-
-
-                ReplayButtonActive = !selfWon;
-
-                ReplayButtonInteractable = !selfWon && _matchStateManager.RemainingReplays > 0;
-
-                WinnerScoreText = FormatScore(winnerScore, winner, 1);
-                LoserScoreText = FormatScore(loserScore, loser, 2);
-
-                DamageText = (damageAmount * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);*/
             }
         }
 
@@ -94,7 +86,7 @@ namespace CompCube.UI.BSML.Match
                 {
                     try
                     {
-                        _roundResultsView.ReplayButtonInteractable = false;
+                        _view.ReplayButtonInteractable = false;
 
                         await _matchStateManager.UseReplay();
                     }
@@ -103,6 +95,25 @@ namespace CompCube.UI.BSML.Match
                         _siraLog.Error(e);
                     }
                 });
+        }
+
+        public void Initialize()
+        {
+            _serverListener.OnRoundResults += HandleRoundResults;
+            _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
+        }
+
+        private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet) => _beatmapData = packet.Map;
+
+        private void HandleRoundResults(RoundResultsPacket packet)
+        {
+            PopulateData(new MatchScore(_matchStateManager.RedPlayer, packet.RedScore), new MatchScore(_matchStateManager.BluePlayer, packet.BlueScore), packet.DamageAmount, _matchStateManager.DamageMultiplier, _beatmapData!);
+        }
+
+        public void Dispose()
+        {
+            _serverListener.OnRoundResults -= HandleRoundResults;
+            _serverListener.OnPlayerSelectedMap -= HandlePlayerSelectedMap;
         }
     }
 }

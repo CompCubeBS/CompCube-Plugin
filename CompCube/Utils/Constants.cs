@@ -12,5 +12,5 @@ public static class Constants
 
     public static Color WinningBgColor => new(1f, .65f, 0f);
 
-    public static Color LosingBgColor => new Color();
+    public static Color LosingBgColor => new Color32();
 }
