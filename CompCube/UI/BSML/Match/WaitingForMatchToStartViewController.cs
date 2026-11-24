@@ -9,6 +9,7 @@ using CompCube.UI.BSML.Components.CustomLevelBar;
 using HMUI;
 using CompCube.Extensions;
 using CompCube.Interfaces;
+using CompCube.UI.BSML.EarlyLeaveWarning;
 using Reactive;
 using SiraUtil.Logging;
 using UnityEngine;
@@ -45,9 +46,12 @@ public class WaitingForMatchToStartViewController() : ViewController, IInitializ
         IEnumerator PopulateData()
         {
             yield return new WaitUntil(() => isActivated);
-            
-            _view.Beatmap = beatmapData;
-            _view.TimerEndTime = timerEndTime;
+
+            DownloadingBeatmapsModal.CreateOnTransformAndDownloadBeatmaps(transform, [beatmapData.Hash], () =>
+            {
+                _view.Beatmap = beatmapData;
+                _view.TimerEndTime = timerEndTime;
+            });
         }
     }
 

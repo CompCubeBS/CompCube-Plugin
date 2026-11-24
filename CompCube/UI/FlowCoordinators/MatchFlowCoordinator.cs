@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Windows.Forms;
 using BeatSaberMarkupLanguage;
 using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
@@ -55,10 +56,11 @@ public class MatchFlowCoordinator : FlowCoordinator
         _serverListener.OnRoundResults += HandleRoundResults;
         _serverListener.OnPickPhaseStarted += HandlePickPhaseStarted;
         _serverListener.OnMatchFinished += HandleMatchResults;
+        _serverListener.OnReplayRequested += HandleReplayRequested;
         
         _mapPickingViewController.OnBeatmapCardSelected += ShowLeaderboardOrHide;
         
-        ProvideInitialViewControllers(_matchPreviewViewController, _gameplaySetupViewManager.ManagedController);
+        ProvideInitialViewControllers(_matchPreviewViewController);
         showBackButton = true;
         SetTitle("Match Room");
 
@@ -82,9 +84,17 @@ public class MatchFlowCoordinator : FlowCoordinator
         }
     }
 
+    private void HandleReplayRequested(PlayerDidRequestReplayPacket packet)
+    {
+        ShowMapPreviewAndStartMatch(packet.MapToReplay!);
+    }
+
     private void HandleMatchResults(MatchFinishedPacket packet)
     {
         this.ReplaceViewControllerSynchronously(_matchResultsViewController);
+        SetBottomScreenViewController(null, ViewController.AnimationType.Out);
+        SetLeftScreenViewController(null, ViewController.AnimationType.Out);
+        SetRightScreenViewController(null, ViewController.AnimationType.Out);
     }
 
     private void HandlePickPhaseStarted(StartPickPhasePacket packet)
@@ -128,6 +138,7 @@ public class MatchFlowCoordinator : FlowCoordinator
         ShowLeaderboardOrHide(map);
         _soundEffectManager.PlayGongSoundEffect();
         this.ReplaceViewControllerSynchronously(_waitingForMatchToStartViewController);
+        SetLeftScreenViewController(_gameplaySetupViewManager.ManagedController, ViewController.AnimationType.In);
 
         StartCoroutine(WaitForSecondsAndStartMatch());
         return;
@@ -143,7 +154,9 @@ public class MatchFlowCoordinator : FlowCoordinator
                         results.gameplayModifiers.proMode, results.badCutsCount + results.missedCount + results.notGoodCount, results.fullCombo));
                     
                     this.ReplaceViewControllerSynchronously(_waitingViewController, true);
-                    _waitingViewController.SetText($"Waiting for {_matchStateManager.Opponent} to submit a score!");
+                    ShowLeaderboardOrHide(null);
+                    SetLeftScreenViewController(null, ViewController.AnimationType.None);
+                    _waitingViewController.SetText($"Waiting for {_matchStateManager.Opponent.GetFormattedUserName()} to submit a score!");
                 });
         }
     }
@@ -156,6 +169,7 @@ public class MatchFlowCoordinator : FlowCoordinator
         _serverListener.OnRoundResults -= HandleRoundResults;
         _serverListener.OnPickPhaseStarted -= HandlePickPhaseStarted;
         _serverListener.OnMatchFinished -= HandleMatchResults;
+        _serverListener.OnReplayRequested -= HandleReplayRequested;
     }
 
     protected override void BackButtonWasPressed(ViewController viewController)

@@ -145,7 +145,7 @@ public class RoundResultsView(float damageTextAnimationTime) : ReactiveComponent
                     
                     PixelsPerUnit = 15,
                     
-                    GradientColor0 = Constants.WinningBgColor,
+                    GradientColor0 = Constants.ResultsBgColor,
                     GradientColor1 = new Color(0f, 0f, 0f, 0f),
                     UseGradient = true,
                     
