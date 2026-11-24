@@ -213,7 +213,10 @@ namespace CompCube.Networking
         public async Task DisconnectAsync()
         {
             if (!Connected)
+            {
+                _siraLog.Debug("attempted to disconnect from server while not connected");
                 return;
+            }
             
             await SendPacketAsync(new ClientDisconnectPacket());
             await StopListeningToServerAsync();
