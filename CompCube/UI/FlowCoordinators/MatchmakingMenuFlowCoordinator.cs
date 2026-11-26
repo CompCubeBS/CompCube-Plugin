@@ -26,7 +26,6 @@ namespace CompCube.UI.FlowCoordinators
 
         [Inject] private readonly GameplaySetupViewManager _gameplaySetupViewManager = null!;
         [Inject] private readonly CompCubeLeaderboardViewController _leaderboardViewController = null!;
-        [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         
         [Inject] private readonly DisconnectHandler _disconnectHandler = null!;
         
@@ -41,10 +40,11 @@ namespace CompCube.UI.FlowCoordinators
         {
             this.PresentFlowCoordinatorSynchronously(_matchFlowCoordinator);
 
-            _matchFlowCoordinator.PopulateData(packet, () =>
+            _matchFlowCoordinator.OnMatchConcluded = () =>
             {
+                _serverListener.DisconnectAsync();
                 DismissFlowCoordinator(_matchFlowCoordinator);
-            });
+            };
         }
 
         public void Dispose()
@@ -56,10 +56,10 @@ namespace CompCube.UI.FlowCoordinators
         
         public void Initialize()
         {
-            _matchmakingMenuViewController.SetButtonCallbacks(() =>
+            _matchmakingMenuViewController.OnAboutButtonPressedCallback = () =>
             {
                 this.PresentFlowCoordinatorSynchronously(_infoFlowCoordinator);
-            });
+            };
             
             _serverListener.OnMatchCreated += OnMatchCreated;
             _infoFlowCoordinator.OnBackButtonPressed += OnInfoFlowCoordinatorBackButtonPressed;
@@ -73,32 +73,35 @@ namespace CompCube.UI.FlowCoordinators
             
             IEnumerator HandleShouldShowDisconnectScreenCoroutine()
             {
+                if (isActivated)
+                    yield return null;
+                
                 // this will break if the flow coordinator hierarchy ever gets more than 1 deeper after this flow coordinator
                 if (childFlowCoordinator)
                     DismissFlowCoordinator(childFlowCoordinator);
                 
                 yield return new WaitUntil(() => isActivated && !isInTransition);
                 
-                _warningModalViewController.ParseOntoViewController(topViewController, $"Disconnected from server.\nReason: {reason}", _warningModalViewController.Hide);
+                OkDialogModal.CreateOnTransform(_matchmakingMenuViewController.transform, $"Disconnected from server.\nReason: {reason}", true);
             }
         }
 
         private void OnInfoFlowCoordinatorBackButtonPressed() => DismissFlowCoordinator(_infoFlowCoordinator);
 
-        private void OnAboutButtonClicked()
-        {
-            this.PresentFlowCoordinatorSynchronously(_infoFlowCoordinator);
-        }
-
         protected override void BackButtonWasPressed(ViewController viewController)
         {
             if (_serverListener.Connected)
             {
-                _warningModalViewController.ParseOntoViewController(viewController, "Are you sure you want to leave the matchmaking queue?", () =>
-                {
-                    _serverListener.DisconnectAsync();
-                    _mainFlowCoordinator.DismissFlowCoordinator(this);
-                }, _warningModalViewController.Hide);
+                YesOrNoDialogModal.CreateOnTransform(viewController.transform, 
+                    "Are you sure you want to leave the matchmaking queue?",
+                    true,
+                    () =>
+                    {
+                        _serverListener.DisconnectAsync();
+                        _mainFlowCoordinator.DismissFlowCoordinator(this);
+                    },
+                    () => { }
+                );
                 return;
             }
                 

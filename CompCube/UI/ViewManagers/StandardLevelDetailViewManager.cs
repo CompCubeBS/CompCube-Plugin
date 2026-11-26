@@ -11,10 +11,10 @@ public class StandardLevelDetailViewManager : ViewManager
     
     public override ViewController ManagedController => _standardLevelDetailViewController;
     
-    private Action<VotingMap>? _buttonPressedCallback;
-    public VotingMap? CurrentVotingMap { get; private set; }
+    private Action<CCBeatmapData>? _buttonPressedCallback;
+    public CCBeatmapData? CurrentVotingMap { get; private set; }
     
-    public void SetData(VotingMap votingMap, Action<VotingMap> buttonPressedCallback, string buttonText, bool buttonInteractable = true)
+    public void SetData(CCBeatmapData votingMap, Action<CCBeatmapData> buttonPressedCallback, string buttonText, bool buttonInteractable = true)
     {
         CurrentVotingMap = votingMap;
         

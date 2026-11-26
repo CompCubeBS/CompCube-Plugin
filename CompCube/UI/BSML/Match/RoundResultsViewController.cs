@@ -1,89 +1,50 @@
 ﻿using System.Collections;
-using System.Globalization;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.ViewControllers;
-using CompCube_Models.Models.ClientData;
 using CompCube_Models.Models.Map;
 using CompCube_Models.Models.Match;
 using CompCube_Models.Models.Packets.ServerPackets;
-using JetBrains.Annotations;
-using CompCube.Extensions;
-using CompCube.Game;
 using CompCube.Game.MatchState;
-using CompCube.UI.BSML.Components.CustomLevelBar;
+using CompCube.Interfaces;
 using CompCube.UI.BSML.EarlyLeaveWarning;
+using HMUI;
+using Reactive;
 using SiraUtil.Logging;
 using UnityEngine;
 using Zenject;
 
 namespace CompCube.UI.BSML.Match
 {
-    [ViewDefinition("CompCube.UI.BSML.Match.RoundResultsView.bsml")]
-    public class RoundResultsViewController : BSMLAutomaticViewController
+    public class RoundResultsViewController : ViewController, IInitializable, IDisposable
     {
-        [Inject] private readonly MatchStateManager _matchStateManager = null!;
+        private const float DamageTextAnimationTimeSeconds = 3f;
+
+        [Inject] private readonly IServerListener _serverListener = null!;
+        
+        [Inject] private readonly BottomScreenMatchStateViewController _bottomScreenMatchStateViewController = null!;
         [Inject] private readonly SharedCoroutineStarter _sharedCoroutineStarter = null!;
+        [Inject] private readonly MatchStateManager _matchStateManager = null!;
+
         [Inject] private readonly SiraLog _siraLog = null!;
-        [Inject] private readonly WarningModalViewController _warningModalViewController = null!;
         
-        [UIValue("titleBgColor")] private string TitleBgColor { get; set; } = "#FFA500";
-        [UIValue("titleText")] private string TitleText { get; set; } = "";
+        private RoundResultsView _view = null!;
+        
+        private CCBeatmapData? _beatmapData = null;
 
-        [UIValue("winnerScoreText")] private string WinnerScoreText { get; set; } = "";
-        [UIValue("loserScoreText")] private string LoserScoreText { get; set; } = "";
-        
-        [UIValue("damageText")] private string DamageText { get; set; } = "";
-        
-        [UIValue("replayButtonActive")] private bool ReplayButtonActive { get; set; } = false;
-        
-        [UIValue("replayButtonInteractable")] private bool ReplayButtonInteractable { get; set; } = false;
-
-        private CustomLevelBar? _customLevelbar;
-
-        [UIAction("#post-parse")]
-        void PostParse()
+        void Awake()
         {
-            _customLevelbar ??= Resources.FindObjectsOfTypeAll<CustomLevelBar>()
-                .First(i => i.name == "RoundResultsLevelBar");
-        }
-
-        [UIAction("replayButtonOnClick")]
-        void ReplayButtonOnClick()
-        {
-            _warningModalViewController.ParseOntoViewController(this, "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
-                async void () =>
-                {
-                    try
-                    {
-                        _warningModalViewController.Hide();
-                        ReplayButtonInteractable = false;
-                
-                        NotifyPropertyChanged(nameof(ReplayButtonInteractable));
-
-                        await _matchStateManager.UseReplay();
-                    }
-                    catch (Exception e)
-                    {
-                        _siraLog.Error(e);
-                    }
-                }, _warningModalViewController.Hide);
+            new RoundResultsView(DamageTextAnimationTimeSeconds).Bind(ref _view).Use(transform);
         }
         
-        public void PopulateData(Score redScore, Score blueScore, float damageAmount, float multiplier, VotingMap votingMap)
+        public void PopulateData(MatchScore redScore, MatchScore blueScore, float damageAmount, float multiplier, CCBeatmapData votingMap)
         {
             _sharedCoroutineStarter.Run(PopulateDataCoroutine());
             return;
 
             IEnumerator PopulateDataCoroutine()
             {
-                yield return new WaitUntil(() => isActivated);
+                yield return new WaitUntil(() => _view != null);
+            
+                var redWon = redScore.Score.Points >= blueScore.Score.Points;
                 
-                TitleText = "Results";
-            
-                _customLevelbar?.Setup(votingMap);
-            
-                var redWon = redScore.Points >= blueScore.Points;
-            
                 var winnerScore = redWon ? redScore : blueScore;
                 var loserScore = redWon ? blueScore : redScore;
             
@@ -92,23 +53,67 @@ namespace CompCube.UI.BSML.Match
                 
                 var selfWon = (redWon && _matchStateManager.IsRedTeam) || (!redWon && !_matchStateManager.IsRedTeam);
 
-                ReplayButtonActive = !selfWon;
+                _view.DidWin = selfWon;
+                _view.WinningScore = winnerScore;
+                _view.LosingScore = loserScore;
+                _view.MapPlayed = votingMap;
+                
+                _view.ReplayButtonActive = winner.PlatformId != _matchStateManager.Self.PlatformId;
+                _view.ReplayButtonInteractable = _matchStateManager.RemainingReplays > 0;
 
-                ReplayButtonInteractable = !selfWon && _matchStateManager.RemainingReplays > 0;
-            
-                WinnerScoreText = FormatScore(winnerScore, winner, 1);
-                LoserScoreText = FormatScore(loserScore, loser, 2);
-            
-                DamageText = (damageAmount * _matchStateManager.DamageMultiplier).ToString("P", CultureInfo.InvariantCulture);
-            
-                NotifyPropertyChanged(null);
+                _view.ReplayButtonClickedCallback = HandleReplayButtonClicked;
+                
+                _view.ResetDamageAmountImmediate();
+                
+                yield return new WaitForSeconds(1f);
+                
+                _view.Damage = damageAmount * multiplier;
+                
+                yield return new WaitForSeconds(DamageTextAnimationTimeSeconds + 2f);
+
+                if (!isActivated)
+                    yield return null;
+                
+                _bottomScreenMatchStateViewController.UpdateHealth(redWon ? _matchStateManager.RedHealth : _matchStateManager.RedHealth - damageAmount * multiplier, !redWon ? _matchStateManager.BlueHealth : _matchStateManager.BlueHealth - damageAmount * multiplier);
             }
         }
 
-        private string FormatScore(Score score, UserProfile user, int placement) =>
-            $"{(placement)}. {user.GetFormattedUserName()} - " +
-            $"{(score.RelativeScore * 100):F}% " +
-            $"{(score.FullCombo ? "FC".FormatWithHtmlColor("#90EE90") : $"{score.Misses}x".FormatWithHtmlColor("#FF7F7F"))}" +
-            $"{(score.ProMode ? " (PM)" : "")}";
+        private void HandleReplayButtonClicked()
+        {
+            YesOrNoDialogModal.CreateOnTransform(transform, "NOTE:\nYou can only call one replay per match, and the\nhighest scores from either player will be used.\n\nWould you like to call a replay?",
+                true, 
+                async void () =>
+                {
+                    try
+                    {
+                        _view.ReplayButtonInteractable = false;
+
+                        await _matchStateManager.UseReplay();
+                    }
+                    catch (Exception e)
+                    {
+                        _siraLog.Error(e);
+                    }
+                });
+        }
+
+        public void Initialize()
+        {
+            _serverListener.OnRoundResults += HandleRoundResults;
+            _serverListener.OnPlayerSelectedMap += HandlePlayerSelectedMap;
+        }
+
+        private void HandlePlayerSelectedMap(PlayerSelectedMapPacket packet) => _beatmapData = packet.Map;
+
+        private void HandleRoundResults(RoundResultsPacket packet)
+        {
+            PopulateData(new MatchScore(_matchStateManager.RedPlayer, packet.RedScore), new MatchScore(_matchStateManager.BluePlayer, packet.BlueScore), packet.DamageAmount, _matchStateManager.DamageMultiplier, _beatmapData!);
+        }
+
+        public void Dispose()
+        {
+            _serverListener.OnRoundResults -= HandleRoundResults;
+            _serverListener.OnPlayerSelectedMap -= HandlePlayerSelectedMap;
+        }
     }
 }

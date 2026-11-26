@@ -17,8 +17,6 @@
     <Dependency Include="BeatSaberMarkupLanguage" Version="*" />
     <Dependency Include="SiraUtil" Version="*" />
     <Dependency Include="SongCore" Version="*" />
-    <Dependency Include="BeatSaverSharp" Version="*" />
-    <Dependency Include="protobuf-net" Version="*" />
   </ItemGroup>
   <!-- End Manifest -->
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">

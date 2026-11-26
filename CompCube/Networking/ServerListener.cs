@@ -44,7 +44,7 @@ namespace CompCube.Networking
         
         private CancellationTokenSource _cancellationTokenSource = new();
         
-        public async Task ConnectAsync(string queueEndpoint, Action? onConnectedCallback)
+        public async Task ConnectAsync(string queueEndpoint, CancellationToken token, Action? onConnectedCallback)
         {
             if (Connected)
             {
@@ -54,7 +54,11 @@ namespace CompCube.Networking
 
             try
             {
-                var auth = await _beatKhanaGameAuth.RequestTokenAsync();
+                _siraLog.Notice("Authenticating with BeatKhana...");
+                
+                var auth = await _beatKhanaGameAuth.RequestTokenAsync(token);
+                
+                _siraLog.Notice("Authenticated as " + auth.PlatformId);
                 
                 _client = new ClientWebSocket();
                 
@@ -64,7 +68,13 @@ namespace CompCube.Networking
                 _client.Options.SetRequestHeader("UserName", _userModelWrapper.UserName);
                 
                 _cancellationTokenSource = new CancellationTokenSource();
-                await _client.ConnectAsync(new Uri($"{_config.WebsocketIp}/{queueEndpoint}", UriKind.Absolute), _cancellationTokenSource.Token);
+                
+                var endpoint = $"{_config.WebsocketIp}/{queueEndpoint}";
+                
+                _siraLog.Notice("Connecting to " + endpoint + "...");
+                await _client.ConnectAsync(new Uri(endpoint, UriKind.Absolute), _cancellationTokenSource.Token);
+                
+                _siraLog.Notice("Connected to server!");
                 
                 onConnectedCallback?.Invoke();
                 
@@ -75,16 +85,19 @@ namespace CompCube.Networking
             }
             catch (OperationCanceledException)
             {
-                // do nothing
+                _siraLog.Notice("Connection cancelled!");
+                
+                if (Connected)
+                    _client.Abort();
             }
         }
 
-        public async Task DiscardMapsAsync(IReadOnlyCollection<VotingMap> maps)
+        public async Task DiscardMapsAsync(IReadOnlyCollection<CCBeatmapData> maps)
         {
             await SendPacketAsync(new DiscardMapsPacket(maps.ToArray()));
         }
 
-        public async Task SelectMapAsync(VotingMap map)
+        public async Task SelectMapAsync(CCBeatmapData map)
         {
             await SendPacketAsync(new MapSelectionPacket(map));
         }
@@ -112,12 +125,15 @@ namespace CompCube.Networking
                     return;
                 }
 
+                
                 var json = Encoding.UTF8.GetString(data);
 
                 if (json == "")
                     return;
                 
+                #if DEBUG
                 _siraLog.Info(json);
+                #endif
 
                 var packet = ServerPacket.Deserialize(json);
 
@@ -189,16 +205,24 @@ namespace CompCube.Networking
         private async Task StopListeningToServerAsync()
         {
             _shouldListenToServer = false;
-            _cancellationTokenSource.Cancel();
             await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Normal Closure", CancellationToken.None);
+            _cancellationTokenSource.Cancel();
             _client.Dispose();
         }
 
         public async Task DisconnectAsync()
         {
+            if (!Connected)
+            {
+                _siraLog.Debug("attempted to disconnect from server while not connected");
+                return;
+            }
+            
             await SendPacketAsync(new ClientDisconnectPacket());
             await StopListeningToServerAsync();
             OnDisconnected?.Invoke();
+            
+            _siraLog.Notice("Disconnected from server!");
         }
 
         public async Task HandleAbruptDisconnectionAsync(string reason)

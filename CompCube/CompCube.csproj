@@ -219,6 +219,8 @@
         </PackageReference>
 		<PackageReference Include="Fody" Version="6.8.2" PrivateAssets="all" />
 		<PackageReference Include="Costura.Fody" Version="6.0.0" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="11.0.0" />
+		<PackageReference Include="Reactive.Compiler" Version="1.0.0" />
 		<PackageReference Include="SocketIOClient" Version="3.0.8" />
     </ItemGroup>
     <ItemGroup>
@@ -233,14 +235,8 @@
       <None Remove="UI\BSML\Disconnect\DisconnectView.bsml" />
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Include="UI\BSML\Match\MatchResultsView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Menu\MatchmakingMenuView.bsml" />
       <None Remove="UI\BSML\MatchmakingMenuView.bsml" />
       <None Remove="UI\BSML\VotingScreenView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\WaitingView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\RoundResultsView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\VotingScreenView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\WaitingForMatchToStartView.bsml" />
       <None Remove="UI\BSML\AwaitingMapDecisionView.bsml" />
       <None Remove="UI\BSML\WaitingForMatchToStartView.bsml" />
       <None Remove="UI\BSML\AwaitMatchEndView.bsml" />
@@ -274,20 +270,15 @@
       <None Remove="UI\BSML\EarlyLeaveWarning\EarlyLeaveWarningModalView.bsml" />
       <None Remove="UI\BSML\Match\WaitingForOpponentsPickView.bsml" />
       <None Remove="UI\BSML\Match\Modal\PhasePopupView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\Modal\PhasePopupView.bsml" />
       <None Remove="UI\BSML\Modal\WarningModalView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Modal\WarningModalView.bsml" />
       <None Remove="UI\BSML\Match\BottomScreenMatchStateView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\BottomScreenMatchStateView.bsml" />
       <None Remove="UI\BSML\Components\CustomMapList\CustomMapList.bsml" />
       <EmbeddedResource Include="UI\BSML\Components\CustomMapList\CustomMapList.bsml" />
       <None Remove="UI\BSML\Match\WaitingForDiscardPhaseToFinishViewController.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\WaitingForDiscardPhaseToFinishView.bsml" />
       <None Remove="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Modal\DownloadingBeatmapsModalView.bsml" />
       <None Remove="UI\BSML\Match\MatchPreviewView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Match\MatchPreviewView.bsml" />
       <None Remove="UI\BSML\Info\ContributorsView.bsml" />
-      <EmbeddedResource Include="UI\BSML\Info\ContributorsView.bsml" />
+      <None Remove="Resources\compcube.png" />
+      <EmbeddedResource Include="Resources\compcube.png" />
     </ItemGroup>
 </Project>
