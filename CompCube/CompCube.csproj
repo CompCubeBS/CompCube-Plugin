@@ -281,4 +281,7 @@
       <None Remove="Resources\compcube.png" />
       <EmbeddedResource Include="Resources\compcube.png" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Networking\ReplayRecording\" />
+    </ItemGroup>
 </Project>
